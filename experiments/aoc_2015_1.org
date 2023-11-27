@@ -1,0 +1,49 @@
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+#+END_SRC
+
+#+RESULTS:
+: t
+
+#+begin_src python :session :results output
+  import numpy
+  a = []
+  with open("aoc_2015_1_data.txt") as f:
+    for x in f.read():
+      if x == '(':
+	a.append(1)
+      else:
+	a.append(-1)
+  npa = numpy.array(a)
+
+  print( len(a))
+#+end_src
+
+#+RESULTS:
+: 7002
+
+
+#+begin_src python :session :results output
+print(npa.sum())
+#+end_src
+
+#+RESULTS:
+: 280
+
+#+begin_src python :session :results output
+
+
+def findit():
+    try:
+        for i in range(1, len(npa)-1):
+            if npa[0:i].sum() < 0:
+                print(f'Basement at {i}')
+                return
+    except Exception as e:
+        print(f"Error: {e}")
+
+findit()
+#+end_src
+
+#+RESULTS:
+: Basement at 1797

@@ -1,0 +1,44 @@
+* Notes
+** https://cachestocaches.com/2018/6/org-literate-programming/
+* Code
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+#+END_SRC
+
+#+RESULTS:
+
+#+NAME: testing
+#+BEGIN_SRC python :results output
+print("Testing")
+#+END_SRC
+
+#+RESULTS: testing
+: Testing
+
+#+NAME: some_python
+#+BEGIN_SRC python :session  :results raw
+  x = 10
+#+END_SRC
+
+#+RESULTS: some_python
+
+5
+
+
+#+NAME: more_python
+#+BEGIN_SRC python :session :results output
+  print(f"Test: {x}")
+#+END_SRC
+
+#+RESULTS: more_python
+: Test: 10
+
+#+NAME: table_test
+#+BEGIN_SRC python :session :results table
+[1,2,3, x]
+#+END_SRC
+
+#+RESULTS: table_test
+| 1 | 2 | 3 | 10 |
+
+

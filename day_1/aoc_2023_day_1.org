@@ -1,0 +1,27 @@
+
+* AOC 2023 Day 1
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+#+END_SRC
+
+#+RESULTS:
+
+** Load and validate data
+#+BEGIN_SRC python :session session_day_1 :results output
+a = 10
+print(f"A is {a}")
+#+END_SRC
+
+#+RESULTS:
+: A is 10
+
+** Calculate the answer
+#+BEGIN_SRC python :session session_day_1 :results output
+print(f"A is {a}")
+#+END_SRC
+
+#+RESULTS:
+: A is 10
+
