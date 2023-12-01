@@ -4,24 +4,77 @@
 ** Initialize 
 #+BEGIN_SRC elisp
   (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
 #+END_SRC
 
 #+RESULTS:
 
+#+BEGIN_SRC python :session session_day_1 :results output
 ** Load and validate data
 #+BEGIN_SRC python :session session_day_1 :results output
-a = 10
-print(f"A is {a}")
+def load(path: str) -> list[str]:
+    with open(path,"r") as f:
+        return [l.strip() for l in f.read().split("\n") if l.strip()]
+
+data = load("input.txt")
+print(f"Data has {len(data)} lines")
 #+END_SRC
 
 #+RESULTS:
-: A is 10
+: Data has 1000 lines
 
-** Calculate the answer
+* Calculate the answer
 #+BEGIN_SRC python :session session_day_1 :results output
-print(f"A is {a}")
+# Preserve indentation
+import re
+def star_1(data: list[str]) -> int:
+ a: int = 0
+ for line in data:
+  matches = re.findall(r"\d", line)
+  if len(matches) == 0:
+   print("ERROR: no numbers found")
+  else:
+   n = f"{matches[0]}{matches[-1]}"
+   a += int(n)
+ return a
+
+print(f"Star 1 answer is {star_1(data)}")
 #+END_SRC
 
 #+RESULTS:
-: A is 10
+: Star 1 answer is 142
 
+#+BEGIN_SRC python :session session_day_1 :results output
+# Preserve indentation
+import re
+mapping = {"one": 1,"two": 2, "three": 3, "four": 4, "five": 5,
+           "six": 6, "seven": 7,"eight": 8,"nine": 9}
+
+def map_digit(s: str) -> int:
+    try:
+        return int(s)
+    except ValueError:
+        return mapping.get(s) or 0
+
+def star_2(data: list[str]) -> int:
+ a: int = 0
+ for line in data:
+  line = line.replace("twone","21")
+  line = line.replace("oneight","18")
+  line = line.replace("eightwo","82")
+  line = line.replace("eighthree","83")
+  matches = re.findall(r"(\d|one|two|three|four|five|six|seven|eight|nine)", line)
+  if len(matches) == 0:
+   print("ERROR: no numbers found")
+  else:
+   n = f"{map_digit(matches[0])}{map_digit(matches[-1])}"
+   #print(n)
+   a += int(n)
+ return a
+
+print(f"Star 2 answer is {star_2(data)}")
+#+END_SRC
+
+#+RESULTS:
+: Star 2 answer is 54094
