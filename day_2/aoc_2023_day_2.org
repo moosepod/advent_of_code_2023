@@ -1,0 +1,86 @@
+
+* AOC 2023 Day 2
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Load and validate data
+#+BEGIN_SRC python :session session_day_2 :results output
+try:
+    from pydantic import BaseModel
+    import re
+    class Draw(BaseModel):
+        color: str
+        n: int
+        
+    class Game(BaseModel):
+        id: int
+        draws: list[list[Draw]]
+
+    def load_data(path: str) -> list[Game]:
+        games: list[Game] = []
+        with open(path,'r') as f:
+            for row in f.read().split("\n"):
+                m = re.match(r"^Game (\d+): (.+)$", row.strip())
+                if m:
+                    idx, rest = m.group(1), m.group(2)
+                    game = Game(id=idx,draws=[])
+                    games.append(game)
+                    for draw_set in rest.split(";"):
+                        game.draws.append([])
+                        for count,color in re.findall("(\d+) (red|green|blue)", draw_set):
+                            game.draws[-1].append(Draw(color=color,n=int(count)))
+
+        return games
+
+    data = load_data("input.txt")
+    print(len(data))
+except Exception as e:
+    print(e)
+
+#+END_SRC
+
+#+RESULTS:
+: 100
+
+** Calculate the answer
+#+BEGIN_SRC python :session session_day_2 :results output
+try:
+    def check_game(game: Game,  red_max: int, green_max:int , blue_max: int, debug=False) -> int:
+        for draw_set in game.draws:
+            for draw in draw_set:
+                if draw.color == "red" and draw.n > red_max:
+                    if debug: print(f"{game.id}: red overflow with {draw.n}")
+                    return 0
+                if draw.color == "blue" and draw.n > blue_max:
+                    if debug: print(f"{game.id}: blue overflow with {draw.n}")
+                    return 0
+                if draw.color == "green" and draw.n > green_max:
+                    if debug: print(f"{game.id}: green overflow with {draw.n}")
+                    return 0
+        return game.id
+    
+
+    def star_1(data: list[Game], red_max: int, green_max:int , blue_max: int) -> int:
+        id_sum: int = 0
+        for game in data:
+            id_sum += check_game(game,red_max,green_max,blue_max,debug=False)
+        return id_sum
+
+    print(star_1(data,12,13,14))
+except Exception as e:
+    print(e)
+
+
+#+END_SRC
+
+#+RESULTS:
+: 2149
+

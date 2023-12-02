@@ -33,6 +33,8 @@ def aoc_template(day: int) -> str:
 ** Initialize 
 #+BEGIN_SRC elisp
   (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
 #+END_SRC
 
 ** Load and validate data

@@ -43,7 +43,7 @@ print(f"Star 1 answer is {star_1(data)}")
 #+END_SRC
 
 #+RESULTS:
-: Star 1 answer is 142
+: Star 1 answer is 54968
 
 #+BEGIN_SRC python :session session_day_1 :results output
 # Preserve indentation
