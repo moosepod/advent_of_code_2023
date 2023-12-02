@@ -39,10 +39,44 @@ def aoc_template(day: int) -> str:
 
 ** Load and validate data
 #+BEGIN_SRC python :session session_day_{day} :results output
+from pydantic import BaseModel
+try:
+  class Data(BaseModel):
+    pass
+
+  def load_data(path) -> Data:
+    return Data()
+
+  data = load_data("sample.txt")
+  print(data)
+except Exception as e:
+  print("Error:",e)
 #+END_SRC
 
-** Calculate the answer
+** Day {day} star 1
+*** Problem statement
+*** Solution
 #+BEGIN_SRC python :session session_day_{day} :results output
+try:
+  def star_1(data: Data) -> int:
+      return 0
+  
+  print(star_1(data))
+except Exception as e:
+  print("Error:",e)
+#+END_SRC
+
+** Day {day} star 2
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :session session_day_{day} :results output
+try:
+  def star_2(data: Data) -> int:
+      return 0
+  
+  print(star_2(data))
+except Exception as e:
+  print("Error:",e)
 #+END_SRC
 
 """
