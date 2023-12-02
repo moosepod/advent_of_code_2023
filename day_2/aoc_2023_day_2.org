@@ -41,6 +41,7 @@ try:
         return games
 
     data = load_data("input.txt")
+    #data = load_data("sample.txt")
     print(len(data))
 except Exception as e:
     print(e)
@@ -50,7 +51,7 @@ except Exception as e:
 #+RESULTS:
 : 100
 
-** Calculate the answer
+** Calculate the answer for star 1
 #+BEGIN_SRC python :session session_day_2 :results output
 try:
     def check_game(game: Game,  red_max: int, green_max:int , blue_max: int, debug=False) -> int:
@@ -74,6 +75,12 @@ try:
             id_sum += check_game(game,red_max,green_max,blue_max,debug=False)
         return id_sum
 
+    def 
+    def star_2(data: list[Game]):
+        for game in data:
+            red_min, green_min, blue_min = find_min(game)
+            print(red_min,green_min,blue_min)
+
     print(star_1(data,12,13,14))
 except Exception as e:
     print(e)
@@ -83,4 +90,38 @@ except Exception as e:
 
 #+RESULTS:
 : 2149
+
+** Calculate the answer for star 2
+#+BEGIN_SRC python :session session_day_2 :results output
+try:
+    def find_max(game: Game):
+        red_max, green_max, blue_max = 0,0,0
+        for draw_set in game.draws:
+            for draw in draw_set:
+                if draw.color == "red" and draw.n > red_max:
+                    red_max = draw.n
+                if draw.color == "green" and draw.n > green_max:
+                    green_max = draw.n
+                if draw.color == "blue" and draw.n > blue_max:
+                    blue_max = draw.n
+        
+        return red_max, green_max, blue_max
+    
+    def star_2(data: list[Game]):
+        power_sum = 0
+        for game in data:
+            red_max, green_max, blue_max = find_max(game)
+            power_sum += (red_max * green_max * blue_max)
+            #print(red_max,green_max,blue_max)
+        return power_sum
+
+    print(star_2(data))
+except Exception as e:
+    print(e)
+
+
+#+END_SRC
+
+#+RESULTS:
+: 71274
 
