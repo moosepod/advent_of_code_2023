@@ -58,13 +58,10 @@ try:
         for draw_set in game.draws:
             for draw in draw_set:
                 if draw.color == "red" and draw.n > red_max:
-                    if debug: print(f"{game.id}: red overflow with {draw.n}")
                     return 0
                 if draw.color == "blue" and draw.n > blue_max:
-                    if debug: print(f"{game.id}: blue overflow with {draw.n}")
                     return 0
                 if draw.color == "green" and draw.n > green_max:
-                    if debug: print(f"{game.id}: green overflow with {draw.n}")
                     return 0
         return game.id
     
@@ -75,12 +72,6 @@ try:
             id_sum += check_game(game,red_max,green_max,blue_max,debug=False)
         return id_sum
 
-    def 
-    def star_2(data: list[Game]):
-        for game in data:
-            red_min, green_min, blue_min = find_min(game)
-            print(red_min,green_min,blue_min)
-
     print(star_1(data,12,13,14))
 except Exception as e:
     print(e)
@@ -89,7 +80,8 @@ except Exception as e:
 #+END_SRC
 
 #+RESULTS:
-: 2149
+
+
 
 ** Calculate the answer for star 2
 #+BEGIN_SRC python :session session_day_2 :results output
@@ -112,7 +104,6 @@ try:
         for game in data:
             red_max, green_max, blue_max = find_max(game)
             power_sum += (red_max * green_max * blue_max)
-            #print(red_max,green_max,blue_max)
         return power_sum
 
     print(star_2(data))
@@ -123,5 +114,6 @@ except Exception as e:
 #+END_SRC
 
 #+RESULTS:
-: 71274
+
+
 
