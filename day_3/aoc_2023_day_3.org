@@ -96,7 +96,7 @@ try:
 
     return grid
 
-  grid = load_grid("sample.txt")
+  grid = load_grid("input.txt")
   # Uncomment to show whole grid
   #print(grid.as_text())
   print(f"Grid is {grid.width}x{grid.height}")
@@ -105,7 +105,7 @@ except Exception as e:
 #+END_SRC
 
 #+RESULTS:
-: Grid is 10x10
+: Grid is 140x140
 
 
 ** Day 3 star 1
@@ -159,7 +159,6 @@ except Exception as e:
 #+END_SRC
 
 #+RESULTS:
-: 4361
 
 ** Day 3 star 2
 *** Problem statement
@@ -206,11 +205,12 @@ try:
           for cell in digit_cells:
             for part_number in part_numbers:
               if part_number.in_cell(*cell):
-                matching_numbers[part_number.n] = part_number
+                matching_numbers[(part_number.n,part_number.x,part_number.y)] = part_number
                 break
                 
           if len(matching_numbers) == 2:
-            gear_ratios.append(prod(matching_numbers.keys()))
+            ratio = prod([x[0] for x in matching_numbers.keys()])
+            gear_ratios.append(ratio)
 
     return sum(gear_ratios)
   
@@ -220,5 +220,5 @@ except Exception as e:
 #+END_SRC
 
 #+RESULTS:
-: 467835
+
 
