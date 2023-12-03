@@ -46,6 +46,7 @@ sum is 4361.
 #+BEGIN_SRC python :session session_day_3 :results output
 from pydantic import BaseModel
 try:
+  DIRECTIONS = ((-1,-1),(0,-1),(1,-1),(-1,0),(1,0),(-1,1),(0,1),(1,1),)
   class Grid(BaseModel):
     cells: dict[tuple, str]
     width: int = 0
@@ -62,11 +63,19 @@ try:
       return self.cells.get((x,y)) or '.'
 
     def adjascent_to_symbol(self, x: int, y: int) -> bool:
-      for dx,dy in ((-1,-1),(0,-1),(1,-1),(-1,0),(1,0),(-1,1),(0,1),(1,1),):
+      for dx,dy in DIRECTIONS:
         c = self.get_cell(x+dx, y+dy)
         if not c.isdigit() and not c == '.':
           return True
       return False
+
+    def adjascent_cells_with_digits(self, x: int, y: int) -> list[tuple[int,int]]:
+      r = []
+      for dx,dy in DIRECTIONS:
+        c = self.get_cell(x+dx, y+dy)
+        if c.isdigit():
+          r.append(((x+dx),(y+dy)))
+      return r
 
     def as_text(self):
       s = ""
@@ -87,14 +96,16 @@ try:
 
     return grid
 
-  grid = load_grid("input.txt")
+  grid = load_grid("sample.txt")
   # Uncomment to show whole grid
   #print(grid.as_text())
+  print(f"Grid is {grid.width}x{grid.height}")
 except Exception as e:
   print("Error:",e)
 #+END_SRC
 
 #+RESULTS:
+: Grid is 10x10
 
 
 ** Day 3 star 1
@@ -110,7 +121,11 @@ try:
     n: int
     x: int
     y: int
+    l: int
     a: bool
+
+    def in_cell(self, x: int, y: int):
+      return y == self.y and x >= self.x and x < self.x + self.l
     
   def extract_part_numbers(grid: Grid) -> list[PartNumber]:
     part_numbers: list[PartNumber] = []
@@ -121,10 +136,11 @@ try:
 
         if c.isdigit():
             if not pn:
-              pn = PartNumber(n=0,x=x,y=y,a=False)
+              pn = PartNumber(n=0,x=x,y=y,a=False,l=0)
               part_numbers.append(pn)
             pn.n *= 10
             pn.n += int(c)
+            pn.l += 1
             if grid.adjascent_to_symbol(x,y):
               pn.a = True
         else:
@@ -143,7 +159,7 @@ except Exception as e:
 #+END_SRC
 
 #+RESULTS:
-: 540212
+: 4361
 
 ** Day 3 star 2
 *** Problem statement
@@ -168,15 +184,41 @@ Consider the same engine schematic again:
 ......755.
 ...$.*....
 .664.598..
-In this schematic, there are two gears. The first is in the top left; it has part numbers 467 and 35, so its gear ratio is 16345. The second gear is in the lower right; its gear ratio is 451490. (The * adjacent to 617 is not a gear because it is only adjacent to one part number.) Adding up all of the gear ratios produces 467835.
+
+In this schematic, there are two gears. The first is in the top left;
+it has part numbers 467 and 35, so its gear ratio is 16345. The second
+gear is in the lower right; its gear ratio is 451490. (The * adjacent
+to 617 is not a gear because it is only adjacent to one part number.)
+Adding up all of the gear ratios produces 467835.
+
 *** Solution
 #+BEGIN_SRC python :session session_day_3 :results output
 try:
+  from math import prod
   def star_2(grid: Grid) -> int:
-      return 0
+    part_numbers = extract_part_numbers(grid)
+    gear_ratios = []
+    for y in range(0,grid.height):
+      for x in range(0,grid.width):
+        if grid.get_cell(x,y) == '*':
+          digit_cells = grid.adjascent_cells_with_digits(x,y)
+          matching_numbers = {}
+          for cell in digit_cells:
+            for part_number in part_numbers:
+              if part_number.in_cell(*cell):
+                matching_numbers[part_number.n] = part_number
+                break
+                
+          if len(matching_numbers) == 2:
+            gear_ratios.append(prod(matching_numbers.keys()))
+
+    return sum(gear_ratios)
   
   print(star_2(grid))
 except Exception as e:
   print("Error:",e)
 #+END_SRC
+
+#+RESULTS:
+: 467835
 
