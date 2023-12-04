@@ -72,9 +72,6 @@ except Exception as e:
   print("Error:",e)
 #+END_SRC
 
-#+RESULTS:
-: Loaded 219 cards
-
 ** Day 4 star 1
 *** Problem statement
 
@@ -111,10 +108,6 @@ try:
 except Exception as e:
   print("Error:",e)
 #+END_SRC
-
-#+RESULTS:
-: 33950
-
 
 
 ** Day 4 star 2
@@ -193,10 +186,4 @@ try:
 except Exception as e:
   print("Error:",e)
 #+END_SRC
-
-#+RESULTS:
-: 14814534
-
-#+RESULTS:
-: 14814534
 
