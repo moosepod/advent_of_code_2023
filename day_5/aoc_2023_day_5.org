@@ -350,11 +350,49 @@ try:
                         break
                     
         return min(source)
-    
-    print(star_1_map("sample.txt"))
+
+    def star_2_map(path: str) -> int:
+        lines = []
+        with open(path,'r') as f:
+            lines = f.read().split("\n")
+
+        source = [extract_seeds(l) for l in lines if l.startswith("seeds: ") ][0]
+        ranges = [(source[i],source[i]+source[i+1]-1) for i in range(0,len(source),2)]
+
+        mappings = []
+        current_map = []
+        for line in lines[2:]:
+            if line:
+                if line.endswith("map:"):
+                    mappings.append([])
+                else:
+                    a = [int(x) for x in line.strip().split(" ")]
+                    mappings[-1].append((a[1],a[1]+a[2]-1,a[0]-a[1]))
+
+        for mapper in mappings[:-1]:
+            print(mapper)
+            for i in range(0,len(ranges)):
+                n = ranges[i]
+                for m in mapper:
+                    s = (max(m[0],n[0]),min(m[1],n[1]))
+                    if s[0] <s[1]:
+                        ranges.append((n[0],s[0]-1))
+                        ranges.append((s[0]+m[2], s[1]+m[2]))
+                        ranges.append((n[1]+1,s[1]))
+                        break
+                    
+        return lowest
+
+    print(star_2_map("sample.txt"))
 except Exception as e:
     print("Error:",e)
 #+END_SRC
 
 #+RESULTS:
-: 35
+: [(98, 99, -48), (50, 97, 2)]
+: [(15, 51, -15), (52, 53, -15), (0, 14, 39)]
+: [(53, 60, -4), (11, 52, -11), (0, 6, 42), (7, 10, 50)]
+: [(18, 24, 70), (25, 94, -7)]
+: [(77, 99, -32), (45, 63, 36), (64, 76, 4)]
+: [(69, 69, -69), (0, 68, 1)]
+: Error: name 'lowest' is not defined
