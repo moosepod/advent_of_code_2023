@@ -123,11 +123,37 @@ initial seed number:
 - Input numbers are very big. Makes sense to only pay attention to plantable seeds.
   
 ** Load and validate data
-#+BEGIN_SRC python :session session_day_5 :results values
+#+BEGIN_SRC python :session session_day_5a :results value
 from pydantic import BaseModel
 import re
-data = Data(seeds=[])
+import pandas as pd
 try:
+  class Range(BaseModel):
+    start: int
+    end: int
+    offset: int = 0
+
+    def contains(self, n: int):
+      return n >= self.start and n <= self.end
+
+    def clone(self):
+      return Range(start=self.start,end=self.end,offset=self.offset)
+
+    def overlaps(self,r) -> bool:
+      return not (self.end < r.start or self.start > r.end)
+
+    def contains(self, r) -> bool:
+      return r.start >= self.start and r.end <= self.end
+
+    def intersection(self, r) -> Range | None:
+      r = Range(start=max(self.start, r.start),end=min(self.end, r.end),offset=self.offset+r.offset)
+      if r.start < r.end:
+        return r
+      return None
+
+    def __hash__(self) -> str:
+      return hash(f'{self.start}-{self.end}-{self.offset}')
+    
   class Seed(BaseModel):
     seed: int
     soil: int=0
@@ -140,6 +166,8 @@ try:
 
   class Data(BaseModel):
     seeds: list[Seed]
+    mappings: list[tuple]
+    ranges: dict[tuple[str,str], list[Range]]
 
     def values(self):
       # Let's experiment with table in org mode results!
@@ -160,6 +188,8 @@ try:
 
   def load_data(path) -> Data:
     seeds=[]
+    ranges = {}
+    mappings = []
     current_map = None
     with open(path) as f:
       for row in f.read().split("\n"):
@@ -176,13 +206,21 @@ try:
             # Initalize values
             for seed in seeds:
               setattr(seed,m.group(2), getattr(seed, m.group(1)))
+            ranges[current_map] = []
+            mappings.append(current_map)
             continue
           m = re.match("(\d+) (\d+) (\d+)", row)
           if m:
             dest_start, source_start, l = [int(x) for x in m.groups()]
+            ranges[current_map].append(Range(start=source_start,
+                                             end=source_start+l-1,
+                                             offset=dest_start-source_start))
+            #print(current_map, ranges[current_map][-1])
             process_seeds(current_map, dest_start, source_start, l, seeds)
 
-    return Data(seeds=seeds)
+    for v in ranges.values():
+      v.sort(key=lambda x:x.start)
+    return Data(seeds=seeds,ranges=ranges, mappings=mappings)
 
   data = load_data("input.txt")
   print(data.values())
@@ -215,8 +253,6 @@ data.values()
 |  256306471 | 1751627384 | 4111811671 | 2568632764 | 1956886017 |  2742276835 | 2742276835 | 1822648163 |
 
 
-** 
-
 ** Day 5 star 1
 *** Problem statement
 
@@ -239,7 +275,7 @@ What is the lowest location number that corresponds to any of the
 initial seed numbers?
 
 *** Solution
-#+BEGIN_SRC python :session session_day_5 :results output
+#+BEGIN_SRC python :session session_day_5a :results output
 try:
   def star_1(data: Data) -> int:
       return min([seed.location for seed in data.seeds])
@@ -254,14 +290,71 @@ except Exception as e:
 
 ** Day 5 star 2
 *** Problem statement
-*** Solution
-#+BEGIN_SRC python :session session_day_5 :results output
+
+Everyone will starve if you only plant such a small number of
+seeds. Re-reading the almanac, it looks like the seeds: line actually
+describes ranges of seed numbers.
+
+The values on the initial seeds: line come in pairs. Within each pair,
+the first value is the start of the range and the second value is the
+length of the range. So, in the first line of the example above:
+
+seeds: 79 14 55 13
+
+This line describes two ranges of seed numbers to be planted in the
+garden. The first range starts with seed number 79 and contains 14
+values: 79, 80, ..., 91, 92. The second range starts with seed number
+55 and contains 13 values: 55, 56, ..., 66, 67.
+
+Now, rather than considering four seed numbers, you need to consider a
+total of 27 seed numbers.
+
+In the above example, the lowest location number can be obtained from
+seed number 82, which corresponds to soil 84, fertilizer 84, water 84,
+light 77, temperature 45, humidity 46, and location 46. So, the lowest
+location number is 46.
+
+Consider all of the initial seed numbers listed in the ranges on the
+first line of the almanac. What is the lowest location number that
+corresponds to any of the initial seed numbers?
+
+*** Alternative approach to star 1/star 2
+#+BEGIN_SRC python :session session_day_5a :results output
 try:
-  def star_2(data: Data) -> int:
-      return 0
-  
-  print(star_2(data))
+    def extract_seeds(s: str) -> list[int]:
+        m = re.match("seeds: (.+)", s)
+        return [int(n) for n in m.group(1).split(' ')]
+    
+    def star_1_map(path: str) -> int:
+        lines = []
+        with open(path,'r') as f:
+            lines = f.read().split("\n")
+
+        source = [extract_seeds(l) for l in lines if l.startswith("seeds: ") ][0]
+        mappings = []
+        current_map = []
+        for line in lines[2:]:
+            if line:
+                if line.endswith("map:"):
+                    mappings.append([])
+                else:
+                    a = [int(x) for x in line.strip().split(" ")]
+                    mappings[-1].append((a[1],a[1]+a[2]-1,a[0]-a[1]))
+
+        for mapper in mappings:
+            for i in range(0,len(source)):
+                n = source[i]
+                for m in mapper:
+                    if n >= m[0] and n <= m[1]:
+                        source[i] += m[2]
+                        break
+                    
+        return min(source)
+    
+    print(star_1_map("sample.txt"))
 except Exception as e:
-  print("Error:",e)
+    print("Error:",e)
 #+END_SRC
 
+#+RESULTS:
+: 35
