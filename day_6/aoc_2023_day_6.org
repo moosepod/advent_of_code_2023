@@ -113,8 +113,6 @@ except Exception as e:
 #+END_SRC
 
 #+RESULTS:
-: [42, 18, 35, 17]
-: 449820
 
 ** Day 6 star 2
 *** Problem statement
@@ -157,16 +155,14 @@ prod_race=Race(time=53717880,distance=275118112151524)
 try:
   def star_2(race: Race) -> int:
     counter = 0
-    for c in range(0, test_race.time):
+    for c in range(0, race.time):
       if (c*race.time - c*c) > race.distance:
         counter += 1
     return counter
   
-  print(star_2(test_race))
+  print(star_2(prod_race))
 except Exception as e:
   print("Error:",e)
 #+END_SRC
 
-#+RESULTS:
-: 71503
 
