@@ -1,0 +1,131 @@
+
+* AOC 2023 Day 6
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Puzzle
+
+The organizer brings you over to the area where the boat races are
+held. The boats are much smaller than you expected - they're actually
+toy boats, each with a big button on top. Holding down the button
+charges the boat, and releasing the button allows the boat to
+move. Boats move faster if their button was held longer, but time
+spent holding the button counts against the total race time. You can
+only hold the button at the start of the race, and boats don't move
+until the button is released.
+
+For example:
+
+| Time:     | 7 | 15 |  30 |
+| Distance: | 9 | 40 | 200 |
+
+This document describes three races:
+
+- The first race lasts 7 milliseconds. The record distance in this race is 9 millimeters.
+- The second race lasts 15 milliseconds. The record distance in this race is 40 millimeters.
+= The third race lasts 30 milliseconds. The record distance in this
+race is 200 millimeters.
+
+Your toy boat has a starting speed of zero
+millimeters per millisecond. For each whole millisecond you spend at
+the beginning of the race holding down the button, the boat's speed
+increases by one millimeter per millisecond.
+
+** Load and validate data
+SCHEDULED: <2023-12-06 Wed>
+#+BEGIN_SRC python :session session_day_6 :results output
+from pydantic import BaseModel
+try:
+  class Race(BaseModel):
+    time: int
+    distance: int
+
+    def travelled(self,charge_time: int) -> int:
+      return charge_time * (self.time - charge_time)
+      
+    
+  class Data(BaseModel):
+    races: list[Race]
+
+  def load_data(test:bool) -> Data:
+    if test:
+      return Data(races=[Race(time=7,distance=9),Race(time=15, distance=40), Race(time=30,distance=200)])
+
+    return Data(races=[Race(time=53,distance=275),Race(time=71,distance=1181),Race(time=78,distance=1215),Race(time=80,distance=1524)])
+
+  data = load_data(False)
+  print(data)
+except Exception as e:
+  print("Error:",e)
+#+END_SRC
+
+#+RESULTS:
+: races=[Race(time=53, distance=275), Race(time=71, distance=1181), Race(time=78, distance=1215), Race(time=80, distance=1524)]
+
+** Day 6 star 1
+*** Problem statement
+
+Since the current record for this race is 9 millimeters, there are
+actually 4 different ways you could win: you could hold the button for
+2, 3, 4, or 5 milliseconds at the start of the race.
+
+In the second race, you could hold the button for at least 4
+milliseconds and at most 11 milliseconds and beat the record, a total
+of 8 different ways to win.
+
+In the third race, you could hold the button for at least 11
+milliseconds and no more than 19 milliseconds and still beat the
+record, a total of 9 ways you could win.
+
+To see how much margin of error you have, determine the number of ways
+you can beat the record in each race; in this example, if you multiply
+these values together, you get 288 (4 * 8 * 9).
+
+Determine the number of ways you could beat the record in each
+race. What do you get if you multiply these numbers together?
+
+
+*** Notes
+- d = ct * (ct-rt)
+
+*** Solution
+#+BEGIN_SRC python :session session_day_6 :results output
+try:
+  from math import prod
+  def star_1(data: Data) -> int:
+    ways = []
+    for idx,race in enumerate(data.races):
+      ways.append(len([ct for ct in range(1, race.time) if race.travelled(ct) > race.distance]))
+    print(ways)
+    return prod(ways)
+  
+  print(star_1(data))
+except Exception as e:
+  print("Error:",e)
+#+END_SRC
+
+#+RESULTS:
+: [42, 18, 35, 17]
+: 449820
+
+** Day 6 star 2
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :session session_day_6 :results output
+try:
+  def star_2(data: Data) -> int:
+      return 0
+  
+  print(star_2(data))
+except Exception as e:
+  print("Error:",e)
+#+END_SRC
+
