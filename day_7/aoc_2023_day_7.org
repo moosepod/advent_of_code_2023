@@ -71,9 +71,13 @@ will be multiplied by 5
 #+BEGIN_SRC python :session session_day_7 :results value
 from pydantic import BaseModel
 import enum
-a = [["C1","C2","C3","C4","C5","Bid","Rank"]]
+a = [["C1","C2","C3","C4","C5","Bid","Rank","Joker Rank"]]
 
-strength_mapping = {c: 15-i for i,c in enumerate(['1','2','3','4','5','6','7','8','9','T','J','Q','K','A'])}
+CARDS = ['1','2','3','4','5','6','7','8','9','T','J','Q','K','A']
+strength_mapping = {c: 15-i for i,c in enumerate(CARDS)}
+joker_strength_mapping = strength_mapping.copy()
+joker_strength_mapping['J'] = 16
+
 try:
 
   class Rank(enum.Enum):
@@ -90,6 +94,7 @@ try:
     cards: list[str]
     bid: int
     rank: Rank
+    joker_rank: Rank
     
   class Data(BaseModel):
     hands: list[Hand]
@@ -123,6 +128,27 @@ try:
       
     return rank
 
+  def joker_rank_cards(cards: list[str]) -> int:
+    rank = rank_cards(cards)
+    card_count = 1
+
+    if 'J' in cards:
+      for card in CARDS:
+        if card != 'J':
+          temp_cards = []
+          for c in cards:
+            if c == 'J':
+              temp_cards.append(card)
+            else:
+              temp_cards.append(c)
+          temp_cards.sort()
+          temp_rank = rank_cards(temp_cards)
+          if temp_rank.value < rank.value:
+            rank = temp_rank
+    
+    return rank
+
+
   def load_data(path) -> Data:
     data = Data(hands=[])
 
@@ -132,7 +158,11 @@ try:
           cards, bid = line.split(' ')
           original_cards = cards
           cards = sorted(list(cards))
-          hand = Hand(original_cards=original_cards,cards=cards, bid=int(bid), rank=rank_cards(cards), )
+          hand = Hand(original_cards=original_cards,
+                      cards=cards,
+                      bid=int(bid),
+                      joker_rank=joker_rank_cards(cards),
+                      rank=rank_cards(cards), )
           data.hands.append(hand)
 
     return data
@@ -144,8 +174,9 @@ try:
     a.append([])
     a[-1].extend(hand.cards)
     a[-1].append(hand.bid)
-    a[-1].append(str(hand.rank))
-
+    a[-1].append(hand.rank.name )
+    a[-1].append(hand.joker_rank.name)
+    
 except Exception as e:
   print("Error:",e)
 len(a)
@@ -192,7 +223,7 @@ try:
       elif s1 < s2:
         return 1
 
-    return 0
+    return
   
   def star_1(data: Data) -> int:
     sorted_hands = sorted(data.hands,key=functools.cmp_to_key(compare))
@@ -215,11 +246,38 @@ except Exception as e:
 *** Solution
 #+BEGIN_SRC python :session session_day_7 :results output
 try:
+  import functools
+  def joker_compare(h1: Hand, h2: Hand) -> int:
+    if h1.joker_rank.value < h2.joker_rank.value:
+      return 1
+
+    if h1.joker_rank.value > h2.joker_rank.value:
+      return -1
+
+    # Compare strengths one by one
+    for i in range(0,5):
+      s1,s2 = joker_strength_mapping[h1.original_cards[i]], joker_strength_mapping[h2.original_cards[i]]
+      if s1 > s2:
+        return -1
+      elif s1 < s2:
+        return 1
+
+    return
+  
   def star_2(data: Data) -> int:
-      return 0
+    sorted_hands = sorted(data.hands,key=functools.cmp_to_key(joker_compare))
+    i = 0
+    for rank, hand in enumerate(sorted_hands):
+      #print(hand.original_cards)
+      i+= (rank + 1) * hand.bid
+    return i
+  
   
   print(star_2(data))
 except Exception as e:
   print("Error:",e)
 #+END_SRC
+
+#+RESULTS:
+: 250812407
 
