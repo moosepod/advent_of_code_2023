@@ -1,0 +1,225 @@
+
+* AOC 2023 Day 7
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+
+** Problem statement
+In Camel Cards, you get a list of hands, and your goal is to order
+them based on the strength of each hand. A hand consists of five cards
+labeled one of A, K, Q, J, T, 9, 8, 7, 6, 5, 4, 3, or 2. The relative
+strength of each card follows this order, where A is the highest and 2
+is the lowest.
+
+Every hand is exactly one type. From strongest to weakest, they are:
+
+- Five of a kind, where all five cards have the same label: AAAAA
+- Four of a kind, where four cards have the same label and one card
+  has a different label: AA8AA
+- Full house, where three cards have the same label, and the remaining
+  two cards share a different label: 23332
+- Three of a kind, where three cards have the same label, and the
+  remaining two cards are each different from any other card in the
+  hand: TTT98
+- Two pair, where two cards share one label, two other cards share a
+  second label, and the remaining card has a third label: 23432
+- One pair, where two cards share one label, and the other three cards
+  have a different label from the pair and each other: A23A4
+- High card, where all cards' labels are distinct: 23456
+
+Hands are primarily ordered based on type; for example, every full
+house is stronger than any three of a kind.
+
+If two hands have the same type, a second ordering rule takes
+effect. Start by comparing the first card in each hand. If these cards
+are different, the hand with the stronger first card is considered
+stronger. If the first card in each hand have the same label, however,
+then move on to considering the second card in each hand. If they
+differ, the hand with the higher second card wins; otherwise, continue
+with the third card in each hand, then the fourth, then the fifth.
+
+So, 33332 and 2AAAA are both four of a kind hands, but 33332 is
+stronger because its first card is stronger. Similarly, 77888 and
+77788 are both a full house, but 77888 is stronger because its third
+card is stronger (and both hands have the same first and second card).
+
+To play Camel Cards, you are given a list of hands and their
+corresponding bid (your puzzle input). For example:
+
+32T3K 765
+T55J5 684
+KK677 28
+KTJJT 220
+QQQJA 483
+
+This example shows five hands; each hand is followed by its bid
+amount. Each hand wins an amount equal to its bid multiplied by its
+rank, where the weakest hand gets rank 1, the second-weakest hand gets
+rank 2, and so on up to the strongest hand. Because there are five
+hands in this example, the strongest hand will have rank 5 and its bid
+will be multiplied by 5
+
+** Load and validate data
+#+BEGIN_SRC python :session session_day_7 :results value
+from pydantic import BaseModel
+import enum
+a = [["C1","C2","C3","C4","C5","Bid","Rank"]]
+
+strength_mapping = {c: 15-i for i,c in enumerate(['1','2','3','4','5','6','7','8','9','T','J','Q','K','A'])}
+try:
+
+  class Rank(enum.Enum):
+    five_of_a_kind = 1
+    four_of_a_kind = 2
+    full_house = 3
+    three_of_a_kind = 4
+    two_pair = 5
+    one_pair = 6
+    high_card = 7
+    
+  class Hand(BaseModel):
+    original_cards: str
+    cards: list[str]
+    bid: int
+    rank: Rank
+    
+  class Data(BaseModel):
+    hands: list[Hand]
+  
+  def rank_cards(cards: list[str]) -> int:
+    rank = Rank.high_card
+    card_count = 1
+    
+    for i in range(1,5):
+      c1,c2 = cards[i],cards[i-1]
+      if c1 == c2 :
+        card_count += 1
+        if card_count == 5:
+          return Rank.five_of_a_kind
+
+      if c1 != c2 or i == 4:
+        if card_count == 4:
+          return Rank.four_of_a_kind
+        elif card_count == 3:
+          if rank == Rank.one_pair:
+            return Rank.full_house
+          rank = Rank.three_of_a_kind
+        elif card_count == 2:
+          if rank == Rank.three_of_a_kind:
+            return Rank.full_house
+          if rank == Rank.one_pair:
+            return Rank.two_pair
+          rank = Rank.one_pair
+
+        card_count = 1
+      
+    return rank
+
+  def load_data(path) -> Data:
+    data = Data(hands=[])
+
+    with open(path, "r") as f:
+      for line in f.read().split("\n"):
+        if line:
+          cards, bid = line.split(' ')
+          original_cards = cards
+          cards = sorted(list(cards))
+          hand = Hand(original_cards=original_cards,cards=cards, bid=int(bid), rank=rank_cards(cards), )
+          data.hands.append(hand)
+
+    return data
+  
+
+  data = load_data("input.txt")
+
+  for hand in data.hands:
+    a.append([])
+    a[-1].extend(hand.cards)
+    a[-1].append(hand.bid)
+    a[-1].append(str(hand.rank))
+
+except Exception as e:
+  print("Error:",e)
+len(a)
+#+END_SRC
+
+#+RESULTS:
+: 1001
+
+** Day 7 star 1
+
+So, the first step is to put the hands in order of strength:
+
+- 32T3K is the only one pair and the other hands are all a stronger
+  type, so it gets rank 1.
+- KK677 and KTJJT are both two pair. Their first cards both have the
+  same label, but the second card of KK677 is stronger (K vs T), so
+  KTJJT gets rank 2 and KK677 gets rank 3.
+- T55J5 and QQQJA are both three of a kind. QQQJA has a stronger first
+  card, so it gets rank 5 and T55J5 gets rank 4.
+- Now, you can determine the total winnings of this set of hands by
+  adding up the result of multiplying each hand's bid with its rank
+  (765 * 1 + 220 * 2 + 28 * 3 + 684 * 4 + 483 * 5). So the total
+  winnings in this example are 6440.
+
+Find the rank of every hand in your set. What are the total winnings?
+
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :session session_day_7 :results output
+try:
+  import functools
+  def compare(h1: Hand, h2: Hand) -> int:
+    if h1.rank.value < h2.rank.value:
+      return 1
+
+    if h1.rank.value > h2.rank.value:
+      return -1
+
+    # Compare strengths one by one
+    for i in range(0,5):
+      s1,s2 = strength_mapping[h1.original_cards[i]], strength_mapping[h2.original_cards[i]]
+      if s1 > s2:
+        return -1
+      elif s1 < s2:
+        return 1
+
+    return 0
+  
+  def star_1(data: Data) -> int:
+    sorted_hands = sorted(data.hands,key=functools.cmp_to_key(compare))
+    i = 0
+    for rank, hand in enumerate(sorted_hands):
+      #print(hand.original_cards)
+      i+= (rank + 1) * hand.bid
+    return i
+  
+  print(star_1(data))
+except Exception as e:
+  print("Error:",e)
+#+END_SRC
+
+#+RESULTS:
+: 251287184
+
+** Day 7 star 2
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :session session_day_7 :results output
+try:
+  def star_2(data: Data) -> int:
+      return 0
+  
+  print(star_2(data))
+except Exception as e:
+  print("Error:",e)
+#+END_SRC
+
