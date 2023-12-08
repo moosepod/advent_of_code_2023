@@ -95,10 +95,6 @@ except Exception as e:
   print("Error:",e)
 #+END_SRC
 
-#+RESULTS:
-: 2
-: 6
-: 20659
 
 ** Day 8 star 2
 *** Problem statement
@@ -187,6 +183,4 @@ except Exception as e:
   print("Error:",e)
 #+END_SRC
 
-#+RESULTS:
-: 15690466351717
 
