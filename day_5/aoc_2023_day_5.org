@@ -396,3 +396,95 @@ except Exception as e:
 : [(77, 99, -32), (45, 63, 36), (64, 76, 4)]
 : [(69, 69, -69), (0, 68, 1)]
 : Error: name 'lowest' is not defined
+
+*** Yet another approach to star 1
+#+BEGIN_SRC python :session session_day_5a :results output
+import re
+try:
+    def star_1(path: str) -> int:
+        with open(path,'r') as f:
+            text = f.read()
+            seeds = [int(n) for n in re.match(f"seeds: (.+)", text).group(1).split(' ')]
+
+            for mappings in re.findall(f"(\w+)-to-(\w+) map:\n(.+?)\n\n", text, re.DOTALL):
+                new_seeds = []
+                for seed in seeds:
+                    found = False
+                    for mapping in mappings[2].split("\n"):
+                        if mapping:
+                            dest, src, count = [int(x) for x in mapping.split(' ')]
+                            if seed >= src and seed < src + count:
+                                new_seeds.append(seed + dest - src)
+                                found = True
+                                break
+                    if not found:
+                        new_seeds.append(seed)
+                seeds = new_seeds
+                
+            return min(seeds)
+           
+    print(f"sample.txt: {star_1('sample.txt')}")
+    print(f"input.txt:  {star_1('input.txt')}")
+except Exception as e:
+    print("Error:",e)
+
+#+END_SRC
+
+#+RESULTS:
+: sample.txt: 35
+: input.txt:  346433842
+
+*** Yet another approach to star 2
+#+BEGIN_SRC python :session session_day_5a :results output
+import re
+try:
+    def star_2(path: str) -> int:
+        with open(path,'r') as f:
+            text = f.read()
+            seeds = [int(n) for n in re.match(f"seeds: (.+)", text).group(1).split(' ')]
+            seeds = [(seeds[i],seeds[i]+seeds[i+1]) for i in range(0,len(seeds),2)]
+
+            for mappings in re.findall(f"(\w+)-to-(\w+) map:\n(.+?)\n\n", text, re.DOTALL):
+                new_seeds = []
+                for start,end in seeds:
+                    found = False
+                    for mapping in mappings[2].split("\n"):
+                        if mapping:
+                            dest, src, count = [int(x) for x in mapping.split(' ')]
+                            if seed >= src and seed < src + count:
+                                new_seeds.append(seed + dest - src)
+                                found = True
+                                break
+                    if not found:
+                        new_seeds.append(seed)
+                seeds = new_seeds
+                
+            return min(seeds)
+           
+    print(f"sample.txt: {star_2('sample.txt')}")
+    print(f"input.txt:  {star_2('input.txt')}")
+except Exception as e:
+    print("Error:",e)
+
+#+END_SRC
+
+#+RESULTS:
+: Error: name 'seed' is not defined
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
