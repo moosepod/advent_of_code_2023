@@ -1,0 +1,72 @@
+
+* AOC 2023 Day 9
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Load and validate data
+*** Sample
+|  0 |  3 |  6 |  9 | 12 | 15 |
+|  1 |  3 |  6 | 10 | 15 | 21 |
+| 10 | 13 | 16 | 21 | 30 | 45 |
+
+** Day 9 star 1
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :session  :results value
+result = []
+try:
+  def expand_line(line: str) -> list[int]:
+    results = [[int(x) for x in line.split(' ') if x != ' ']]
+    # Calculate differences
+    while sum(results[-1]) != 0:
+      results.append([int(results[-1][i])-int(results[-1][i-1]) for i in range(1,len(results[-1]))])
+
+    results[-1].append(0)
+    for i in range(len(results)-1, 0, -1):
+      results[i-1].append(results[i-1][-1] + results[i][-1])
+        
+    return results
+  
+  def star_1(path: str) -> list[int]:
+    results = []
+    with open(path) as f:
+      for line in f.read().split("\n"):
+        if line:
+          results.append(expand_line(line))
+
+    return results
+
+  f = "sample.txt"
+  #result = star_1(f)
+  result = sum(x[0][-1] for x in star_1(f))
+except Exception as e:
+  print("Error:",e)
+  
+result
+#+END_SRC
+
+#+RESULTS:
+: 114
+
+
+** Day 9 star 2
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :session :results output
+try:
+  def star_2(data: Data) -> int:
+      return 0
+  
+  print(star_2(data))
+except Exception as e:
+  print("Error:",e)
+#+END_SRC
+
