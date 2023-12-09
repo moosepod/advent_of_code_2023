@@ -434,57 +434,172 @@ except Exception as e:
 : sample.txt: 35
 : input.txt:  346433842
 
+a - seed
+b - range
+
+a1 -- a2
+           b1  -- b2 
+(a1,a2),(b1,b2)
+
+	   a1 -- a2
+b1 -- b2
+
+(a1,a2),(b1,b2)
+
+---
+
+min(a1,b1) -> max(b1,a1)
+min(a2,b2) -> max(a2,b2)
+max(b1,a1) -> min(a2,b2)
+
+a1 -- a2
+   b1 -- b2
+(a1,b1) [S], (b1,a2)[O],(a2,b2)
+- (a1, b1), (b1, a2), (a2, b2)
+
+   a1 -- a2
+b1 -- b2
+(b1-a1) (a1,b2)[O] (b2,a2)[S]
+- (b1, a1), (a1, b2), (b2,a2)
+  
+
+      a1 --- a2
+b1 ---------------- b2
+(b1,a1), (a1,a2), (a2,b2)
+- (b1, a1), (a1,a2)[O] , (a2, b2)
+  
+
+a1 ---------------- a2
+      b1 -- b2
+(a1,b1), (b1,b2), (b2, a1)
+
+- (a1, b1)[S],(b1,b2)[O]  (b2, a2)[S]  
+
+
+h(t(l(w(f(s(x))))))
+
+
+79 92
+
+
 *** Yet another approach to star 2
-#+BEGIN_SRC python :session session_day_5a :results output
+**** Just not clear why this doesn't work? NEXT STEP -- check logic of each step
+#+BEGIN_SRC python :results output
 import re
 try:
+    def intersect(l1: tuple[int,int], l2: tuple[int,int]) -> bool:
+        return max([l1[0],l2[0]]) < min([l1[1],l2[1]])
+        
     def star_2(path: str) -> int:
         with open(path,'r') as f:
             text = f.read()
             seeds = [int(n) for n in re.match(f"seeds: (.+)", text).group(1).split(' ')]
-            seeds = [(seeds[i],seeds[i]+seeds[i+1]) for i in range(0,len(seeds),2)]
+            seed_ranges = [(seeds[i],seeds[i]+seeds[i+1]-1) for i in range(0,len(seeds),2)]
 
             for mappings in re.findall(f"(\w+)-to-(\w+) map:\n(.+?)\n\n", text, re.DOTALL):
-                new_seeds = []
-                for start,end in seeds:
+                new_seed_ranges = []
+                for seed_start,seed_end in seed_ranges:
                     found = False
                     for mapping in mappings[2].split("\n"):
+                        
                         if mapping:
-                            dest, src, count = [int(x) for x in mapping.split(' ')]
-                            if seed >= src and seed < src + count:
-                                new_seeds.append(seed + dest - src)
+                            dest, mapping_start, count = [int(x) for x in mapping.split(' ')]
+                            mapping_end = mapping_start + count-1
+                                                                                    
+                            if intersect((seed_start,seed_end),(mapping_start,mapping_end)):
                                 found = True
+                                temp = [(min(seed_start, mapping_start),max(seed_start,mapping_start)),
+                                (max(seed_start, mapping_start),min(seed_end,mapping_end)),
+                                (min(seed_end, mapping_end),max(seed_end,mapping_end))]
+
+                                for start, end in temp:
+                                    if intersect((seed_start,seed_end),(start,end)):
+                                        if intersect((mapping_start,mapping_end),(start,end)):
+                                            offset = dest - mapping_start
+                                            new_seed_ranges.append((start+offset,end+offset))
+                                        else:
+                                            new_seed_ranges.append((start,end))
+
                                 break
                     if not found:
-                        new_seeds.append(seed)
-                seeds = new_seeds
+                        new_seed_ranges.append((seed_start, seed_end),)
+
+                # Clean up any overlapping ranges
+                seed_ranges = []
+                seed_ranges = new_seed_ranges
+                #print(mappings[0],seed_ranges)
                 
-            return min(seeds)
-           
-    print(f"sample.txt: {star_2('sample.txt')}")
+            return min([x[0] for x in seed_ranges])
+
+
+    #print(f"sample.txt: {star_2('sample.txt')}")
     print(f"input.txt:  {star_2('input.txt')}")
 except Exception as e:
     print("Error:",e)
 
+# : input.txt:  87968959 -- too high
 #+END_SRC
 
 #+RESULTS:
-: Error: name 'seed' is not defined
+: input.txt:  87968958
 
+** Another try, building up some primitives first
+#+BEGIN_SRC python :results values
+from pydantic import BaseModel, model_validator
 
+class P(BaseModel):
+    """ A point """
+    x: int
+    y: int
+    z: int = 0
 
+class R(BaseModel):
+    """ A range """
+    a: int
+    b: int
 
+    def overlap(self, r: 'R') -> bool:
+        return max(self.a, r.a) <= min(self.b, r.b) 
 
+    @model_validator(mode='after')
+    def check_ordering(self) -> 'R':
+        if self.a > self.b:
+            raise ValueError(f"a [{self.a}] is greater than b [{self.b}]")
 
+        return self
 
+def sort_of_tests() -> list[tuple[str,str,str]]:
+    results = [("Test","Expected","Got")]
+    results.append(("R: Init", "a=1 b=2", str(R(a=1,b=2))))
+    try:
+        R(a=2,b=1)
+        results.append(("R: Validation", "ValueError","No error"))
+    except ValueError:
+        results.append(("R: Validation", "ValueError","ValueError"))
 
+    results.append(("R: Overlap","False",R(a=1,b=3).overlap(R(a=4,b=6))))
+    results.append(("R: Overlap","False",R(a=4,b=6).overlap(R(a=1,b=3))))
+    results.append(("R: Overlap","True",R(a=1,b=3).overlap(R(a=3,b=5))))
+    results.append(("R: Overlap","True",R(a=3,b=5).overlap(R(a=1,b=3))))
+    results.append(("R: Overlap","True",R(a=1,b=3).overlap(R(a=1,b=3))))
+    results.append(("R: Overlap","True",R(a=1,b=3).overlap(R(a=1,b=3))))
+    results.append(("R: Overlap","True",R(a=1,b=3).overlap(R(a=0,b=2))))
+    results.append(("R: Overlap","True",R(a=0,b=2).overlap(R(a=1,b=3))))
+    
+    return results
 
+return sort_of_tests()
+#+END_SRC
 
-
-
-
-
-
-
-
-
+#+RESULTS:
+| Test          | Expected   | Got        |
+| R: Init       | a=1 b=2    | a=1 b=2    |
+| R: Validation | ValueError | ValueError |
+| R: Overlap    | False      | False      |
+| R: Overlap    | False      | False      |
+| R: Overlap    | True       | True       |
+| R: Overlap    | True       | True       |
+| R: Overlap    | True       | True       |
+| R: Overlap    | True       | True       |
+| R: Overlap    | True       | True       |
+| R: Overlap    | True       | True       |
