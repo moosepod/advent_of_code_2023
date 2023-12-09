@@ -557,45 +557,67 @@ def sort_of_tests() -> list[tuple[str,str,str]]:
         results.append(("R: Validation", "ValueError","ValueError"))
 
     results.append(("R: Overlap","False",R(a=1,b=3).overlap(R(a=4,b=6))))
+    results.append(("R: Intersection","None",R(a=1,b=3).intersection(R(a=4,b=6))))
     results.append(("R: Overlap","False",R(a=4,b=6).overlap(R(a=1,b=3))))
+    results.append(("R: Intersection","False",R(a=4,b=6).intersection(R(a=1,b=3))))
     results.append(("R: Overlap","True",R(a=1,b=3).overlap(R(a=3,b=5))))
+    results.append(("R: Intersection","a=3,b=3",str(R(a=1,b=3).intersection(R(a=3,b=5)))))
     results.append(("R: Overlap","True",R(a=3,b=5).overlap(R(a=1,b=3))))
+    results.append(("R: Intersection","a=3,b=3",str(R(a=3,b=5).intersection(R(a=1,b=3)))))
     results.append(("R: Overlap","True",R(a=1,b=3).overlap(R(a=1,b=3))))
-    results.append(("R: Overlap","True",R(a=1,b=3).overlap(R(a=1,b=3))))
+    results.append(("R: Intersection","a=1,b=3",str(R(a=1,b=3).intersection(R(a=1,b=3)))))
     results.append(("R: Overlap","True",R(a=1,b=3).overlap(R(a=0,b=2))))
+    results.append(("R: Intersection","a=1,b=2",str(R(a=1,b=3).intersection(R(a=0,b=2)))))
     results.append(("R: Overlap","True",R(a=0,b=2).overlap(R(a=1,b=3))))
-    results.append(("R: Contains","False", 0 in R(a=1,b=3)))
-    results.append(("R: Contains","True", 1 in R(a=1,b=3)))
-    results.append(("R: Contains","True", 2 in R(a=1,b=3)))
-    results.append(("R: Contains","True", 3 in R(a=1,b=3)))
-    results.append(("R: Contains","False", 4 in R(a=1,b=3)))
-    results.append(("R: Contains","False", 'a' in R(a=1,b=3)))
-    results.append(("R: Contains","True", 2.0 in R(a=1,b=3)))
-    
+    results.append(("R: Intersection","a=1,b=2",str(R(a=0,b=2).intersection(R(a=1,b=3)))))
+
+    results.append(("R: Contains N","False", 0 in R(a=1,b=3)))
+    results.append(("R: Contains N","True", 1 in R(a=1,b=3)))
+    results.append(("R: Contains N","True", 2 in R(a=1,b=3)))
+    results.append(("R: Contains N","True", 3 in R(a=1,b=3)))
+    results.append(("R: Contains N","False", 4 in R(a=1,b=3)))
+    results.append(("R: Contains N","False", 'a' in R(a=1,b=3)))
+    results.append(("R: Contains N","True", 2.0 in R(a=1,b=3)))
+    results.append(("R: Contains R","True",R(a=0,b=2) in R(a=1,b=3)))
+    results.append(("R: Contains R","False",R(a=4,b=6) in R(a=1,b=3)))
+    results.append(("R: Subtract R","None",R(a=1,b=3) - R(a=4,b=6)))
+    results.append(("R: Subtract R","a=1,b=2",str(R(a=0,b=2) - R(a=1,b=3))))
+    results.append(("R: add 3", "a=4,b=5", str(R(a=1,b=2) + 3)))
     return results
 
 return sort_of_tests()
 #+END_SRC
 
 #+RESULTS:
-| Test          | Expected   | Got        |
-| R: Init       | a=1 b=2    | a=1 b=2    |
-| R: Validation | ValueError | ValueError |
-| R: Overlap    | False      | False      |
-| R: Overlap    | False      | False      |
-| R: Overlap    | True       | True       |
-| R: Overlap    | True       | True       |
-| R: Overlap    | True       | True       |
-| R: Overlap    | True       | True       |
-| R: Overlap    | True       | True       |
-| R: Overlap    | True       | True       |
-| R: Contains   | False      | False      |
-| R: Contains   | True       | True       |
-| R: Contains   | True       | True       |
-| R: Contains   | True       | True       |
-| R: Contains   | False      | False      |
-| R: Contains   | False      | False      |
-| R: Contains   | True       | True       |
+| Test            | Expected   | Got        |
+| R: Init         | a=1 b=2    | a=1 b=2    |
+| R: Validation   | ValueError | ValueError |
+| R: Overlap      | False      | False      |
+| R: Intersection | None       | None       |
+| R: Overlap      | False      | False      |
+| R: Intersection | False      | None       |
+| R: Overlap      | True       | True       |
+| R: Intersection | a=3,b=3    | a=3 b=3    |
+| R: Overlap      | True       | True       |
+| R: Intersection | a=3,b=3    | a=3 b=3    |
+| R: Overlap      | True       | True       |
+| R: Intersection | a=1,b=3    | a=1 b=3    |
+| R: Overlap      | True       | True       |
+| R: Intersection | a=1,b=2    | a=1 b=2    |
+| R: Overlap      | True       | True       |
+| R: Intersection | a=1,b=2    | a=1 b=2    |
+| R: Contains N   | False      | False      |
+| R: Contains N   | True       | True       |
+| R: Contains N   | True       | True       |
+| R: Contains N   | True       | True       |
+| R: Contains N   | False      | False      |
+| R: Contains N   | False      | False      |
+| R: Contains N   | True       | True       |
+| R: Contains R   | True       | True       |
+| R: Contains R   | False      | False      |
+| R: Subtract R   | None       | None       |
+| R: Subtract R   | a=1,b=2    | a=1 b=2    |
+| R: add 3        | a=4,b=5    | a=4 b=5    |
 
 ** Star one, redux
 
@@ -637,3 +659,63 @@ return star_1("input.txt")
 
 #+RESULTS:
 : 346433842
+
+** Star 2 redux
+#+BEGIN_SRC python :results output
+import re
+from utils import P,R
+def star_2(path: str):
+    with open(path,'r') as f:
+        text = f.read()
+        raw_seeds = [int(n) for n in re.match(f"seeds: (.+)", text).group(1).split(' ')]
+        seeds = [R(a=raw_seeds[i], b=raw_seeds[i]+raw_seeds[i+1]-1) for i in range(0,len(raw_seeds)-1, 2)]
+        for mappings in re.findall(r"(\w+)-to-(\w+) map:\n(.+?)\n\n", text, re.DOTALL):
+            stage_from, stage_to, mapping_text = mappings
+            seed_length = len(seeds)
+            for seed_idx in range(0, seed_length):
+                for mapping in mapping_text.strip().split('\n'):
+                    dest,src,count = [int(x) for x in mapping.split(' ')]
+                    r = R(a=src, b=src+count)
+                    if seeds[seed_idx] in r:
+                        o = r - seeds[seed_idx]
+                        print('....',r,'-',seeds[seed_idx],'=', o)
+                        seeds[seed_idx] = o + (dest - src)
+                        print('.... now', seeds[seed_idx])
+                        # Next steps
+                        # Figure out how to handle parts of seed that _don't_ totally overlap
+                        # Make sure seed ranges are de-duped
+                    else:
+                        # Seed can be left alone, not mapped
+                        pass
+
+    print(seeds)
+    return min([x.a for x in seeds])
+
+print(star_2("sample.txt"))
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+.... a=50 b=98 - a=79 b=92 = a=79 b=92
+.... now a=81 b=94
+.... a=50 b=98 - a=55 b=67 = a=55 b=67
+.... now a=57 b=69
+.... a=53 b=61 - a=57 b=69 = a=57 b=61
+.... now a=53 b=57
+.... a=11 b=53 - a=53 b=57 = a=53 b=53
+.... now a=42 b=42
+.... a=25 b=95 - a=81 b=94 = a=81 b=94
+.... now a=74 b=87
+.... a=25 b=95 - a=42 b=42 = a=42 b=42
+.... now a=35 b=35
+.... a=77 b=100 - a=74 b=87 = a=77 b=87
+.... now a=45 b=55
+.... a=45 b=64 - a=45 b=55 = a=45 b=55
+.... now a=81 b=91
+.... a=0 b=69 - a=35 b=35 = a=35 b=35
+.... now a=36 b=36
+[R(a=81, b=91), R(a=36, b=36)]
+36
+#+end_example
+
+** 
