@@ -545,28 +545,7 @@ except Exception as e:
 
 ** Another try, building up some primitives first
 #+BEGIN_SRC python :results values
-from pydantic import BaseModel, model_validator
-
-class P(BaseModel):
-    """ A point """
-    x: int
-    y: int
-    z: int = 0
-
-class R(BaseModel):
-    """ A range """
-    a: int
-    b: int
-
-    def overlap(self, r: 'R') -> bool:
-        return max(self.a, r.a) <= min(self.b, r.b) 
-
-    @model_validator(mode='after')
-    def check_ordering(self) -> 'R':
-        if self.a > self.b:
-            raise ValueError(f"a [{self.a}] is greater than b [{self.b}]")
-
-        return self
+from utils import P, R
 
 def sort_of_tests() -> list[tuple[str,str,str]]:
     results = [("Test","Expected","Got")]
@@ -585,6 +564,13 @@ def sort_of_tests() -> list[tuple[str,str,str]]:
     results.append(("R: Overlap","True",R(a=1,b=3).overlap(R(a=1,b=3))))
     results.append(("R: Overlap","True",R(a=1,b=3).overlap(R(a=0,b=2))))
     results.append(("R: Overlap","True",R(a=0,b=2).overlap(R(a=1,b=3))))
+    results.append(("R: Contains","False", 0 in R(a=1,b=3)))
+    results.append(("R: Contains","True", 1 in R(a=1,b=3)))
+    results.append(("R: Contains","True", 2 in R(a=1,b=3)))
+    results.append(("R: Contains","True", 3 in R(a=1,b=3)))
+    results.append(("R: Contains","False", 4 in R(a=1,b=3)))
+    results.append(("R: Contains","False", 'a' in R(a=1,b=3)))
+    results.append(("R: Contains","True", 2.0 in R(a=1,b=3)))
     
     return results
 
@@ -603,3 +589,51 @@ return sort_of_tests()
 | R: Overlap    | True       | True       |
 | R: Overlap    | True       | True       |
 | R: Overlap    | True       | True       |
+| R: Contains   | False      | False      |
+| R: Contains   | True       | True       |
+| R: Contains   | True       | True       |
+| R: Contains   | True       | True       |
+| R: Contains   | False      | False      |
+| R: Contains   | False      | False      |
+| R: Contains   | True       | True       |
+
+** Star one, redux
+
+*** Notes
+| seeds: | 79 | 14 | 55 | 13 |
+
+seed-to-soil map:
+| 50 | 98 |  2 |
+| 52 | 50 | 48 |
+
+soil-to-fertilizer map:
+|  0 | 15 | 37 |
+| 37 | 52 |  2 |
+| 39 |  0 | 15 |
+
+...
+
+#+BEGIN_SRC python :results values
+import re
+from utils import P,R
+def star_1(path: str):
+    with open(path,'r') as f:
+        text = f.read()
+        seeds = [int(n) for n in re.match(f"seeds: (.+)", text).group(1).split(' ')]
+
+        for mappings in re.findall(r"(\w+)-to-(\w+) map:\n(.+?)\n\n", text, re.DOTALL):
+            stage_from, stage_to, mapping_text = mappings
+            for seed_idx in range(0, len(seeds)):
+                for mapping in mapping_text.strip().split('\n'):
+                    dest,src,count = [int(x) for x in mapping.split(' ')]
+                    if seeds[seed_idx] in R(a=src,b=src+count):
+                        seeds[seed_idx] += dest - src
+                        break
+            
+    return min(seeds)
+
+return star_1("input.txt")
+#+END_SRC
+
+#+RESULTS:
+: 346433842
