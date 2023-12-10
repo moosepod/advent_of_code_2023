@@ -45,7 +45,8 @@ def star_1(path: str, start_char: str) -> int:
       else:
           pg.cells[p] = grid.cells[p]
           
-  dump_grid(pg)
+  #dump_grid(pg)
+  print(pg.size)
   return len(path)/2
   
 star_1("sample.txt","F")
@@ -76,6 +77,20 @@ import re
 from pydantic import BaseModel
 from d10_utils import P,S, Grid, load_grid, dump_grid, find_loop_path
 
+def outside(p: P, grid: Grid) -> bool:
+    if grid.cells.get(p,'.') != '.':
+        return False
+    
+    for dir in (P(x=1,y=0),P(x=-1,y=0),P(x=0,y=-1),P(x=0,y=1)):
+        p2 = p + dir
+        if not grid.in_bounds(p2):
+            return True
+        
+        if grid.cells.get(p2,'.') == 'O' :
+            return True
+            
+    return False
+
 def star_2(path: str, start_char: str) -> int:
   grid = load_grid(path)
   grid.cells[grid.start] = start_char
@@ -88,21 +103,70 @@ def star_2(path: str, start_char: str) -> int:
           pg.cells[p] = '*'
       else:
           pg.cells[p] = grid.cells[p]
+
           
   dump_grid(pg)
 
-  return len([x for x in pg.cells.values() if x == 'I'])
+  counter = 0
+  old_enclosed = -1
+  enclosed = 0
+
+  while old_enclosed != enclosed and counter < 10000:
+      counter += 1
+      old_enclosed = enclosed
+      ul,lr = P(x=0,y=0), P(x=pg.size.width,y=pg.size.width)
+
+      while ul.x < lr.x:
+          for x in range(ul.x, lr.x):
+              p = P(x=x, y=ul.y)
+              if outside(p,pg):
+                  pg.cells[p] = 'O'
+              
+              p = P(x=x, y=lr.y-1)
+              if outside(p,pg):
+                  pg.cells[p] = 'O'
+                  
+          for y in range(ul.y, lr.y):
+              p = P(x=ul.x, y=y)
+              if outside(p,pg):
+                  pg.cells[p] = 'O'
+
+              p = P(x=lr.x-1, y=y)
+              if outside(p,pg):
+                  pg.cells[p] = 'O'
+
+          ul += P(x=1,y=1)
+          lr += P(x=-1,y=-1)
+
+      enclosed = 0
+      for y in range(0,pg.size.height):
+         for x in range(0,pg.size.width):
+             if pg.cells.get(P(x=x,y=y),'.') == '.':
+                 enclosed += 1
+      
+  if counter == 10000:
+      print("WARNING: hit max")
+      
+  #dump_grid(pg)
+
+  return enclosed
 
 print()
-print('Star 2:',star_2("sample.txt","F"))
+print('Star 2:',star_2("sample_3.txt","F"))
 #+END_SRC
 
 #+RESULTS:
-: 
-: Starting at x=0 y=0 z=0
-: .....
-: .*-7.
-: .|.|.
-: .L-J.
-: .....
-: Star 2: 0
+#+begin_example
+
+Starting at x=0 y=0 z=0
+...........
+.*-------7.
+.|F-----7|.
+.||.....||.
+.||.....||.
+.|L-7.F-J|.
+.|..|.|..|.
+.L--J.L--J.
+...........
+Star 2: 4
+#+end_example
