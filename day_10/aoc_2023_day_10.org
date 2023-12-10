@@ -8,6 +8,9 @@
   (setq org-src-preserve-indentation t)
 #+END_SRC
 
+#+RESULTS:
+: t
+
 ** Day 10 star 1
 *** Problem statement
 If the animal had entered this loop in the northwest corner, the sketch would instead look like this:
@@ -72,9 +75,13 @@ Can solve with pathfinding, though unclear if efficient enoguh
 import re
 from pydantic import BaseModel
 from d10_utils import P,S, Grid, load_grid, dump_grid, find_loop_path
+from pathfinding.finder.a_star import AStarFinder
+from pathfinding.core.grid import Grid as PathfinderGrid
 
-def path_exists(p1: P, p2: P) -> bool:
-    return True
+def path_exists(p1: P, p2: P, grid: PathfinderGrid) -> bool:
+    finder = AStarFinder(diagonal_movement=False)
+    path, runs = finder.find_path(grid.node(p1.x,p1.y),grid.node(p2.x,p2.y), grid)
+    return len(path) > 0
 
 def star_2(path: str, start_char: str) -> int:
   grid = load_grid(path)
@@ -82,22 +89,52 @@ def star_2(path: str, start_char: str) -> int:
 
   path = find_loop_path(grid)
   pg = Grid(size=grid.size, cells={}, start=P())
+
   for p in path:
       if p == grid.start:
           pg.cells[p] = '*'
       else:
           pg.cells[p] = grid.cells[p]
           
+  matrix = []
+  for y in range(0,grid.size.height):
+      matrix.append([])
+      for x in range(0,grid.size.width):
+          if pg.cells.get(P(x=x,y=y),'.') == '.':
+              matrix[-1].append(1)
+          else:
+              matrix[-1].append(0)
+
+  pf_grid = PathfinderGrid(matrix=matrix)
+              
+  target_p = (P(x=0,y=0),P(x=0,y=pg.size.height-1),P(x=pg.size.width-1,y=0),P(x=pg.size.width-1,y=pg.size.height-1))
+  for y in range(0,grid.size.height):
+      for x in range(0,grid.size.width):
+          p = P(x=x,y=y)
+          if pg.cells.get(p,'.') == '.':
+              found_path = False
+              for p2 in target_p:
+                  if path_exists(p2,p,pf_grid):
+                      found_path = True
+                      break
+              if not found_path:
+                  pg.cells[p] = 'I'
+              pf_grid.cleanup()
+
   dump_grid(pg)
 
+  return len([x for x in pg.cells.values() if x == 'I'])
 
-star_2("sample.txt","F")
+print()
+print('Star 2:',star_2("sample.txt","F"))
 #+END_SRC
 
 #+RESULTS:
+: 
 : Starting at x=0 y=0 z=0
 : .....
 : .*-7.
-: .|.|.
+: .|I|.
 : .L-J.
 : .....
+: Star 2: 1
