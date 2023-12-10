@@ -98,7 +98,11 @@ But my solution shows:
 - OL--JL--JO
 - OOOOOOOOOO
 
+
 because the gap between the pipes is a path out.
+
+- Have O "follow the pipe" somehow -, JL 7F (and upper/lower examples)
+- Replace things with gaps with new (eg H in this case). Needs to handle corner cases.
 
 *** Solution
 #+BEGIN_SRC python :results output
