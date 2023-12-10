@@ -96,31 +96,6 @@ def star_2(path: str, start_char: str) -> int:
       else:
           pg.cells[p] = grid.cells[p]
           
-  matrix = []
-  for y in range(0,grid.size.height):
-      matrix.append([])
-      for x in range(0,grid.size.width):
-          if pg.cells.get(P(x=x,y=y),'.') == '.':
-              matrix[-1].append(1)
-          else:
-              matrix[-1].append(0)
-
-  pf_grid = PathfinderGrid(matrix=matrix)
-              
-  target_p = (P(x=0,y=0),P(x=0,y=pg.size.height-1),P(x=pg.size.width-1,y=0),P(x=pg.size.width-1,y=pg.size.height-1))
-  for y in range(0,grid.size.height):
-      for x in range(0,grid.size.width):
-          p = P(x=x,y=y)
-          if pg.cells.get(p,'.') == '.':
-              found_path = False
-              for p2 in target_p:
-                  if path_exists(p2,p,pf_grid):
-                      found_path = True
-                      break
-              if not found_path:
-                  pg.cells[p] = 'I'
-              pf_grid.cleanup()
-
   dump_grid(pg)
 
   return len([x for x in pg.cells.values() if x == 'I'])
@@ -134,7 +109,7 @@ print('Star 2:',star_2("sample.txt","F"))
 : Starting at x=0 y=0 z=0
 : .....
 : .*-7.
-: .|I|.
+: .|.|.
 : .L-J.
 : .....
-: Star 2: 1
+: Star 2: 0
