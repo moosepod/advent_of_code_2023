@@ -23,47 +23,26 @@ If the animal had entered this loop in the northwest corner, the sketch would in
 - Need to enumerate over all paths, find largest
 - Not acyclic
 - Each pipe only has _one_ connection
-- Star 2 is basically pathfinding, but to edge (or 0,0)
     
 *** Solution
 #+BEGIN_SRC python :results output
 import re
 from pydantic import BaseModel
-from d10_utils import P,S, Grid, load_grid, dump_grid
+from d10_utils import P,S, Grid, load_grid, dump_grid, find_loop_path
 
 def star_1(path: str, start_char: str) -> int:
   grid = load_grid(path)
   grid.cells[grid.start] = start_char
-  
-  visited: dict[P,bool] = {grid.start: 0}
-  max_depth = 0
-  p = grid.start
-  to_visit = [*grid.connected_points(p)]
 
-  # use DFS to find the path
-  counter = 0
-  path = [p]
-  while len(to_visit) and counter < 100000:
-      counter+=1
-      p2 = to_visit[0]#.pop()
-      del to_visit[0]
-      if not visited.get(p2):
-          visited[p2] = True
-          #print('Visited',p2,grid.cells[p2],'from',p,visited[p2])
-          to_visit.extend([np for np in grid.connected_points(p2) if not visited.get(np)])
-          path.append(p2)
-
+  path = find_loop_path(grid)
   pg = Grid(size=grid.size, cells={}, start=P())
   for p in path:
       if p == grid.start:
           pg.cells[p] = '*'
       else:
           pg.cells[p] = grid.cells[p]
-
-  #print(grid)
-  print(len(path),len(path)/2)
+          
   dump_grid(pg)
-      
   return len(path)/2
   
 star_1("sample.txt","F")
@@ -71,7 +50,6 @@ star_1("sample.txt","F")
 #+END_SRC
 
 #+RESULTS:
-: 9 4.5
 : Starting at x=0 y=0 z=0
 : .....
 : .*-7.
@@ -80,3 +58,46 @@ star_1("sample.txt","F")
 : .....
 
 
+** Star 2
+*** Problem
+Figure out whether you have time to search for the nest by calculating
+the area within the loop. How many tiles are enclosed by the loop?
+
+*** Notes
+
+Can solve with pathfinding, though unclear if efficient enoguh
+
+*** Solution
+#+BEGIN_SRC python :results output
+import re
+from pydantic import BaseModel
+from d10_utils import P,S, Grid, load_grid, dump_grid, find_loop_path
+
+def path_exists(p1: P, p2: P) -> bool:
+    return True
+
+def star_2(path: str, start_char: str) -> int:
+  grid = load_grid(path)
+  grid.cells[grid.start] = start_char
+
+  path = find_loop_path(grid)
+  pg = Grid(size=grid.size, cells={}, start=P())
+  for p in path:
+      if p == grid.start:
+          pg.cells[p] = '*'
+      else:
+          pg.cells[p] = grid.cells[p]
+          
+  dump_grid(pg)
+
+
+star_2("sample.txt","F")
+#+END_SRC
+
+#+RESULTS:
+: Starting at x=0 y=0 z=0
+: .....
+: .*-7.
+: .|.|.
+: .L-J.
+: .....

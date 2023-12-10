@@ -119,3 +119,23 @@ def dump_grid(grid: Grid):
       s+=grid.cells.get(P(x=x,y=y)) or '.'
     print(s)
 
+def find_loop_path(grid: Grid) -> list[P]:
+  visited: dict[P,bool] = {grid.start: 0}
+  max_depth = 0
+  p = grid.start
+  to_visit = [*grid.connected_points(p)]
+
+  # use DFS to find the path
+  counter = 0
+  path = [p]
+  while len(to_visit) and counter < 100000:
+      counter+=1
+      p2 = to_visit[0]#.pop()
+      del to_visit[0]
+      if not visited.get(p2):
+          visited[p2] = True
+          #print('Visited',p2,grid.cells[p2],'from',p,visited[p2])
+          to_visit.extend([np for np in grid.connected_points(p2) if not visited.get(np)])
+          path.append(p2)
+
+  return path
