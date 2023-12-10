@@ -1,0 +1,96 @@
+
+* AOC 2023 Day 10
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+** Day 10 star 1
+*** Problem statement
+If the animal had entered this loop in the northwest corner, the sketch would instead look like this:
+
+.....
+.S-7.
+.|.|.
+.L-J.
+.....
+
+*** Notes
+- A graph
+- Need to enumerate over all paths, find largest
+- Not acyclic
+    
+*** Solution
+#+BEGIN_SRC python :results output
+import re
+from pydantic import BaseModel
+from d10_utils import P,S
+
+MAPPINGS = {"|": ((0,-1),(0,1)),
+            "-": ((1,0),(-1,0)),
+            "L": ((1,0),(0,-1)),
+            "J": ((-1,0),(0,-1)),
+            "7": ((-1,0),(0,1)),
+            "F": ((1,0),(0,1))}
+
+class Grid(BaseModel):
+    size: S
+    cells: dict[P, str]
+    start: P
+
+def load_grid(path: str) -> Grid:
+  cells = {}
+  width,height = 0,0
+  start = P()
+  with open(path,'r') as f:
+    for y, row in enumerate(f.read().split("\n")):
+      if row:
+        width = len(row)
+        height +=1 
+        for x, col in enumerate(row.strip()):
+          p = P(x=x,y=y)
+          if col == 'S':
+              start = p
+          cells[p] = col
+
+  return Grid(size=S(width=width,height=height),cells=cells, start=start)
+
+def star_1(path: str) -> int:
+  grid = load_grid(path)
+  print("Starting at",grid.start)
+  for y in range(0,grid.size.height):
+    s = ""
+    for x in range(0,grid.size.width):
+      s+=grid.cells[P(x=x,y=y)]
+    print(s)
+  
+  return 0
+  
+star_1("sample.txt")
+#+END_SRC
+
+#+RESULTS:
+: Starting at x=1 y=1 z=0
+: .....
+: .S-7.
+: .|.|.
+: .L-J.
+: .....
+
+
+
+** Day 10 star 2
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+def star_2(data: Data) -> int:
+  with open(path,'r') as f:
+     pass
+  return 0
+  
+return star_2("sample.txt")
+#+END_SRC
+
