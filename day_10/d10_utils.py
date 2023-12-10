@@ -59,3 +59,63 @@ class R(BaseModel):
             raise ValueError(f"a [{self.a}] is greater than b [{self.b}]")
 
         return self
+
+MAPPINGS = {"|": (P(x=0,y=-1),P(x=0,y=1)),
+            "-": (P(x=1,y=0),P(x=-1,y=0)),
+            "L": (P(x=1,y=0),P(x=0,y=-1)),
+            "J": (P(x=-1,y=0),P(x=0,y=-1)),
+            "7": (P(x=-1,y=0),P(x=0,y=1)),
+            "F": (P(x=1,y=0),P(x=0,y=1))}
+
+class Grid(BaseModel):
+    size: S
+    cells: dict[P, str]
+    start: P
+
+    def connect(self, p1: P, p2: P):
+        c = self.cells[P1]
+        for mapping in MAPPINGS.get(c,()):
+            if mapping + p1 == p2:
+                return True
+
+        return False
+
+    def in_bounds(self,p: P) -> bool:
+        return p.x >=0 and p.y >=0 and p.x < self.size.width and p.y < self.size.height
+    
+    def connected_points(self, p1: P) -> list:
+        points = []
+        c = self.cells[p1]
+        for mapping in MAPPINGS.get(c,()):
+            p2 = p1 + mapping
+            if self.in_bounds(p2):
+                points.append(p2)
+
+        return points
+
+def load_grid(path: str) -> Grid:
+  cells = {}
+  width,height = 0,0
+  start = P()
+  with open(path,'r') as f:
+    for y, row in enumerate(f.read().split("\n")):
+      if row:
+        width = len(row)
+        height +=1 
+        for x, col in enumerate(row.strip()):
+          p = P(x=x,y=y)
+          if col == 'S':
+              start = p
+          cells[p] = col
+
+  return Grid(size=S(width=width,height=height),cells=cells, start=start)
+
+
+def dump_grid(grid: Grid):
+  print("Starting at",grid.start)
+  for y in range(0,grid.size.height):
+    s = ""
+    for x in range(0,grid.size.width):
+      s+=grid.cells.get(P(x=x,y=y)) or '.'
+    print(s)
+
