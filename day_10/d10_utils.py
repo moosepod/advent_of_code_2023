@@ -10,6 +10,10 @@ class P(BaseModel):
     def __hash__(self):
         return hash(f'{self.x}x{self.y}x{self.z}')
 
+    def __add__(self, value):
+        # Assume adding a P
+        return P(x=self.x+value.x, y=self.y+value.y, z=self.z+value.z)
+        
 class S(BaseModel):
     """A size. Not really different than point, but keeps var names separate"""
     width: int
