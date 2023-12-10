@@ -75,13 +75,6 @@ Can solve with pathfinding, though unclear if efficient enoguh
 import re
 from pydantic import BaseModel
 from d10_utils import P,S, Grid, load_grid, dump_grid, find_loop_path
-from pathfinding.finder.a_star import AStarFinder
-from pathfinding.core.grid import Grid as PathfinderGrid
-
-def path_exists(p1: P, p2: P, grid: PathfinderGrid) -> bool:
-    finder = AStarFinder(diagonal_movement=False)
-    path, runs = finder.find_path(grid.node(p1.x,p1.y),grid.node(p2.x,p2.y), grid)
-    return len(path) > 0
 
 def star_2(path: str, start_char: str) -> int:
   grid = load_grid(path)
