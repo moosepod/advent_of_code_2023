@@ -103,7 +103,9 @@ because the gap between the pipes is a path out.
 
 - Have O "follow the pipe" somehow -, JL 7F (and upper/lower examples)
 - Replace things with gaps with new (eg H in this case). Needs to handle corner cases.
-
+= Doesn't work due to inner loop (start from outside in? follow loop?)
+- Alright, this doesn't work either
+  
 *** Solution
 #+BEGIN_SRC python :results output
 import re
@@ -142,6 +144,20 @@ def star_2(path: str, start_char: str) -> int:
       else:
           pg.cells[p] = grid.cells[p]
 
+  # Anything adjascent to a pipe entrance should count as an O
+  # ASSUMPTION -- no pipes touch map edge
+  for y in range(0,grid.size.height):
+      for x in range(0,grid.size.width):
+          p = P(x=x,y=y)
+          if pg.cells[p] == '.':
+              for p1, p2, c1, c2 in ((P(x=x,y=y+1), P(x=x+1,y=y+1), '7','F'),
+                                     (P(x=x-1, y=y),P(x=x-1,y=y-1),'7','J'),
+                                     (P(x=x, y=y-1),P(x=x+1,y=y-1),'J','L'),
+                                     (P(x=x+1, y=y),P(x=x+1,y=y+1),'L','7')
+                                     ):
+                  if pg.in_bounds(p1) and pg.in_bounds(p2) and pg.cells.get(p1) == c1 and pg.cells.get(p2) == c2:
+                      pg.cells[p] = 'M'
+                      break
           
   dump_grid(pg)
 
@@ -186,34 +202,36 @@ def star_2(path: str, start_char: str) -> int:
   return enclosed
 
 print()
-print('Star 2:',star_2("sample_5.txt","F"))
+print('Star 2:',star_2("sample_4.txt","F"))
 #+END_SRC
 
 #+RESULTS:
 #+begin_example
 
-22.5
+70.5
 Starting at x=0 y=0 z=0
-..........
-.*------7.
-.|F----7|.
-.||....||.
-.||....||.
-.|L-7F-J|.
-.|..||..|.
-.L--JL--J.
-..........
+.F----7F7F7F7F-7....
+.|F--7||||||||FJ....
+.||.FJ||||||||L7M...
+FJL7L7LJLJ||LJ.L-7..
+L--J.L7M.MLJ*7F-7L7.
+....F-J..F7FJ|L7L7L7
+....L7.F7||L7|ML7L7|
+.....|FJLJ|FJ|F7|.LJ
+....FJL-7.||.||||...
+....L---J.LJ.LJLJ...
 Starting at x=0 y=0 z=0
-OOOOOOOOOO
-O*------7O
-O|F----7|O
-O||....||O
-O||....||O
-O|L-7F-J|O
-O|..||..|O
-OL--JL--JO
-OOOOOOOOOO
-Star 2: 12
+OF----7F7F7F7F-7OOOO
+O|F--7||||||||FJOOOO
+O||.FJ||||||||L7MOOO
+FJL7L7LJLJ||LJ.L-7OO
+L--J.L7M.MLJ*7F-7L7O
+OOOOF-J..F7FJ|L7L7L7
+OOOOL7.F7||L7|ML7L7|
+OOOOO|FJLJ|FJ|F7|OLJ
+OOOOFJL-7O||O||||OOO
+OOOOL---JOLJOLJLJOOO
+Star 2: 7
 #+end_example
 
 
