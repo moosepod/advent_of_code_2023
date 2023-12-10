@@ -19,6 +19,9 @@ class S(BaseModel):
     width: int
     height: int
 
+    def magnitude(self) -> int:
+        return self.width * self.height
+
 class R(BaseModel):
     """ A range with a/b inclusive""" 
     a: int 
@@ -93,6 +96,9 @@ class Grid(BaseModel):
 
         return points
 
+    def magnitude(self) -> int:
+        return self.size.magnitude()
+
 def load_grid(path: str) -> Grid:
   cells = {}
   width,height = 0,0
@@ -116,7 +122,12 @@ def dump_grid(grid: Grid):
   for y in range(0,grid.size.height):
     s = ""
     for x in range(0,grid.size.width):
-      s+=grid.cells.get(P(x=x,y=y)) or '.'
+      c = grid.cells.get(P(x=x,y=y)) or '.'
+      if c == 'O':
+          c = ' '
+      #elif c != '.':
+      #    c = 'X'
+      s+=c
     print(s)
 
 def find_loop_path(grid: Grid) -> list[P]:
