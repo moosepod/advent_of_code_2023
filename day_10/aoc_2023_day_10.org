@@ -69,8 +69,6 @@ the area within the loop. How many tiles are enclosed by the loop?
 
 *** Notes
 
-Can solve with pathfinding, though unclear if efficient enoguh
-
 *** Solution
 #+BEGIN_SRC python :results output
 import re
