@@ -123,8 +123,8 @@ def dump_grid(grid: Grid):
     s = ""
     for x in range(0,grid.size.width):
       c = grid.cells.get(P(x=x,y=y)) or '.'
-      if c == 'O':
-          c = ' '
+      #if c == 'O':
+      #    c = ' '
       #elif c != '.':
       #    c = 'X'
       s+=c
