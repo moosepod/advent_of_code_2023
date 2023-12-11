@@ -40,26 +40,27 @@ def aoc_template(day: int) -> str:
 ** Day {day} star 1
 *** Problem statement
 *** Solution
-#+BEGIN_SRC python :results values
+#+BEGIN_SRC python :results output
 import re
-def star_1(data: Data) -> int:
+def star_1(path: str) -> int:
   with open(path,'r') as f:
      pass
   return 0
   
-return star_1("sample.txt")
+print("Star 1:",star_1("sample.txt"))
+
 #+END_SRC
 
 ** Day {day} star 2
 *** Problem statement
 *** Solution
 #+BEGIN_SRC python :results output
-def star_2(data: Data) -> int:
+def star_2(path: str) -> int:
   with open(path,'r') as f:
      pass
   return 0
   
-return star_2("sample.txt")
+print("Star 2:", star_2("sample.txt"))
 #+END_SRC
 
 """

@@ -1,0 +1,82 @@
+
+* AOC 2023 Day 11
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Day 11 star 1
+*** Problem statement
+*** Notes
+- Load galaxy
+- expand rows/columns with no galaxies
+- breckenham's distance
+  
+*** Solution
+#+BEGIN_SRC python :results output
+from d11_utils import Grid,load_grid, dump_grid
+
+def star_1(path: str) -> int:
+  with open(path,'r') as f:
+     grid = load_grid(path)
+     dump_grid(grid)
+     grid.expand()
+     print("\n-- expanded -- \n")
+     dump_grid(grid)
+     galaxies = grid.find('#')
+     print('*** Galaxies ***')
+     print(len(galaxies))
+  return 0
+  
+star_1("sample_1.txt")
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+...#......
+.......#..
+#.........
+..........
+......#...
+.#........
+.........#
+..........
+.......#..
+#...#.....
+
+-- expanded -- 
+
+....#........
+.........#...
+#............
+.............
+.............
+........#....
+.#...........
+............#
+.............
+.............
+.........#...
+#....#.......
+,*** Galaxies ***
+9
+#+end_example
+
+** Day 11 star 2
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+def star_2(data: Data) -> int:
+  with open(path,'r') as f:
+     pass
+  return 0
+  
+return star_2("sample.txt")
+#+END_SRC
+
