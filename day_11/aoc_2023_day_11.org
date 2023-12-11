@@ -28,14 +28,12 @@ def star_1(path: str) -> int:
      galaxies = grid.find('#')
      s = 0
 
-     seen = {}
      for i1, p1 in enumerate(galaxies):
-       for i2, p2 in enumerate(galaxies):
-         if p1 != p2 and (p1,p2) not in seen and (p2,p1) not in seen:
+       for i2 in range(i1+1,len(galaxies)):
+         p2 = galaxies[i2]
+         if p1 != p2:
              d = grid.grid_distance(p1,p2)
              s += d
-             #print(f'Distance between {i1+1} and {i2+1} is {d}')
-             seen[(p1,p2)] = True
 
   return s
   
@@ -57,24 +55,22 @@ from d11_utils import Grid,load_grid, dump_grid
 def star_2(path: str) -> int:
   with open(path,'r') as f:
      grid = load_grid(path)
-     grid.expand_size(100)
+     grid.expand_size(10)
      galaxies = grid.find('#')
      s = 0
 
-     seen = {}
      for i1, p1 in enumerate(galaxies):
-       for i2, p2 in enumerate(galaxies):
-         if p1 != p2 and (p1,p2) not in seen and (p2,p1) not in seen:
-           #if i1 == 0 and i2 == 5:
+       for i2 in range(i1+1,len(galaxies)):
+         p2 = galaxies[i2]
+         if p1 != p2:
              d = grid.grid_distance(p1,p2)
              s += d
-             seen[(p1,p2)] = True
 
   return s
   
-print("Star 2:", star_2("sample_1.txt"))
+print("Star 2:", star_2("input.txt"))
 #+END_SRC
 
 #+RESULTS:
-: Star 2: 8410
+: Star 2: 12131997
 
