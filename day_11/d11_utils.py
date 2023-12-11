@@ -13,6 +13,12 @@ class P(BaseModel):
     def __add__(self, value):
         # Assume adding a P
         return P(x=self.x+value.x, y=self.y+value.y, z=self.z+value.z)
+
+    def __eq__(self, value):
+        return self.x == value.x and self.y == value.y and self.z == value.z
+    
+    def clone(self) -> 'P':
+        return P(x=self.x,y=self.y,z=self.z)
         
 class S(BaseModel):
     """A size. Not really different than point, but keeps var names separate"""
@@ -95,7 +101,31 @@ class Grid(BaseModel):
                     r.append(p)
 
         return r
-    
+
+    def grid_distance(self, p1: P, p2: P) -> int:
+        d = 0
+        p = p1.clone()
+        
+        toggle = True
+        while p != p2:
+            d+=1
+            if d > 100000:
+                print(">>> Distance too large for",p1,'->',p2)
+                return 0
+            dx = p2.x - p.x
+            dy = p2.y - p.y
+            if dy == 0:
+                p.x += 1 if dx > 0 else -1
+            elif dx == 0:
+                p.y += 1 if dy > 0 else -1
+            elif p != p2:
+                if toggle:
+                    p.x += 1 if dx > 0 else -1
+                else:
+                    p.y += 1 if dy > 0 else -1
+                toggle = not toggle
+        return d
+                
     def connected_points(self, p1: P) -> list:
         points = []
         c = self.cells[p1]

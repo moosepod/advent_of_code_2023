@@ -25,48 +25,28 @@ from d11_utils import Grid,load_grid, dump_grid
 def star_1(path: str) -> int:
   with open(path,'r') as f:
      grid = load_grid(path)
-     dump_grid(grid)
+     #dump_grid(grid)
      grid.expand()
-     print("\n-- expanded -- \n")
-     dump_grid(grid)
+     #dump_grid(grid)
      galaxies = grid.find('#')
-     print('*** Galaxies ***')
-     print(len(galaxies))
-  return 0
+     s = 0
+
+     seen = []
+     for i1, p1 in enumerate(galaxies):
+       for i2, p2 in enumerate(galaxies):
+         if p1 != p2 and (p1,p2) not in seen and (p2,p1) not in seen:
+             d = grid.grid_distance(p1,p2)
+             s += d
+             #print(f'Distance between {i1+1} and {i2+1} is {d}')
+             seen.append((p1,p2))
+
+  return s
   
-star_1("sample_1.txt")
+print(star_1("sample_1.txt"))
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
-...#......
-.......#..
-#.........
-..........
-......#...
-.#........
-.........#
-..........
-.......#..
-#...#.....
-
--- expanded -- 
-
-....#........
-.........#...
-#............
-.............
-.............
-........#....
-.#...........
-............#
-.............
-.............
-.........#...
-#....#.......
-,*** Galaxies ***
-9
-#+end_example
+: 374
 
 ** Day 11 star 2
 *** Problem statement
