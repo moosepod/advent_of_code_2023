@@ -55,7 +55,7 @@ from d11_utils import Grid,load_grid, dump_grid
 def star_2(path: str) -> int:
   with open(path,'r') as f:
      grid = load_grid(path)
-     grid.expand_size(10)
+     grid.expand_size(1000000)
      galaxies = grid.find('#')
      s = 0
 
@@ -72,5 +72,5 @@ print("Star 2:", star_2("input.txt"))
 #+END_SRC
 
 #+RESULTS:
-: Star 2: 12131997
+: Star 2: 357134560737
 

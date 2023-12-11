@@ -137,6 +137,14 @@ class Grid(BaseModel):
                 d += s.height
                 p.y += dir_y
             else:
+                s1 = self.cell_sizes[P(x=p.x+dir_x,y=p.y)]
+                s2 = self.cell_sizes[P(x=p.x,y=p.y+dir_y)]
+
+                if s1.width > s2.width:
+                    toggle = False
+                elif s1.height < s2.height:
+                    toggle = True
+                
                 if toggle:
                     d += s.width 
                     p.x += dir_x
