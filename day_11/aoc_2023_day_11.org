@@ -17,7 +17,6 @@
 - Load galaxy
 - expand rows/columns with no galaxies
 - breckenham's distance
-  
 *** Solution
 #+BEGIN_SRC python :results output
 from d11_utils import Grid,load_grid, dump_grid
@@ -25,38 +24,57 @@ from d11_utils import Grid,load_grid, dump_grid
 def star_1(path: str) -> int:
   with open(path,'r') as f:
      grid = load_grid(path)
-     #dump_grid(grid)
-     grid.expand()
-     #dump_grid(grid)
+     grid.expand_size(2)
      galaxies = grid.find('#')
      s = 0
 
-     seen = []
+     seen = {}
      for i1, p1 in enumerate(galaxies):
        for i2, p2 in enumerate(galaxies):
          if p1 != p2 and (p1,p2) not in seen and (p2,p1) not in seen:
              d = grid.grid_distance(p1,p2)
              s += d
              #print(f'Distance between {i1+1} and {i2+1} is {d}')
-             seen.append((p1,p2))
+             seen[(p1,p2)] = True
 
   return s
   
-print(star_1("sample_1.txt"))
+print(star_1("input.txt"))
 #+END_SRC
 
 #+RESULTS:
-: 374
+: 9274989
 
 ** Day 11 star 2
 *** Problem statement
+*** Notes
+- Can't work around expanded rows/columns
+- They just affect the size
+  
 *** Solution
 #+BEGIN_SRC python :results output
-def star_2(data: Data) -> int:
+from d11_utils import Grid,load_grid, dump_grid
+def star_2(path: str) -> int:
   with open(path,'r') as f:
-     pass
-  return 0
+     grid = load_grid(path)
+     grid.expand_size(100)
+     galaxies = grid.find('#')
+     s = 0
+
+     seen = {}
+     for i1, p1 in enumerate(galaxies):
+       for i2, p2 in enumerate(galaxies):
+         if p1 != p2 and (p1,p2) not in seen and (p2,p1) not in seen:
+           #if i1 == 0 and i2 == 5:
+             d = grid.grid_distance(p1,p2)
+             s += d
+             seen[(p1,p2)] = True
+
+  return s
   
-return star_2("input.txt")
+print("Star 2:", star_2("sample_1.txt"))
 #+END_SRC
+
+#+RESULTS:
+: Star 2: 8410
 

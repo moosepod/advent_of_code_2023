@@ -80,6 +80,7 @@ class Grid(BaseModel):
     size: S
     cells: dict[P, str]
     distance_cache: dict[str,int] = {}
+    cell_sizes: dict[P, str]
 
     def connect(self, p1: P, p2: P):
         c = self.cells[P1]
@@ -111,24 +112,41 @@ class Grid(BaseModel):
         toggle = True
         while p != p2:
             if self.distance_cache.get((p,p2)) != None:
-                return self.distance_cache[(p,p2)]
+                return d + self.distance_cache[(p,p2)]
+
+            dir_x = 0
+            dir_y = 0
+
+            if p.x != p2.x:
+                dir_x = 1 if p2.x - p.x > 0 else -1
+
+            if p.y != p2.y:
+                dir_y = 1 if p2.y - p.y > 0 else -1
+
+            if dir_x == 0 and dir_y == 0:
+                break
             
-            d+=1
-            if d > 100000:
-                print(">>> Distance too large for",p1,'->',p2)
-                return 0
-            dx = p2.x - p.x
-            dy = p2.y - p.y
-            if dy == 0:
-                p.x += 1 if dx > 0 else -1
-            elif dx == 0:
-                p.y += 1 if dy > 0 else -1
-            elif p != p2:
+            s = self.cell_sizes[p]
+
+            #print('1',p,s)
+
+            if dir_y == 0:
+                d += s.width
+                p.x += dir_x
+            elif dir_x == 0:
+                d += s.height
+                p.y += dir_y
+            else:
                 if toggle:
-                    p.x += 1 if dx > 0 else -1
+                    d += s.width 
+                    p.x += dir_x
                 else:
-                    p.y += 1 if dy > 0 else -1
+                    d+= s.height
+                    p.y += dir_y
                 toggle = not toggle
+
+            #print('2',p,d,dir_x,dir_y)
+            #print()
 
         self.distance_cache[(p,p2)] = d
         
@@ -160,6 +178,21 @@ class Grid(BaseModel):
         for x in range(0,self.size.width):
             self.cells[P(x=x,y=at_y)] = c
 
+    def expand_size(self, s: int):        
+        for x in range(0, self.size.width):
+            for y in range(0, self.size.height):
+                self.cell_sizes[P(x=x,y=y)] = S(width=1,height=1)
+
+        for x in range(0,self.size.width):
+            if len([True for y in range(0,self.size.height) if not self.cells.get(P(x=x, y=y)) == '#']) == self.size.height:
+                for y in range(0,self.size.height):
+                    self.cell_sizes[P(x=x,y=y)].width = s
+
+        for y in range(0, self.size.height):
+            if len([True for x in range(0,self.size.width) if not self.cells.get(P(x=x, y=y)) == '#']) == self.size.width:
+                for x in range(0,self.size.width):
+                    self.cell_sizes[P(x=x,y=y)].height = s
+        
     def expand(self):
         x = 0
         while x < self.size.width:
@@ -191,7 +224,7 @@ def load_grid(path: str) -> Grid:
           p = P(x=x,y=y)
           cells[p] = col
 
-  return Grid(size=S(width=width,height=height),cells=cells)
+  return Grid(size=S(width=width,height=height),cells=cells,cell_sizes={})
 
 
 def dump_grid(grid: Grid):
