@@ -57,6 +57,6 @@ def star_2(data: Data) -> int:
      pass
   return 0
   
-return star_2("sample.txt")
+return star_2("input.txt")
 #+END_SRC
 

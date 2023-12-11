@@ -79,6 +79,7 @@ MAPPINGS = {"|": (P(x=0,y=-1),P(x=0,y=1)),
 class Grid(BaseModel):
     size: S
     cells: dict[P, str]
+    distance_cache: dict[str,int] = {}
 
     def connect(self, p1: P, p2: P):
         c = self.cells[P1]
@@ -104,10 +105,14 @@ class Grid(BaseModel):
 
     def grid_distance(self, p1: P, p2: P) -> int:
         d = 0
+
         p = p1.clone()
         
         toggle = True
         while p != p2:
+            if self.distance_cache.get((p,p2)) != None:
+                return self.distance_cache[(p,p2)]
+            
             d+=1
             if d > 100000:
                 print(">>> Distance too large for",p1,'->',p2)
@@ -124,6 +129,9 @@ class Grid(BaseModel):
                 else:
                     p.y += 1 if dy > 0 else -1
                 toggle = not toggle
+
+        self.distance_cache[(p,p2)] = d
+        
         return d
                 
     def connected_points(self, p1: P) -> list:
