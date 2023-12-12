@@ -26,19 +26,21 @@ import re
 import itertools
 
 def valid(spring: str, arrangement: list[int]) -> bool:
-    
-    
-    spring = '.' + spring + '.'
-    print('Checking',spring)
-    for arrangement in arrangement:
-        target = '.' + ('#' * arrangement) + '.'
-        if target not in spring:
-            print(target,'not found in ',spring)
-            return False
-        
-        spring = re.sub(target,'!',spring, count=1)
+    contiguous_blocks = []
+    i = 0
+    while i < len(spring):
+        if spring[i] == '#':
+            count = 0
+            while i < len(spring) and spring[i] == '#':
+                count += 1
+                i += 1
+            if count > 0:
+                contiguous_blocks.append(count)
+        else:
+            i+=1
 
-    return '#' not in spring and '?' not in spring
+    #print(spring, contiguous_blocks, arrangement)
+    return contiguous_blocks == arrangement
         
 def star_1(path: str) -> int:
   with open(path,'r') as f:
@@ -51,7 +53,7 @@ def star_1(path: str) -> int:
         spring_indexes = [i for i in range(0,len(springs)) if springs[i] == '?']
 
         # Brute force
-        for l in range(0,len(spring_indexes)):
+        for l in range(0,len(spring_indexes)+1):
             for indexes in itertools.combinations(spring_indexes, l):
                 ts = ""
                 for i in range(0,len(springs)):
@@ -62,41 +64,24 @@ def star_1(path: str) -> int:
                             ts += '#'
                         else:
                             ts += '.'
+
                 if valid(ts,arrangements):
                     row_arrangements += 1
 
-        print(springs,'|',arrangements,'|',spring_indexes,'|',row_arrangements, valid(springs,arrangements))
+        #print(springs,'|',arrangements,'|',spring_indexes,'|',row_arrangements, valid(springs,arrangements))
+        #print(springs,row_arrangements)
         s += row_arrangements
 
-        return 0
+        #return 0
 
   return s
   
-print("Star 1:",star_1("sample_1.txt"))
+print("Star 1:",star_1("input.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
-Checking .....###.
-.#. not found in  .....###.
-Checking .#...###.
-.#. not found in  !..###.
-Checking ..#..###.
-.#. not found in  .!.###.
-Checking ...#.###.
-.#. not found in  ..!###.
-Checking .##..###.
-.#. not found in  .##..###.
-Checking .#.#.###.
-.#. not found in  !#.###.
-Checking ..##.###.
-.#. not found in  ..##.###.
-Checking .???.###.
-.#. not found in  .???.###.
-???.### | [1, 1, 3] | [0, 1, 2] | 0 False
-Star 1: 0
-#+end_example
+: Star 1: 7653
 
 ** Day 12 star 2
 *** Problem statement
