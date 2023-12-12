@@ -39,7 +39,6 @@ def valid(spring: str, arrangement: list[int]) -> bool:
         else:
             i+=1
 
-    #print(spring, contiguous_blocks, arrangement)
     return contiguous_blocks == arrangement
         
 def star_1(path: str) -> int:
@@ -68,20 +67,18 @@ def star_1(path: str) -> int:
                 if valid(ts,arrangements):
                     row_arrangements += 1
 
-        #print(springs,'|',arrangements,'|',spring_indexes,'|',row_arrangements, valid(springs,arrangements))
-        #print(springs,row_arrangements)
         s += row_arrangements
 
         #return 0
 
   return s
   
-print("Star 1:",star_1("input.txt"))
+print("Star 1:",star_1("sample_1.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-: Star 1: 7653
+: Star 1: 21
 
 ** Day 12 star 2
 *** Problem statement
