@@ -23,6 +23,7 @@
 *** Solution
 #+BEGIN_SRC python :results output
 import re
+import time
 import itertools
 
 def valid(spring: str, arrangement: list[int]) -> bool:
@@ -42,10 +43,12 @@ def valid(spring: str, arrangement: list[int]) -> bool:
     return contiguous_blocks == arrangement
         
 def star_1(path: str) -> int:
+  count = 0
   with open(path,'r') as f:
     s = 0
     for row in f.read().split("\n"):
       if row:
+        count += 1
         row_arrangements = 0
         springs, arrangement_s = re.search(r"^([?#.]+) ([\d,]+)$", row.strip()).groups()
         arrangements = [int(x) for x in arrangement_s.split(",")]
@@ -71,14 +74,17 @@ def star_1(path: str) -> int:
 
         #return 0
 
-  return s
-  
-print("Star 1:",star_1("sample_1.txt"))
+  return s, count
+
+t = time.time()
+result, count = star_1('input.txt')
+elapsed = time.time() - t
+print(f"Star 1: {result} in {elapsed:.4f}s resulting in {elapsed/count:.4f}s per iteration ")
 
 #+END_SRC
 
 #+RESULTS:
-: Star 1: 21
+: Star 1: 7653 in 23.8801s resulting in 0.0239s per iteration 
 
 ** Day 12 star 2
 *** Problem statement
