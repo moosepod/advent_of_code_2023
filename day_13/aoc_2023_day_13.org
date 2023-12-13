@@ -34,6 +34,7 @@
 
 Sample 3 has one where I'm finding no matches
 
+ANSWER -- need to try moving out from BOTH SIDES.
 
 *** Solution
 #+BEGIN_SRC python :results output
@@ -55,6 +56,7 @@ def check_row(grid: Grid, r: int) -> int:
     while r-h >= 0 and r+h+1 < grid.size.height:
         for c in range(0,grid.size.width):
             if grid.cells[P(x=c,y=r-h)] != grid.cells[P(x=c,y=r+h+1)]:
+                #print('Bounce on row',r,'range',r-h,'to',r+h+1,'col',c,grid.cells[P(x=c,y=r-h)],grid.cells[P(x=c,y=r+h+1)])
                 return 0
         h+=1
         
@@ -83,11 +85,12 @@ def star_1(path: str) -> int:
     grids = [load_grid_from_str(s) for s in f.read().split("\n\n") if len(s.strip())]
 
     for idx,grid in enumerate(grids):
-      #print(idx)
-      #print('123456789')
-      #dump_grid(grid)
-      total += sum(find_vertical(grid))
-      total += sum([x*100 for x in find_horizontal(grid)])
+          #dump_grid(grid)
+          old_total = total
+          total += sum(find_vertical(grid))
+          total += sum([x*100 for x in find_horizontal(grid)])
+          if total == old_total:
+              print('Nothing found for',idx)
   
   return total
   
