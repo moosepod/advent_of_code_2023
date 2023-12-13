@@ -38,105 +38,70 @@ Sample 3 has one where I'm finding no matches
 *** Solution
 #+BEGIN_SRC python :results output
 import re
-from d13_utils import load_grid_from_str, dump_grid
+from d13_utils import load_grid_from_str, dump_grid, Grid,P
 
-def check_reflection_line(s: str, c: int, w: int) -> bool:
-    for i in range(1,w+1):
-        if s[c-i] != s[c+i-1]:
-            return False
-
-    return True
-
-def check_reflections(lines: list[str], c: int, w: int) -> bool:
-    for line in lines:
-        if not check_reflection_line(line,c,w):
-            return False
-
-    return True
+def check_column(grid: Grid, c: int) -> int:
+    w = 0
+    while c-w >= 0 and c+w+1 < grid.size.width:
+        for r in range(0,grid.size.height):
+            if grid.cells[P(x=c-w,y=r)] != grid.cells[P(x=c+w+1,y=r)]:
+                return w
+        w+=1
         
-def find_reflections(lines: list[str]) -> list[int]:
-    r = []
-    d = 2
-    max_w = 0
-
-    width = len(lines[0])
-    center = int(width/2)
-
-    #print(width,center,width-1,abs(center-width)-2)
-
-    max_width = 0
-
-    #print('1234567890123')
-    #for line in lines:
-    #    print(line)
+    return w
     
-    for c in range(1, width-1):
-        for w in range(1, width):
-            #print(c,w,c-w,c+2)
-                            
-            if c-w >= 0 and c+w < width:
-                if check_reflections(lines, c,w) and w > max_width:
-                    r.append((c,w))
-                    max_width = w
+def find_vertical(grid: Grid) -> int:
+    longest = 0
+    column = -1
+    for c in range(0,grid.size.width-1):
+        l = check_column(grid,c)
+        if l > longest:
+            column = c
+            longest = l
 
-    if r:
-        return r[-1]
-    
-    return r
-            
+    return column + 1
+
 def star_1(path: str) -> int:
   total = 0
   with open(path,'r') as f:
-    grids = []
-    horizontal = []
-    vertical = []
-    # Find vertical
-    for idx, l in enumerate(f.read().split("\n\n")):
-      l = l.strip()
-      if l:
-        #print(f"Grid {idx+1}")        
-        results = find_reflections(l.split("\n"))
-        grids.append((idx,[s.strip() for s in l.split("\n")]))
-        vertical.append(results)
+    grids = [load_grid_from_str(s) for s in f.read().split("\n\n") if len(s.strip())]
 
-    # Find horizonal
-    for idx, lines in grids:
-        rotated_lines = [""] * len(lines[0])
-
-        for col in range(0,len(lines[0])):
-            for row in range(0,len(lines)):
-                rotated_lines[col] += lines[row][col]
-        #print(f"Grid {idx+1}")
-        #print("123456789")
-        #for line in rotated_lines:
-        #    print(line)
-            
-        results = find_reflections(rotated_lines)
-        horizontal.append(results)
-
-  for i in range(0,len(vertical)):
-      if vertical[i] and horizontal[i]:
-          if vertical[i][1] > horizontal[i][1]:
-              total += vertical[i][0]
-          else:
-              total += horizontal[i][0] * 100
-      elif vertical[i]:
-          total += vertical[i][0]
-      elif horizontal[i]:
-          total += horizontal[i][0] * 100
-      else:
-          print('No match at',i)
-
+    for grid in grids:
+      print('123456789')
+      dump_grid(grid)
+      print(find_vertical(grid))
+      print()
           
   return total
   
-print("Star 1:",star_1("sample_3.txt"))
+print("Star 1:",star_1("sample.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-: No match at 0
-: Star 1: 0
+#+begin_example
+123456789
+#.##..##.
+..#.##.#.
+##......#
+##......#
+..#.##.#.
+..##..##.
+#.#.##.#.
+5
+
+123456789
+#...##..#
+#....#..#
+..##..###
+#####.##.
+#####.##.
+..##..###
+#....#..#
+3
+
+Star 1: 0
+#+end_example
 
 ** First result -- this is too low
 : Star 1: 800
