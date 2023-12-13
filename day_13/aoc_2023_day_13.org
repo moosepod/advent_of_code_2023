@@ -49,6 +49,16 @@ def check_column(grid: Grid, c: int) -> int:
         w+=1
         
     return w
+
+def check_row(grid: Grid, r: int) -> int:
+    h = 0
+    while r-h >= 0 and r+h+1 < grid.size.height:
+        for c in range(0,grid.size.width):
+            if grid.cells[P(x=c,y=r-h)] != grid.cells[P(x=c,y=r+h+1)]:
+                return h
+        h+=1
+        
+    return h
     
 def find_vertical(grid: Grid) -> int:
     longest = 0
@@ -59,49 +69,39 @@ def find_vertical(grid: Grid) -> int:
             column = c
             longest = l
 
-    return column + 1
+    return (column + 1,longest)
+
+def find_horizontal(grid: Grid) -> int:
+    longest = 0
+    row = -1
+    for r in range(0,grid.size.height-1):
+        l = check_row(grid,r)
+        if l > longest:
+            row = r
+            longest = l
+
+    return (row + 1,longest)
+
 
 def star_1(path: str) -> int:
   total = 0
   with open(path,'r') as f:
     grids = [load_grid_from_str(s) for s in f.read().split("\n\n") if len(s.strip())]
 
-    for grid in grids:
-      print('123456789')
-      dump_grid(grid)
-      print(find_vertical(grid))
-      print()
+    for idx,grid in enumerate(grids):
+      #print('123456789')
+      #dump_grid(grid)
+      v,vs = find_vertical(grid)
+      h,hs = find_horizontal(grid)
           
   return total
   
-print("Star 1:",star_1("sample.txt"))
+print("Star 1:",star_1("input.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
-123456789
-#.##..##.
-..#.##.#.
-##......#
-##......#
-..#.##.#.
-..##..##.
-#.#.##.#.
-5
-
-123456789
-#...##..#
-#....#..#
-..##..###
-#####.##.
-#####.##.
-..##..###
-#....#..#
-3
-
-Star 1: 0
-#+end_example
+: Star 1: 38192
 
 ** First result -- this is too low
 : Star 1: 800
