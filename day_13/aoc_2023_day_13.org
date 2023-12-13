@@ -45,43 +45,37 @@ def check_column(grid: Grid, c: int) -> int:
     while c-w >= 0 and c+w+1 < grid.size.width:
         for r in range(0,grid.size.height):
             if grid.cells[P(x=c-w,y=r)] != grid.cells[P(x=c+w+1,y=r)]:
-                return w
+                return 0
         w+=1
         
-    return w
+    return w+1
 
 def check_row(grid: Grid, r: int) -> int:
     h = 0
     while r-h >= 0 and r+h+1 < grid.size.height:
         for c in range(0,grid.size.width):
             if grid.cells[P(x=c,y=r-h)] != grid.cells[P(x=c,y=r+h+1)]:
-                return h
+                return 0
         h+=1
         
-    return h
+    return h+1
     
-def find_vertical(grid: Grid) -> int:
+def find_vertical(grid: Grid) -> list[int]:
     longest = 0
-    column = -1
+    columns = []
     for c in range(0,grid.size.width-1):
-        l = check_column(grid,c)
-        if l > longest:
-            column = c
-            longest = l
+        columns.append(check_column(grid,c))
+    #print(columns)
+    return columns
 
-    return (column + 1,longest)
-
-def find_horizontal(grid: Grid) -> int:
+def find_horizontal(grid: Grid) -> list[int]:
     longest = 0
-    row = -1
+    rows = []
     for r in range(0,grid.size.height-1):
-        l = check_row(grid,r)
-        if l > longest:
-            row = r
-            longest = l
+        rows.append(check_row(grid,r))
 
-    return (row + 1,longest)
-
+    #print(rows)
+    return rows
 
 def star_1(path: str) -> int:
   total = 0
@@ -89,24 +83,28 @@ def star_1(path: str) -> int:
     grids = [load_grid_from_str(s) for s in f.read().split("\n\n") if len(s.strip())]
 
     for idx,grid in enumerate(grids):
+      #print(idx)
       #print('123456789')
       #dump_grid(grid)
-      v,vs = find_vertical(grid)
-      h,hs = find_horizontal(grid)
-          
+      total += sum(find_vertical(grid))
+      total += sum([x*100 for x in find_horizontal(grid)])
+  
   return total
   
-print("Star 1:",star_1("input.txt"))
+print("Star 1:",star_1("sample.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-: Star 1: 38192
+: Star 1: 405
 
 ** First result -- this is too low
 : Star 1: 800
 ** Second result -- too low
 29616
+
+** Too low
+17973
 
 ** Day 13 star 2
 *** Problem statement
