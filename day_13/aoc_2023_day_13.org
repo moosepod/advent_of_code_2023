@@ -31,7 +31,10 @@
 - 5^#####.##.^5
 - 6 ..##..### 6
 - 7 #....#..# 7
-  
+
+Sample 3 has one where I'm finding no matches
+
+
 *** Solution
 #+BEGIN_SRC python :results output
 import re
@@ -58,37 +61,46 @@ def find_reflections(lines: list[str]) -> list[int]:
 
     width = len(lines[0])
     center = int(width/2)
-    
-    for c in range(center, center+2):
-        # Trying to skip width-1 matches
-        w = abs(center-width) - 1
-        #print('Checking',c,w,center,width)
-        if check_reflections(lines, c,w):
-            if w >= int(width/2):
-                r.append(c)
 
+    #print(width,center,width-1,abs(center-width)-2)
+
+    max_width = 0
+
+    #print('1234567890123')
+    #for line in lines:
+    #    print(line)
+    
+    for c in range(1, width-1):
+        for w in range(1, width):
+            #print(c,w,c-w,c+2)
+                            
+            if c-w >= 0 and c+w < width:
+                if check_reflections(lines, c,w) and w > max_width:
+                    r.append((c,w))
+                    max_width = w
+
+    if r:
+        return r[-1]
+    
     return r
             
 def star_1(path: str) -> int:
   total = 0
   with open(path,'r') as f:
     grids = []
+    horizontal = []
+    vertical = []
     # Find vertical
     for idx, l in enumerate(f.read().split("\n\n")):
       l = l.strip()
       if l:
-        grids.append([s.strip() for s in l.split("\n")])
-        if len(grids[-1]) % 2 == 0:
-            print('Grid',idx+1,'is even')
         #print(f"Grid {idx+1}")        
         results = find_reflections(l.split("\n"))
-        if not results:
-            print("No horizontal found for",idx)
-        #print(results)
-        total += sum(results)
+        grids.append((idx,[s.strip() for s in l.split("\n")]))
+        vertical.append(results)
 
     # Find horizonal
-    for idx, lines in enumerate(grids):
+    for idx, lines in grids:
         rotated_lines = [""] * len(lines[0])
 
         for col in range(0,len(lines[0])):
@@ -100,223 +112,36 @@ def star_1(path: str) -> int:
         #    print(line)
             
         results = find_reflections(rotated_lines)
-        if not results:
-            print("No vertical found for",idx)
-            
-        total += sum(results)*100
-        
+        horizontal.append(results)
+
+  for i in range(0,len(vertical)):
+      if vertical[i] and horizontal[i]:
+          if vertical[i][1] > horizontal[i][1]:
+              total += vertical[i][0]
+          else:
+              total += horizontal[i][0] * 100
+      elif vertical[i]:
+          total += vertical[i][0]
+      elif horizontal[i]:
+          total += horizontal[i][0] * 100
+      else:
+          print('No match at',i)
+
+          
   return total
   
-print("Star 1:",star_1("input.txt"))
+print("Star 1:",star_1("sample_3.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
-No horizontal found for 0
-No horizontal found for 1
-No horizontal found for 2
-No horizontal found for 3
-No horizontal found for 4
-No horizontal found for 5
-No horizontal found for 6
-No horizontal found for 7
-No horizontal found for 8
-No horizontal found for 9
-No horizontal found for 10
-No horizontal found for 11
-No horizontal found for 12
-No horizontal found for 13
-No horizontal found for 14
-No horizontal found for 15
-No horizontal found for 16
-No horizontal found for 17
-No horizontal found for 18
-No horizontal found for 19
-No horizontal found for 20
-No horizontal found for 21
-No horizontal found for 22
-No horizontal found for 23
-No horizontal found for 24
-No horizontal found for 25
-No horizontal found for 26
-No horizontal found for 27
-No horizontal found for 28
-No horizontal found for 29
-No horizontal found for 30
-No horizontal found for 31
-No horizontal found for 32
-No horizontal found for 33
-No horizontal found for 34
-No horizontal found for 35
-No horizontal found for 36
-No horizontal found for 37
-No horizontal found for 38
-No horizontal found for 39
-No horizontal found for 40
-No horizontal found for 41
-No horizontal found for 42
-No horizontal found for 43
-No horizontal found for 44
-No horizontal found for 45
-No horizontal found for 46
-No horizontal found for 47
-No horizontal found for 48
-No horizontal found for 49
-No horizontal found for 50
-No horizontal found for 51
-No horizontal found for 52
-No horizontal found for 53
-No horizontal found for 54
-No horizontal found for 55
-No horizontal found for 56
-No horizontal found for 57
-No horizontal found for 58
-No horizontal found for 59
-No horizontal found for 60
-No horizontal found for 61
-No horizontal found for 62
-No horizontal found for 63
-No horizontal found for 64
-No horizontal found for 65
-No horizontal found for 66
-No horizontal found for 67
-No horizontal found for 68
-No horizontal found for 69
-No horizontal found for 70
-No horizontal found for 71
-No horizontal found for 72
-No horizontal found for 73
-No horizontal found for 74
-No horizontal found for 75
-No horizontal found for 76
-No horizontal found for 77
-No horizontal found for 78
-No horizontal found for 79
-No horizontal found for 80
-No horizontal found for 81
-No horizontal found for 82
-No horizontal found for 83
-No horizontal found for 84
-No horizontal found for 85
-No horizontal found for 86
-No horizontal found for 87
-No horizontal found for 88
-No horizontal found for 89
-No horizontal found for 90
-No horizontal found for 91
-No horizontal found for 92
-No horizontal found for 93
-No horizontal found for 94
-No horizontal found for 95
-No horizontal found for 96
-No horizontal found for 97
-No horizontal found for 98
-No horizontal found for 99
-No vertical found for 0
-No vertical found for 1
-No vertical found for 2
-No vertical found for 3
-No vertical found for 4
-No vertical found for 5
-No vertical found for 6
-No vertical found for 7
-No vertical found for 8
-No vertical found for 9
-No vertical found for 10
-No vertical found for 11
-No vertical found for 12
-No vertical found for 13
-No vertical found for 14
-No vertical found for 15
-No vertical found for 16
-No vertical found for 17
-No vertical found for 18
-No vertical found for 19
-No vertical found for 20
-No vertical found for 21
-No vertical found for 22
-No vertical found for 23
-No vertical found for 24
-No vertical found for 26
-No vertical found for 27
-No vertical found for 28
-No vertical found for 29
-No vertical found for 30
-No vertical found for 31
-No vertical found for 32
-No vertical found for 33
-No vertical found for 34
-No vertical found for 35
-No vertical found for 36
-No vertical found for 37
-No vertical found for 38
-No vertical found for 39
-No vertical found for 40
-No vertical found for 41
-No vertical found for 42
-No vertical found for 43
-No vertical found for 44
-No vertical found for 45
-No vertical found for 46
-No vertical found for 47
-No vertical found for 48
-No vertical found for 49
-No vertical found for 50
-No vertical found for 51
-No vertical found for 52
-No vertical found for 53
-No vertical found for 54
-No vertical found for 55
-No vertical found for 56
-No vertical found for 57
-No vertical found for 58
-No vertical found for 59
-No vertical found for 60
-No vertical found for 61
-No vertical found for 62
-No vertical found for 63
-No vertical found for 64
-No vertical found for 65
-No vertical found for 66
-No vertical found for 67
-No vertical found for 68
-No vertical found for 69
-No vertical found for 70
-No vertical found for 71
-No vertical found for 72
-No vertical found for 73
-No vertical found for 74
-No vertical found for 75
-No vertical found for 76
-No vertical found for 77
-No vertical found for 78
-No vertical found for 79
-No vertical found for 80
-No vertical found for 81
-No vertical found for 82
-No vertical found for 83
-No vertical found for 84
-No vertical found for 85
-No vertical found for 86
-No vertical found for 87
-No vertical found for 88
-No vertical found for 89
-No vertical found for 90
-No vertical found for 91
-No vertical found for 92
-No vertical found for 93
-No vertical found for 94
-No vertical found for 95
-No vertical found for 96
-No vertical found for 97
-No vertical found for 98
-No vertical found for 99
-Star 1: 800
-#+end_example
+: No match at 0
+: Star 1: 0
 
 ** First result -- this is too low
 : Star 1: 800
+** Second result -- too low
+29616
 
 ** Day 13 star 2
 *** Problem statement
