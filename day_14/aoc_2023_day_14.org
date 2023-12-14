@@ -1,0 +1,63 @@
+
+* AOC 2023 Day 14
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Day 14 star 1
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+import re
+
+def roll_lines(lines: list[str]):
+    for y in range(len(lines)-1,0,-1):
+        for x in range(0,len(lines[-1])):
+            if lines[y][x] == 'O' and lines[y-1][x] == '.':
+                lines[y][x] = '.'
+                lines[y-1][x] = 'O'
+
+def star_1(path: str) -> int:
+  lines = []
+  with open(path,'r') as f:
+    for line in f.read().split("\n"):
+      line = list(line.strip())
+      if line:
+        lines.append(line)
+        roll_lines(lines)
+
+  #for line in lines:
+  #  print(''.join(line))
+  scores = range(len(lines),0,-1)
+
+  return sum([len([c for c in line if c == 'O']) * score for line,score in zip(lines,scores)])
+  
+print("Star 1:",star_1("input.txt"))
+
+#+END_SRC
+
+#+RESULTS:
+: Star 1: 110274
+
+** Day 14 star 2
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+def star_2(path: str) -> int:
+  with open(path,'r') as f:
+     pass
+  return 0
+  
+print("Star 2:", star_2("input.txt"))
+#+END_SRC
+
+#+RESULTS:
+: Star 2: 0
+
