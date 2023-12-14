@@ -91,6 +91,28 @@ def dump_lines(lines, msg: str):
   for line in lines:
     print(''.join(line))
   print()
+
+def score_lines(lines):
+  scores = range(len(lines),0,-1)
+  return sum([len([c for c in line if c == 'O']) * score for line,score in zip(lines,scores)])
+
+def find_cycle(scores):
+    max_cycle_size = 0
+    cycle_size = 1
+    last_index = len(scores)-1
+    while cycle_size < len(scores):
+        if scores[last_index] == scores[last_index-cycle_size]:
+            length  = 0
+            for i in range(1,cycle_size):
+                length += 1
+                if scores[last_index-i] != scores[last_index-i-cycle_size]:
+                    break
+                length += 1
+            if length > max_cycle_size:
+                max_cycle_size = length
+        cycle_size += 1
+            
+    return max_cycle_size
     
 def star_2(path: str) -> int:
   lines = []
@@ -100,85 +122,126 @@ def star_2(path: str) -> int:
       if line:
         lines.append(line)
 
-    dump_lines(lines,'start')
-    roll_lines_n(lines)
-    dump_lines(lines,'north')
-    roll_lines_w(lines)
-    dump_lines(lines,'west')
-    roll_lines_s(lines)
-    dump_lines(lines,'south')
-    roll_lines_e(lines)
-    dump_lines(lines,'east')
+    scores = [score_lines(lines)]
+    for i in range(0,100):
+        roll_lines_n(lines)
+        roll_lines_w(lines)
+        roll_lines_s(lines)
+        roll_lines_e(lines)
+        scores.append(score_lines(lines))
+        print('Cycle size', find_cycle(scores))
 
-  scores = range(len(lines),0,-1)
+    print(scores)
 
-  return sum([len([c for c in line if c == 'O']) * score for line,score in zip(lines,scores)])
+  return 0
+
   
 print("Star 2:", star_2("sample.txt"))
 #+END_SRC
 
 #+RESULTS:
 #+begin_example
----- start ----
-O....#....
-O.OO#....#
-.....##...
-OO.#O....O
-.O.....O#.
-O.#..O.#.#
-..O..#O..O
-.......O..
-#....###..
-#OO..#....
-
----- north ----
-OOOO.#.O..
-OO..#....#
-OO..O##..O
-O..#.OO...
-........#.
-..#....#.#
-..O..#.O.O
-..O.......
-#....###..
-#....#....
-
----- west ----
-OOOO.#O...
-OO..#....#
-OOO..##O..
-O..#OO....
-........#.
-..#....#.#
-O....#OO..
-O.........
-#....###..
-#....#....
-
----- south ----
-.....#....
-....#.O..#
-O..O.##...
-O.O#......
-O.O....O#.
-O.#..O.#.#
-O....#....
-OO....OO..
-#O...###..
-#O..O#....
-
----- east ----
-.....#....
-....#...O#
-...OO##...
-.OO#......
-.....OOO#.
-.O#...O#.#
-....O#....
-......OOOO
-#...O###..
-#..OO#....
-
-Star 2: 87
+Cycle size 0
+Cycle size 0
+Cycle size 0
+Cycle size 1
+Cycle size 0
+Cycle size 0
+Cycle size 1
+Cycle size 0
+Cycle size 0
+Cycle size 1
+Cycle size 3
+Cycle size 5
+Cycle size 7
+Cycle size 9
+Cycle size 11
+Cycle size 12
+Cycle size 12
+Cycle size 12
+Cycle size 12
+Cycle size 12
+Cycle size 12
+Cycle size 12
+Cycle size 13
+Cycle size 15
+Cycle size 17
+Cycle size 19
+Cycle size 21
+Cycle size 23
+Cycle size 25
+Cycle size 26
+Cycle size 26
+Cycle size 26
+Cycle size 26
+Cycle size 26
+Cycle size 26
+Cycle size 26
+Cycle size 27
+Cycle size 29
+Cycle size 31
+Cycle size 33
+Cycle size 35
+Cycle size 37
+Cycle size 39
+Cycle size 40
+Cycle size 40
+Cycle size 40
+Cycle size 40
+Cycle size 40
+Cycle size 40
+Cycle size 40
+Cycle size 41
+Cycle size 43
+Cycle size 45
+Cycle size 47
+Cycle size 49
+Cycle size 51
+Cycle size 53
+Cycle size 54
+Cycle size 54
+Cycle size 54
+Cycle size 54
+Cycle size 54
+Cycle size 54
+Cycle size 54
+Cycle size 55
+Cycle size 57
+Cycle size 59
+Cycle size 61
+Cycle size 63
+Cycle size 65
+Cycle size 67
+Cycle size 68
+Cycle size 68
+Cycle size 68
+Cycle size 68
+Cycle size 68
+Cycle size 68
+Cycle size 68
+Cycle size 69
+Cycle size 71
+Cycle size 73
+Cycle size 75
+Cycle size 77
+Cycle size 79
+Cycle size 81
+Cycle size 82
+Cycle size 82
+Cycle size 82
+Cycle size 82
+Cycle size 82
+Cycle size 82
+Cycle size 82
+Cycle size 83
+Cycle size 85
+Cycle size 87
+Cycle size 89
+Cycle size 91
+Cycle size 93
+Cycle size 95
+Cycle size 96
+[104, 87, 69, 69, 69, 65, 64, 65, 63, 68, 69, 69, 65, 64, 65, 63, 68, 69, 69, 65, 64, 65, 63, 68, 69, 69, 65, 64, 65, 63, 68, 69, 69, 65, 64, 65, 63, 68, 69, 69, 65, 64, 65, 63, 68, 69, 69, 65, 64, 65, 63, 68, 69, 69, 65, 64, 65, 63, 68, 69, 69, 65, 64, 65, 63, 68, 69, 69, 65, 64, 65, 63, 68, 69, 69, 65, 64, 65, 63, 68, 69, 69, 65, 64, 65, 63, 68, 69, 69, 65, 64, 65, 63, 68, 69, 69, 65, 64, 65, 63, 68]
+Star 2: 0
 #+end_example
 
