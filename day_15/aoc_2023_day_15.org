@@ -44,11 +44,63 @@ print("Star 1:",star_1("input.txt"))
 *** Problem statement
 *** Solution
 #+BEGIN_SRC python :results output
+import re
+
+def HASH(s: str) -> int:
+    v = 0
+    for c in s:
+        v += ord(c)
+        v *= 17
+        v = v % 256
+        
+    return v
+
+def dump(boxes: list):
+    for i in range(0,256):
+        if boxes[i]:
+            print(f'Box {i}:',''.join([f"[{x[0]} {x[1]}] " for x in boxes[i]]))
+    
+    print()
+
 def star_2(path: str) -> int:
+  boxes = []
+  for i in range(0,256):
+      boxes.append([])
+    
   with open(path,'r') as f:
-     pass
-  return 0
+     for instruction in f.read().strip().split(','):
+       label, instr, lens_s = re.search('^(\w+)([=-])([1-9])?$', instruction).groups()
+       lens = int(lens_s or "0")
+       box = HASH(label)
+       if instr == "=":
+           found = False
+           for i in range(0,len(boxes[box])):
+               if boxes[box][i][0] == label:
+                   boxes[box][i] = (label,lens)
+                   found = True
+                   break
+
+           if not found:
+               boxes[box].append((label,lens),)
+                          
+       elif instr == "-":
+         boxes[box] = [x for x in boxes[box] if x[0] != label]
+
+       #print(f'After "{instruction}"')
+       #dump(boxes)
+
+  p = 0
+
+  for box_idx in range(0,256):
+        for slot in range(0,len(boxes[box_idx])):
+            lens = boxes[box_idx][slot]
+            p += (box_idx+1) * (slot+1) * lens[1]
+
+  return p
   
-print("Star 2:", star_2("sample.txt"))
+print("Star 2:", star_2("input.txt"))
 #+END_SRC
+
+#+RESULTS:
+: Star 2: 296921
 
