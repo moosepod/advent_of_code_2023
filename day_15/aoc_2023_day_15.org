@@ -1,0 +1,54 @@
+
+* AOC 2023 Day 15
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Day 15 star 1
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+
+def HASH(s: str) -> int:
+    v = 0
+    for c in s:
+        v += ord(c)
+        v *= 17
+        v = v % 256
+        
+    return v
+
+import re
+def star_1(path: str) -> int:
+  v = 0
+  with open(path,'r') as f:
+      v += sum([HASH(s) for s in f.read().strip().split(',')])
+
+  return v
+  
+print("Star 1:",star_1("input.txt"))
+
+#+END_SRC
+
+#+RESULTS:
+: Star 1: 507291
+
+** Day 15 star 2
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+def star_2(path: str) -> int:
+  with open(path,'r') as f:
+     pass
+  return 0
+  
+print("Star 2:", star_2("sample.txt"))
+#+END_SRC
+
