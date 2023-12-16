@@ -55,14 +55,10 @@ def calculate_energized(grid: Grid, sp: P, sv: P) -> int:
          beams.append(Beam(p=sp,v=d))
 
      counter=0
-     circuitbreak = 2000
      visited: list[Beam] = {}
-     while beams and counter < circuitbreak:
+     while beams:
          counter += 1
          beams = iterate(grid,beams, visited)
-
-     if counter >= circuitbreak:
-         print("WARNING -- loop reached circuitbreaker of",circuitbreak)
 
      return len(grid.energized)
 
@@ -73,8 +69,6 @@ def star_1(path: str) -> int:
      sp = P()
      sv = RIGHT
      
-     #dump_grid(grid)
-
      return calculate_energized(grid,sp,sv)
      
 def star_2(path: str) -> int:
@@ -103,25 +97,16 @@ def star_2(path: str) -> int:
          el  = calculate_energized(grid, P(y=y,x=grid.size.width-1),LEFT)
          max_energized = max(max_energized, er, el)
 
-         if er == max_energized:
-             max_config=f"right at {y} scoring {er}"
-         elif el == max_energized:
-             max_config=f"left at {y} scoring {el}"
-
-     #dump_grid(grid)
-     print(max_config)
      return max_energized
 
-#print("Star 1:",star_1("input.txt"))
+print("Star 1:",star_1("input.txt"))
 print("Star 2:",star_2("input.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-: up at 55 scoring 7716
+: Star 1: 7472
 : Star 2: 7716
 
-** Too high
-: Star 2: 7743
 
 
