@@ -48,13 +48,8 @@ def iterate(grid: Grid, beams: list[Beam], visited: dict[Beam,bool]) -> list[Bea
                 r.append(Beam(p=beam.p,v=d,sp=beam.p, sv=d))
 
     return r
-            
-def star_1(path: str) -> int:
-  with open(path,'r') as f:
-     grid = load_grid(path)
 
-     sp = P()
-     sv = MAPPINGS[grid.cells[P()]][RIGHT][0]
+def calculate_energized(grid: Grid, sp: P, sv: P) -> int:
      beams: list[Beam] = [Beam(p=sp,v=sv)]
 
      counter=0
@@ -66,30 +61,48 @@ def star_1(path: str) -> int:
 
      if counter >= circuitbreak:
          print("WARNING -- loop reached circuitbreaker of",circuitbreak)
-     else:
-         print(f"Completed in {counter} iterations")
+
+     return len(grid.energized)
+
+def star_1(path: str) -> int:
+  with open(path,'r') as f:
+     grid = load_grid(path)
+
+     sp = P()
+     sv = MAPPINGS[grid.cells[P()]][RIGHT][0]
      
      #dump_grid(grid)
+
+     return calculate_energized(grid,sp,sv)
      
-  return len(grid.energized)
+def star_2(path: str) -> int:
+  with open(path,'r') as f:
+     grid = load_grid(path)
+
+     max_energized = 0
+     
+     for x in range(0,grid.size.width):
+         grid.energized = {}
+         ed = calculate_energized(grid, P(x=x,y=0),DOWN)
+         grid.energized = {}
+         eu  = calculate_energized(grid, P(x=x,y=grid.size.height-1),UP)
+         max_energized = max(max_energized, eu,ed)
+
+     for y in range(0,grid.size.height):
+         grid.energized = {}
+         er = calculate_energized(grid, P(y=y,x=0),RIGHT)
+         grid.energized = {}
+         el  = calculate_energized(grid, P(y=y,x=grid.size.width-1),LEFT)
+         max_energized = max(max_energized, er, el)
+
+     #dump_grid(grid)
+     
+     return max_energized
   
-print("Star 1:",star_1("input.txt"))
+#print("Star 1:",star_1("sample.txt"))
+print("Star 2:",star_2("sample.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-: Completed in 919 iterations
-: Star 1: 7472
-
-** Day 16 star 2
-*** Problem statement
-*** Solution
-#+BEGIN_SRC python :results output
-def star_2(path: str) -> int:
-  with open(path,'r') as f:
-     pass
-  return 0
-  
-print("Star 2:", star_2("sample.txt"))
-#+END_SRC
-
+: Star 2: 51
