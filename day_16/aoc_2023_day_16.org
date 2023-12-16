@@ -45,12 +45,14 @@ def iterate(grid: Grid, beams: list[Beam], visited: dict[Beam,bool]) -> list[Bea
         if grid.in_bounds(beam.p) and not visited.get(beam):
             visited[beam] = True
             for d in MAPPINGS[grid.cells[beam.p]][beam.v]:
-                r.append(Beam(p=beam.p,v=d,sp=beam.p, sv=d))
+                r.append(Beam(p=beam.p,v=d))
 
     return r
 
 def calculate_energized(grid: Grid, sp: P, sv: P) -> int:
-     beams: list[Beam] = [Beam(p=sp,v=sv)]
+     beams: list[Beam] = []
+     for d in MAPPINGS[grid.cells[sp]][sv]:
+         beams.append(Beam(p=sp,v=d))
 
      counter=0
      circuitbreak = 2000
@@ -69,7 +71,7 @@ def star_1(path: str) -> int:
      grid = load_grid(path)
 
      sp = P()
-     sv = MAPPINGS[grid.cells[P()]][RIGHT][0]
+     sv = RIGHT
      
      #dump_grid(grid)
 
@@ -80,6 +82,7 @@ def star_2(path: str) -> int:
      grid = load_grid(path)
 
      max_energized = 0
+     max_config=""
      
      for x in range(0,grid.size.width):
          grid.energized = {}
@@ -88,6 +91,11 @@ def star_2(path: str) -> int:
          eu  = calculate_energized(grid, P(x=x,y=grid.size.height-1),UP)
          max_energized = max(max_energized, eu,ed)
 
+         if eu == max_energized:
+             max_config=f"up at {x} scoring {eu}"
+         elif ed == max_energized:
+             max_config=f"down at {x} scoring {ed}"
+
      for y in range(0,grid.size.height):
          grid.energized = {}
          er = calculate_energized(grid, P(y=y,x=0),RIGHT)
@@ -95,14 +103,25 @@ def star_2(path: str) -> int:
          el  = calculate_energized(grid, P(y=y,x=grid.size.width-1),LEFT)
          max_energized = max(max_energized, er, el)
 
+         if er == max_energized:
+             max_config=f"right at {y} scoring {er}"
+         elif el == max_energized:
+             max_config=f"left at {y} scoring {el}"
+
      #dump_grid(grid)
-     
+     print(max_config)
      return max_energized
-  
-#print("Star 1:",star_1("sample.txt"))
-print("Star 2:",star_2("sample.txt"))
+
+#print("Star 1:",star_1("input.txt"))
+print("Star 2:",star_2("input.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-: Star 2: 51
+: up at 55 scoring 7716
+: Star 2: 7716
+
+** Too high
+: Star 2: 7743
+
+
