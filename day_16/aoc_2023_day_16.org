@@ -1,0 +1,95 @@
+
+* AOC 2023 Day 16
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Day 16 star 1
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+import re
+from pydantic import BaseModel
+from d16_utils import Grid, load_grid, dump_grid,P, dump_grid_s
+
+RIGHT=P(x=1,y=0)
+LEFT=P(x=-1,y=0)
+UP=P(x=0,y=-1)
+DOWN=P(x=0,y=1)
+
+MAPPINGS = {".": {LEFT: (LEFT,), RIGHT: (RIGHT,), DOWN: (DOWN,), UP: (UP,)},
+            "/": {LEFT: (DOWN,), RIGHT: (UP,), DOWN: (LEFT,), UP: (RIGHT,)},
+            "\\": {LEFT: (UP,), RIGHT: (DOWN,), DOWN: (RIGHT,), UP: (LEFT,)},
+            "-": {LEFT: (LEFT,), RIGHT: (RIGHT,), DOWN: (LEFT,RIGHT,), UP: (LEFT,RIGHT,)},
+            "|": {LEFT: (UP,DOWN,), RIGHT: (UP,DOWN,), UP: (UP,), DOWN: (DOWN,)}}
+
+class Beam(BaseModel):
+    p: P
+    v: P
+
+    def __hash__(self):
+        return hash(f'{self.p}x{self.v}')
+
+def iterate(grid: Grid, beams: list[Beam], visited: dict[Beam,bool]) -> list[Beam]:
+    r = []
+    for beam in beams:
+        grid.energized[beam.p] = "#"
+        beam.p += beam.v
+        if grid.in_bounds(beam.p) and not visited.get(beam):
+            visited[beam] = True
+            for d in MAPPINGS[grid.cells[beam.p]][beam.v]:
+                r.append(Beam(p=beam.p,v=d,sp=beam.p, sv=d))
+
+    return r
+            
+def star_1(path: str) -> int:
+  with open(path,'r') as f:
+     grid = load_grid(path)
+
+     sp = P()
+     sv = MAPPINGS[grid.cells[P()]][RIGHT][0]
+     beams: list[Beam] = [Beam(p=sp,v=sv)]
+
+     counter=0
+     circuitbreak = 2000
+     visited: list[Beam] = {}
+     while beams and counter < circuitbreak:
+         counter += 1
+         beams = iterate(grid,beams, visited)
+
+     if counter >= circuitbreak:
+         print("WARNING -- loop reached circuitbreaker of",circuitbreak)
+     else:
+         print(f"Completed in {counter} iterations")
+     
+     #dump_grid(grid)
+     
+  return len(grid.energized)
+  
+print("Star 1:",star_1("input.txt"))
+
+#+END_SRC
+
+#+RESULTS:
+: Completed in 919 iterations
+: Star 1: 7472
+
+** Day 16 star 2
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+def star_2(path: str) -> int:
+  with open(path,'r') as f:
+     pass
+  return 0
+  
+print("Star 2:", star_2("sample.txt"))
+#+END_SRC
+
