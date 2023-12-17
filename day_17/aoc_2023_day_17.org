@@ -23,93 +23,84 @@ Nodes can be revisited
 *** Solution
 #+BEGIN_SRC python :results output
 import re
+from pydantic import BaseModel
 from d17_utils import Grid, load_grid, dump_grid, P
 
 D_INF = 10000000000
-RIGHT=(P(x=1,y=0),'<')
-LEFT=(P(x=-1,y=0),'>')
-UP=(P(x=0,y=-1),'v')
-DOWN=(P(x=0,y=1),'^')
 
-def find_neighbors(grid: Grid, p: P,pp: P) -> list[P]:
-    for d, c in (LEFT,RIGHT,UP,DOWN):
-        p2 = p + d
-        if p2 != pp and grid.in_bounds(p2):
-            yield p2, c
+RIGHT=P(x=1,y=0)
+LEFT=P(x=-1,y=0)
+UP=P(x=0,y=-1)
+DOWN=P(x=0,y=1)
 
-def dump_distances(grid: Grid, distance: dict):
-    s = ""
-    for y in range(0,grid.size.height):
-         for x in range(0,grid.size.width):
-             s+=f"{distance[P(x=x,y=y)]:02} "
-         s+="\n"
-    print(s)
+TURN_L = {RIGHT: UP,
+          LEFT: DOWN,
+          UP: LEFT,
+          DOWN: RIGHT,
+                    P(): DOWN, # Special case for start
+          }
 
-def dump_path(grid: Grid, distance: dict):
-     path = {}
-     t = P()
-     pp = P()
-     p = P(x=grid.size.width-1,y=grid.size.height-1)
-     while p != t:
-         np = p
-         d = D_INF
-         pc = ' '
-         for neighbor, c in find_neighbors(grid,np,pp):
-             if distance[neighbor] < d and distance[neighbor] <= distance[np]:
-                 d = distance[neighbor]
-                 pc = c
-                 p = neighbor
-         path[p] = pc
-         if p == pp:
-             print("--- ERROR --- ")
-             break
-         pp = np
-         
-     dump_grid(grid,path)
+TURN_R = {RIGHT: DOWN,
+          LEFT: UP,
+          UP: RIGHT,
+          DOWN: LEFT,
+          P(): RIGHT, # Special case for start
+          }
+
+class C(BaseModel):
+    p: P
+    v: P
+    d: int = 0
+
+    def s(self):
+        return f"{self.p.x}-{self.p.y}-{self.v.x}-{self.v.y}"
+
+def find_options(grid: Grid, c: C) -> list[C]:
+    for v in (TURN_R[c.v],TURN_L[c.v]):
+        d = 0
+        for x in range(1,4):
+            p2 = c.p + v * x
+                        
+            if grid.in_bounds(p2):
+                d+=grid.cells[p2]
+                yield C(p=p2,v=v,d=c.d + d)
+
+def find_target(grid: Grid, c: C, t: P, visited: dict) -> int:
+    max_len = D_INF
+
+    if visited.get(c.s()):
+        return max_len
+
+    visited[c.s()] = True
     
+    for o in find_options(grid, c):
+        if o.p == t:
+            print('Distance of',c.d)
+            return c.d
+        
+        d = find_target(grid, o, t, visited)
+        if d < max_len:
+            max_len = d
+    
+    return max_len
+
 def star_1(path: str) -> int:
   with open(path,'r') as f:
      grid = load_grid(path)
 
-     p = P()
-     pp = P()
+     p = C(p=P(), v=P())
      t = P(x=grid.size.width-1,y=grid.size.height-1)
-     unvisited = {P(x=x,y=y): True for x in range(0,grid.size.width) for y in range (0,grid.size.height)}
-     distance = {P(x=x,y=y): D_INF for x in range(0,grid.size.width) for y in range (0,grid.size.height)}
-     distance[p] = 0
 
-     # Need to solve for move of 1-3
-     # Need to solve for no turn
-     breaker = 100000
-     counter = 0
-     while unvisited[t] and counter < breaker:
-         for neighbor, c in find_neighbors(grid,p,pp):
-             if unvisited[neighbor]:
-                 distance[neighbor] = min(distance[neighbor], distance[p] + grid.cells[neighbor])
-
-         unvisited[p] = False
-         pp = p
-         pd = D_INF
-         for np, v in unvisited.items():
-             if v and distance[np] < pd:
-                 p = np
-                 pd = distance[np]
-         counter += 1
-
-     if counter == breaker:
-         print(">>> WARNING. Hit breaker.")
-
-     #dump_distances(grid,distance)
-     #dump_path(grid,distance)
-     return distance[t]
+     visited = {}
+     return find_target(grid,p,t, visited)
   
 print("Star 1:",star_1("input.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-: >>> WARNING. Hit breaker.
-: Star 1: 10000000000
+
+*** 
 
 ** Day 17 star 2
 *** Problem statement
