@@ -1,0 +1,127 @@
+
+* AOC 2023 Day 18
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Day 18 star 1
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+import re
+from d18_utils import Grid,S,dump_grid,P, dump_grid_s
+
+RIGHT=P(x=1,y=0)
+LEFT=P(x=-1,y=0)
+UP=P(x=0,y=-1)
+DOWN=P(x=0,y=1)
+
+DIRECTIONS = {"R": RIGHT, "L": LEFT, "U": UP, "D": DOWN}
+
+def draw_line(grid: Grid, p: P, direction: str, distance: int) -> P:
+    p = P(x=p.x, y=p.y)
+    for i in range(0,distance):
+        p += DIRECTIONS[direction]
+        grid.min_p.x = min(grid.min_p.x, p.x)
+        grid.min_p.y = min(grid.min_p.y, p.y)
+        if p.x >= grid.size.width:
+            grid.size.width+=1
+        if p.y >= grid.size.height:
+            grid.size.height+=1
+
+        grid.cells[p] = "#"
+
+    return p
+
+def star_1(path: str) -> int:
+  p = P()
+  volume = 0
+  grid = Grid(min_p=P(), cells={p:"#"}, size=S(width=1,height=1))
+  with open(path,'r') as f:
+    for idx,line in enumerate(f.read().split("\n")):
+      if line.strip():
+        m = re.search("^([RDLU]) (\d+) \((#[a-z0-9]{6})\)",line)
+        direction, distance, color = m.groups()
+        p = draw_line(grid, p, direction, int(distance))
+
+    filled_grid = Grid(min_p=grid.min_p,cells={P():"#"}, size=S(width=grid.size.width,height=grid.size.height))
+    for y in range(grid.min_p.y,grid.size.height):
+        p.y = y
+        line_volume = 0
+        for x in range(grid.min_p.x,grid.size.width):
+            p.x = x
+            if grid.cells.get(p):
+                line_volume += 1
+                filled_grid.cells[P(x=p.x,y=p.y)] = "#"
+            elif grid.is_bounded(p):
+                line_volume +=1
+                filled_grid.cells[P(x=p.x,y=p.y)] = "+"
+        volume += line_volume
+        #print(y+1,line_volume)
+    
+    with open("input_grid_filled.txt","w") as f:
+        f.write(dump_grid_s(filled_grid))
+    dump_grid(filled_grid)
+  return volume
+  
+print("Star 1:",star_1("samplexsy.txt"))
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+#######
+,#+++++#
+###+++#
+..#+++#
+..#+++#
+###+###
+,#+++#..
+##++###
+.#++++#
+.######
+
+Star 1: 62
+#+end_example
+
+#+begin_example
+Too low
+: Star 1: 12613
+#+end_example
+
+#+begin_example
+ 0123456
+0#######
+1#.....#
+2###...#
+3..#...#
+4..#...#
+5###.###
+6#...#..
+7##..###
+8.#....#
+9.######
+
+Star 1: 50
+#+end_example
+
+
+** Day 18 star 2
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+def star_2(path: str) -> int:
+  with open(path,'r') as f:
+     pass
+  return 0
+  
+print("Star 2:", star_2("sample.txt"))
+#+END_SRC
+
