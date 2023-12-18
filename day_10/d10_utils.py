@@ -7,6 +7,9 @@ class P(BaseModel):
     y: int = 0
     z: int = 0
 
+    def clone(self):
+        return P(x=self.x,y=self.y,z=self.z)
+    
     def __hash__(self):
         return hash(f'{self.x}x{self.y}x{self.z}')
 
@@ -70,10 +73,26 @@ MAPPINGS = {"|": (P(x=0,y=-1),P(x=0,y=1)),
             "7": (P(x=-1,y=0),P(x=0,y=1)),
             "F": (P(x=1,y=0),P(x=0,y=1))}
 
+
+RIGHT=P(x=1,y=0)
+LEFT=P(x=-1,y=0)
+UP=P(x=0,y=-1)
+DOWN=P(x=0,y=1)
+
 class Grid(BaseModel):
     size: S
     cells: dict[P, str]
     start: P
+
+    def flood_fill(self, c: str, Q: list):
+        while Q:
+            p = Q.pop()
+            if self.cells.get(p) == ".":
+                self.cells[p.clone()] = c
+                Q.append(p+DOWN)
+                Q.append(p+UP)
+                Q.append(p+LEFT)
+                Q.append(p+RIGHT)
 
     def connect(self, p1: P, p2: P):
         c = self.cells[P1]

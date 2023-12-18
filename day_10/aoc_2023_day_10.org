@@ -156,25 +156,13 @@ J
 
 Ok -- it's a lot more obvious what is going on using unicode but solution still escapes me.
 
+Solultion - flood fill
+
 *** Solution
 #+BEGIN_SRC python :results output
 import re
 from pydantic import BaseModel
 from d10_utils import P,S, Grid, load_grid, dump_grid, find_loop_path
-
-def outside(p: P, grid: Grid) -> bool:
-    if grid.cells.get(p,'.') != '.':
-        return False
-    
-    for dir in (P(x=1,y=0),P(x=-1,y=0),P(x=0,y=-1),P(x=0,y=1)):
-        p2 = p + dir
-        if not grid.in_bounds(p2):
-            return True
-        
-        if grid.cells.get(p2,'.') == 'O' :
-            return True
-            
-    return False
 
 BOX_MAPPING = {"|": "│", "7": "┐", "F": "┌", "L": "└","J": "┘","-": "─"}
 
@@ -186,8 +174,9 @@ def star_2(path: str, start_char: str) -> int:
   print(len(path)/2)
   pg = Grid(size=grid.size, cells={}, start=P())
 
-  for y in range(0,grid.size.height):
-      for x in range(0,grid.size.width):
+  # Surround grid by blank space to help with fill
+  for y in range(-1,grid.size.height+1):
+      for x in range(-1,grid.size.width+1):
           pg.cells[P(x=x,y=y)] = '.'
           
   for p in path:
@@ -196,79 +185,31 @@ def star_2(path: str, start_char: str) -> int:
       else:
           pg.cells[p] =  BOX_MAPPING.get(grid.cells[p], grid.cells[p])
 
+
+  pg.flood_fill('O',[P()])
   dump_grid(pg)
-
-  old_enclosed = -1
-  enclosed = 0
-
-  while old_enclosed != enclosed:
-      old_enclosed = enclosed
-      ul,lr = P(x=0,y=0), P(x=pg.size.width,y=pg.size.width)
-
-      while ul.x < lr.x:
-          for x in range(ul.x, lr.x):
-              p = P(x=x, y=ul.y)
-              if outside(p,pg):
-                  pg.cells[p] = 'O'
-              
-              p = P(x=x, y=lr.y-1)
-              if outside(p,pg):
-                  pg.cells[p] = 'O'
-                  
-          for y in range(ul.y, lr.y):
-              p = P(x=ul.x, y=y)
-              if outside(p,pg):
-                  pg.cells[p] = 'O'
-
-              p = P(x=lr.x-1, y=y)
-              if outside(p,pg):
-                  pg.cells[p] = 'O'
-
-          ul += P(x=1,y=1)
-          lr += P(x=-1,y=-1)
-
-      enclosed = 0
-      for y in range(0,pg.size.height):
-          for x in range(0,pg.size.width):
-             if pg.cells.get(P(x=x,y=y) or '.') == '.':
-                 enclosed += 1
-
-  dump_grid(pg)
-
-
-  return enclosed
+  
+  return len([x for x in pg.cells.values() if x == '.'])
 
 print()
-print('Star 2:',star_2("sample_4.txt","F"))
+print('Star 2:',star_2("sample_5.txt","F"))
 #+END_SRC
 
 #+RESULTS:
 #+begin_example
 
-70.5
+22.5
 Starting at x=0 y=0 z=0
-.┌────┐┌┐┌┐┌┐┌─┐....
-.│┌──┐││││││││┌┘....
-.││.┌┘││││││││└┐....
-┌┘└┐└┐└┘└┘││└┘.└─┐..
-└──┘.└┐...└┘*┐┌─┐└┐.
-....┌─┘..┌┐┌┘│└┐└┐└┐
-....└┐.┌┐││└┐│.└┐└┐│
-.....│┌┘└┘│┌┘│┌┐│.└┘
-....┌┘└─┐.││.││││...
-....└───┘.└┘.└┘└┘...
-Starting at x=0 y=0 z=0
-O┌────┐┌┐┌┐┌┐┌─┐OOOO
-O│┌──┐││││││││┌┘OOOO
-O││.┌┘││││││││└┐OOOO
-┌┘└┐└┐└┘└┘││└┘.└─┐OO
-└──┘.└┐...└┘*┐┌─┐└┐O
-OOOO┌─┘..┌┐┌┘│└┐└┐└┐
-OOOO└┐.┌┐││└┐│.└┐└┐│
-OOOOO│┌┘└┘│┌┘│┌┐│O└┘
-OOOO┌┘└─┐O││O││││OOO
-OOOO└───┘O└┘O└┘└┘OOO
-Star 2: 10
+OOOOOOOOOO
+O*──────┐O
+O│┌────┐│O
+O││....││O
+O││....││O
+O│└─┐┌─┘│O
+O│..││..│O
+O└──┘└──┘O
+OOOOOOOOOO
+Star 2: 12
 #+end_example
 
 
