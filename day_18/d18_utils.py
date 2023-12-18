@@ -74,45 +74,34 @@ class R(BaseModel):
         return self
 
 
+RIGHT=P(x=1,y=0)
+LEFT=P(x=-1,y=0)
+UP=P(x=0,y=-1)
+DOWN=P(x=0,y=1)
+
 class Grid(BaseModel):
     size: S
     min_p: P
     cells: dict[P, str]
 
-    def is_bounded(self, p: P) -> bool:
-        bounded = 0
-        tp = P()
+    def flood_fill_recursive(self, p: P, c: str):
+        if self.cells.get(p):
+            return
+        self.cells[p.clone()] = c
+        self.flood_fill(p + DOWN,c)
+        self.flood_fill(p + UP,c)
+        self.flood_fill(p + LEFT,c)
+        self.flood_fill(p + RIGHT,c)
 
-        for x in range(p.x-1, self.min_p.x-1, -1):
-            tp.x = x
-            tp.y = p.y
-            if self.cells.get(tp) == '#':
-                bounded += 1
-                break
-            
-        for x in range(p.x+1, self.size.width):
-            tp.x = x
-            tp.y = p.y
-            if self.cells.get(tp) == '#':
-                bounded += 1
-                break
-            
-        for y in range(p.y-1, self.min_p.y-1,-1):
-            tp.x = p.x
-            tp.y = y
-            if self.cells.get(tp) == '#':
-                bounded += 1
-                break
-            
-        for y in range(p.y+1, self.size.height):
-            tp.x = p.x
-            tp.y = y
-            if self.cells.get(tp) == '#':
-                bounded += 1
-                break
-
-        return bounded == 4
-        
+    def flood_fill(self, c: str, Q: list):
+        while Q:
+            p = Q.pop()
+            if not self.cells.get(p):
+                self.cells[p.clone()] = c
+                Q.append(p+DOWN)
+                Q.append(p+UP)
+                Q.append(p+LEFT)
+                Q.append(p+RIGHT)
         
     def in_bounds(self,p: P) -> bool:
         return p.x >=0 and p.y >=0 and p.x < self.size.width and p.y < self.size.height

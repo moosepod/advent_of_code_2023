@@ -16,12 +16,7 @@
 *** Solution
 #+BEGIN_SRC python :results output
 import re
-from d18_utils import Grid,S,dump_grid,P, dump_grid_s
-
-RIGHT=P(x=1,y=0)
-LEFT=P(x=-1,y=0)
-UP=P(x=0,y=-1)
-DOWN=P(x=0,y=1)
+from d18_utils import Grid,S,dump_grid,P, dump_grid_s, UP, DOWN, LEFT, RIGHT
 
 DIRECTIONS = {"R": RIGHT, "L": LEFT, "U": UP, "D": DOWN}
 
@@ -51,45 +46,18 @@ def star_1(path: str) -> int:
         direction, distance, color = m.groups()
         p = draw_line(grid, p, direction, int(distance))
 
-    filled_grid = Grid(min_p=grid.min_p,cells={P():"#"}, size=S(width=grid.size.width,height=grid.size.height))
-    for y in range(grid.min_p.y,grid.size.height):
-        p.y = y
-        line_volume = 0
-        for x in range(grid.min_p.x,grid.size.width):
-            p.x = x
-            if grid.cells.get(p):
-                line_volume += 1
-                filled_grid.cells[P(x=p.x,y=p.y)] = "#"
-            elif grid.is_bounded(p):
-                line_volume +=1
-                filled_grid.cells[P(x=p.x,y=p.y)] = "+"
-        volume += line_volume
-        #print(y+1,line_volume)
-    
+    grid.flood_fill("+",[P(x=1,y=1)])
     with open("input_grid_filled.txt","w") as f:
-        f.write(dump_grid_s(filled_grid))
-    dump_grid(filled_grid)
-  return volume
+        f.write(dump_grid_s(grid))
+    #dump_grid(grid)
+  return len(grid.cells)
   
-print("Star 1:",star_1("samplexsy.txt"))
+print("Star 1:",star_1("input.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
-#######
-,#+++++#
-###+++#
-..#+++#
-..#+++#
-###+###
-,#+++#..
-##++###
-.#++++#
-.######
-
-Star 1: 62
-#+end_example
+: Star 1: 67891
 
 #+begin_example
 Too low
