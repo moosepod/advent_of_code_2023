@@ -84,7 +84,7 @@ print(f"Star 1: {result} in {elapsed:.4f}s resulting in {elapsed/count:.4f}s per
 #+END_SRC
 
 #+RESULTS:
-: Star 1: 7653 in 23.8801s resulting in 0.0239s per iteration 
+: Star 1: 7653 in 23.8299s resulting in 0.0238s per iteration 
 
 ** Day 12 star 2
 *** Problem statement

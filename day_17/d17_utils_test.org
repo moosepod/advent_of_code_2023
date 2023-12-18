@@ -1,0 +1,79 @@
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Testing breadth first search
+
+- [ ] Do a basic BFS
+- [ ] Rework to handle grid going into negative space
+  
+#+BEGIN_SRC python :results output
+import re
+from pydantic import BaseModel
+from d17_utils import Grid, load_grid, dump_grid, P, load_grid_from_str
+
+def find_path(s: str, debug=False) -> list[P]:
+    g = load_grid_from_str(s)
+    start = g.find_first_value(2)
+    end = g.find_first_value(3)
+
+    if debug:
+        print(f'Find path from {start} to {end}')
+        dump_grid(g,{})
+
+    return g.bfs(start,end)
+
+# Clear
+print(find_path("""
+11111111
+10000001
+10020001
+10000003
+10000001
+11111111
+"""))
+
+# Almost blocked
+print(find_path("""
+11111111
+10001001
+10021001
+10001003
+10000001
+11111111
+"""))
+
+# Maze!
+print(find_path("""
+11111111
+10001001
+10121011
+10111003
+10000011
+11111111
+"""))
+
+# Blocked
+print(find_path("""
+11111111
+10001001
+10021001
+10001003
+10001001
+11111111
+"""))
+
+
+#+END_SRC
+
+#+RESULTS:
+: [P(x=7, y=3)]
+: [P(x=7, y=3)]
+: [P(x=7, y=3)]
+: []
