@@ -16,7 +16,33 @@ class P(BaseModel):
     def __add__(self, value):
         # Assume adding a P
         return P(x=self.x+value.x, y=self.y+value.y, z=self.z+value.z)
-        
+
+class Polygon(BaseModel):
+    verticies: list[P]
+
+    def perimeter(self):
+        p = 0
+
+        for i in range(1, len(self.verticies)):
+            p1 = self.verticies[i-1]
+            p2 = self.verticies[i]
+            if p1.y == p2.y:
+                p += abs(p1.x - p2.x)
+            else:
+                p += abs(p1.y - p2.y)
+
+        return p
+    
+    def area(self) -> int:
+        area = 0
+        j = len(self.verticies)-1
+
+        for i in range(0,len(self.verticies)):
+            area += (self.verticies[j].x + self.verticies[i].x) * (self.verticies[j].y - self.verticies[i].y);
+            j = i
+            
+        return area/2
+
 class S(BaseModel):
     """A size. Not really different than point, but keeps var names separate"""
     width: int

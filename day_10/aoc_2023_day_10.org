@@ -157,57 +157,146 @@ Solultion - flood fill
 #+BEGIN_SRC python :results output
 import re
 from pydantic import BaseModel
-from d10_utils import P,S, Grid, load_grid, dump_grid, find_loop_path, RIGHT
+from d10_utils import P,S, Grid, load_grid, dump_grid, find_loop_path, RIGHT, DOWN, LEFT, UP, Polygon
 
 BOX_MAPPING = {"|": "│", "7": "┐", "F": "┌", "L": "└","J": "┘","-": "─"}
+
+START_DIR = {"|": UP, "F": RIGHT, "-": RIGHT, "7": DOWN,
+             "J": LEFT, "L": UP}
+
+CHANGE_DIR = {"F": {UP: RIGHT, LEFT: DOWN},
+              "L": {DOWN: RIGHT, LEFT: UP},
+              "J": {DOWN: LEFT, RIGHT: UP},
+              "7": {RIGHT: DOWN, UP: LEFT}}
 
 def star_2(path: str, start_char: str) -> int:
   grid = load_grid(path)
   grid.cells[grid.start] = start_char
-
-  path = find_loop_path(grid)
-  print(len(path)/2)
-  pg = Grid(size=grid.size, cells={}, start=P())
-
-  # Surround grid by blank space to help with fill
-  for y in range(-1,grid.size.height+1):
-      for x in range(-1,grid.size.width+1):
-          pg.cells[P(x=x,y=y)] = '.'
-          
-  for p in path:
-      if p == grid.start:
-          pg.cells[p] = '*'
-      else:
-          pg.cells[p] =  BOX_MAPPING.get(grid.cells[p], grid.cells[p])
-
-
-  pg.flood_fill('O',[(P(),RIGHT)], {})
-  dump_grid(pg)
   
-  return len([x for x in pg.cells.values() if x == '.'])
+  polygon = Polygon(verticies=[grid.start.clone()])
+
+  p = None
+  d = None
+  while p != grid.start:
+    if p == None:
+      p = grid.start
+      d = START_DIR[grid.cells[p]]
+    p = p + d
+    if CHANGE_DIR.get(grid.cells[p]):
+      d = CHANGE_DIR[grid.cells[p]][d]
+      polygon.verticies.append(p)
+
+  #polygon.verticies.pop()
+  #for v in polygon.verticies:
+  #  print(v)
+
+  #path = find_loop_path(grid)
+  dump_grid(grid)
+
+  print(polygon.area(), int(polygon.perimeter()))
+  return polygon.area() + int(polygon.perimeter()/2) - 1
 
 print()
+print('Star 2:',star_2("sample_7.txt","F"))
+print('Star 2:',star_2("sample.txt","F"))
+print('Star 2:',star_2("sample_8.txt","F"))
+print('Star 2:',star_2("sample_3.txt","F"))
+print('Star 2:',star_2("sample_5.txt","F"))
 print('Star 2:',star_2("sample_4.txt","F"))
 #+END_SRC
 
 #+RESULTS:
 #+begin_example
 
-70.5
-Starting at x=0 y=0 z=0
-OOOOOOOOOOOOOOOOOOOOOO
-OO┌────┐┌┐┌┐┌┐┌─┐OOOOO
-OO│┌──┐││││││││┌┘OOOOO
-OO││.┌┘││││││││└┐OOOOO
-O┌┘└┐└┐└┘└┘││└┘.└─┐OOO
-O└──┘.└┐...└┘*┐┌─┐└┐OO
-OOOOO┌─┘..┌┐┌┘│└┐└┐└┐O
-OOOOO└┐.┌┐││└┐│.└┐└┐│O
-OOOOOO│┌┘└┘│┌┘│┌┐│O└┘O
-OOOOO┌┘└─┐O││O││││OOOO
-OOOOO└───┘O└┘O└┘└┘OOOO
-OOOOOOOOOOOOOOOOOOOOOO
-Star 2: 10
+Starting at x=1 y=1 z=0
+......
+......
+..F7..
+..LJ..
+......
+......
+-1.0 4
+Star 2: 0.0
+Starting at x=1 y=1 z=0
+.......
+.......
+..F-7..
+..|.|..
+..L-J..
+.......
+.......
+-4.0 8
+Star 2: -1.0
+Starting at x=1 y=1 z=0
+........
+........
+..F--7..
+..|..|..
+..L--J..
+........
+........
+-6.0 10
+Star 2: -2.0
+Starting at x=1 y=1 z=0
+.............
+.............
+..F-------7..
+..|F-----7|..
+..||.....||..
+..||.....||..
+..|L-7.F-J|..
+..|..|.|..|..
+..L--J.L--J..
+.............
+.............
+-26.0 46
+Star 2: -4.0
+Starting at x=1 y=1 z=0
+............
+............
+..F------7..
+..|F----7|..
+..||....||..
+..||....||..
+..|L-7F-J|..
+..|..||..|..
+..L--JL--J..
+............
+............
+-25.0 44
+Star 2: -4.0
+Starting at x=12 y=4 z=0
+......................
+..F----7F7F7F7F-7.....
+..|F--7||||||||FJ.....
+..||.FJ||||||||L7.....
+.FJL7L7LJLJ||LJ.L-7...
+.L--J.L7...LJF7F-7L7..
+.....F-J..F7FJ|L7L7L7.
+.....L7.F7||L7|.L7L7|.
+......|FJLJ|FJ|F7|.LJ.
+.....FJL-7.||.||||....
+.....L---J.LJ.LJLJ....
+......................
+77.0 140
+Star 2: 146.0
+#+end_example
+
+#+begin_example
+
+x=1 y=1 z=0
+x=3 y=1 z=0
+x=3 y=3 z=0
+x=1 y=3 z=0
+Starting at x=1 y=1 z=0
+ 012345
+0......
+1.F-7..
+2.|.|..
+3.L-J..
+4......
+
+tar 2: -4.0
 #+end_example
 
 
