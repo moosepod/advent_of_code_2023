@@ -319,7 +319,8 @@ first line of the almanac. What is the lowest location number that
 corresponds to any of the initial seed numbers?
 
 *** Alternative approach to star 1/star 2
-#+BEGIN_SRC python :session session_day_5a :results output
+#+BEGIN_SRC python :session :results output
+import 
 try:
     def extract_seeds(s: str) -> list[int]:
         m = re.match("seeds: (.+)", s)
@@ -389,13 +390,6 @@ except Exception as e:
 #+END_SRC
 
 #+RESULTS:
-: [(98, 99, -48), (50, 97, 2)]
-: [(15, 51, -15), (52, 53, -15), (0, 14, 39)]
-: [(53, 60, -4), (11, 52, -11), (0, 6, 42), (7, 10, 50)]
-: [(18, 24, 70), (25, 94, -7)]
-: [(77, 99, -32), (45, 63, 36), (64, 76, 4)]
-: [(69, 69, -69), (0, 68, 1)]
-: Error: name 'lowest' is not defined
 
 *** Yet another approach to star 1
 #+BEGIN_SRC python :session session_day_5a :results output
