@@ -54,12 +54,7 @@ star_1("sample.txt","F")
 #+END_SRC
 
 #+RESULTS:
-: Starting at x=0 y=0 z=0
-: .....
-: .*-7.
-: .|.|.
-: .L-J.
-: .....
+: width=5 height=5
 
 
 ** Star 2
@@ -162,7 +157,7 @@ Solultion - flood fill
 #+BEGIN_SRC python :results output
 import re
 from pydantic import BaseModel
-from d10_utils import P,S, Grid, load_grid, dump_grid, find_loop_path
+from d10_utils import P,S, Grid, load_grid, dump_grid, find_loop_path, RIGHT
 
 BOX_MAPPING = {"|": "│", "7": "┐", "F": "┌", "L": "└","J": "┘","-": "─"}
 
@@ -186,29 +181,54 @@ def star_2(path: str, start_char: str) -> int:
           pg.cells[p] =  BOX_MAPPING.get(grid.cells[p], grid.cells[p])
 
 
-  pg.flood_fill('O',[P()])
+  pg.flood_fill('O',[(P(),RIGHT)], {})
   dump_grid(pg)
   
   return len([x for x in pg.cells.values() if x == '.'])
 
 print()
-print('Star 2:',star_2("sample_5.txt","F"))
+print('Star 2:',star_2("sample_4.txt","F"))
 #+END_SRC
 
 #+RESULTS:
 #+begin_example
 
-22.5
+70.5
 Starting at x=0 y=0 z=0
-OOOOOOOOOO
-O*──────┐O
-O│┌────┐│O
-O││....││O
-O││....││O
-O│└─┐┌─┘│O
-O│..││..│O
-O└──┘└──┘O
-OOOOOOOOOO
+OOOOOOOOOOOOOOOOOOOOOO
+OO┌────┐┌┐┌┐┌┐┌─┐OOOOO
+OO│┌──┐││││││││┌┘OOOOO
+OO││.┌┘││││││││└┐OOOOO
+O┌┘└┐└┐└┘└┘││└┘.└─┐OOO
+O└──┘.└┐...└┘*┐┌─┐└┐OO
+OOOOO┌─┘..┌┐┌┘│└┐└┐└┐O
+OOOOO└┐.┌┐││└┐│.└┐└┐│O
+OOOOOO│┌┘└┘│┌┘│┌┐│O└┘O
+OOOOO┌┘└─┐O││O││││OOOO
+OOOOO└───┘O└┘O└┘└┘OOOO
+OOOOOOOOOOOOOOOOOOOOOO
+Star 2: 10
+#+end_example
+
+
+22.5
+.... x=1 y=3 z=0
+.... x=1 y=4 z=0
+.... x=8 y=3 z=0
+.... x=8 y=4 z=0
+Starting at x=0 y=0 z=0
+
+#+begin_example
+  0123456789
+0 OOOOOOOOOO
+1 O*──────┐O
+2 O│┌────┐│O
+3 O││....││O
+4 O││....││O
+5 O│└─┐┌─┘│O
+6 O│..││..│O
+7 O└──┘└──┘O
+8 OOOOOOOOOO
 Star 2: 12
 #+end_example
 

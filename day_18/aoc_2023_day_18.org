@@ -59,37 +59,38 @@ print("Star 1:",star_1("input.txt"))
 #+RESULTS:
 : Star 1: 67891
 
-#+begin_example
-Too low
-: Star 1: 12613
-#+end_example
-
-#+begin_example
- 0123456
-0#######
-1#.....#
-2###...#
-3..#...#
-4..#...#
-5###.###
-6#...#..
-7##..###
-8.#....#
-9.######
-
-Star 1: 50
-#+end_example
-
 
 ** Day 18 star 2
 *** Problem statement
 *** Solution
 #+BEGIN_SRC python :results output
+import re
+from d18_utils import P,RIGHT,LEFT,UP,DOWN, Polygon
+
+DIRECTIONS = [RIGHT,UP,LEFT,DOWN]
+#DIRECTIONS = [RIGHT,DOWN,LEFT,UP]
+DEBUG = ["R","D","L","U"]
+
 def star_2(path: str) -> int:
   with open(path,'r') as f:
-     pass
-  return 0
+    polygon = Polygon(verticies=[P(x=-4,y=6)])
+    for idx,line in enumerate(f.read().split("\n")):
+      if line.strip():
+        m = re.search("^[RDLU] \d+ \(#([a-z0-9]{5})(\d)\)",line)
+        hex_distance, direction = m.groups()
+        distance = int(hex_distance, 16)
+        polygon.verticies.append(polygon.verticies[-1] + DIRECTIONS[int(direction)] * distance)
+
+  return polygon.area() + (polygon.perimeter() / 2) + 1
   
-print("Star 2:", star_2("sample.txt"))
+print("Star 2:", star_2("input.txt"))
 #+END_SRC
 
+#+RESULTS:
+: Star 2: 94116351948493.0
+
+#+begin_example
+###
+# #
+###
+#+end_example

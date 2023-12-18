@@ -84,15 +84,18 @@ class Grid(BaseModel):
     cells: dict[P, str]
     start: P
 
-    def flood_fill(self, c: str, Q: list):
+    def flood_fill(self, c: str, Q: list, visited: {}):
         while Q:
-            p = Q.pop()
-            if self.cells.get(p) == ".":
-                self.cells[p.clone()] = c
-                Q.append(p+DOWN)
-                Q.append(p+UP)
-                Q.append(p+LEFT)
-                Q.append(p+RIGHT)
+            p,d = Q.pop()
+            if not visited.get(p):
+                visited[p.clone()] = True
+                if self.cells.get(p) == ".":
+                    self.cells[p.clone()] = c
+                    Q.append((p+DOWN,DOWN))
+                    Q.append((p+UP,UP))
+                    Q.append((p+LEFT,LEFT))
+                    Q.append((p+RIGHT,RIGHT))
+                    
 
     def connect(self, p1: P, p2: P):
         c = self.cells[P1]
@@ -138,9 +141,9 @@ def load_grid(path: str) -> Grid:
 
 def dump_grid(grid: Grid):
   print("Starting at",grid.start)
-  for y in range(0,grid.size.height):
+  for y in range(-1,grid.size.height+1):
     s = ""
-    for x in range(0,grid.size.width):
+    for x in range(-1,grid.size.width+1):
       c = grid.cells.get(P(x=x,y=y)) or '.'
       #if c == 'O':
       #    c = ' '
