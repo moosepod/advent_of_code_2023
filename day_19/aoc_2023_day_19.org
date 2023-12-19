@@ -97,6 +97,37 @@ def load(path: str) -> tuple[list[Part], dict[str,Workflow]]:
         
     return parts, workflows
 
+
+class Node(BaseModel):
+    workflow: str
+    edges: list["Node"]
+
+from queue import Queue
+
+def make_graph(workflows: dict[str, Workflow], start: str) -> Node:
+    n = Node(workflow=start, edges=[])
+
+    frontier = Queue()
+    frontier.put(start)
+    came_from = dict()
+    came_from[start] = None
+    
+    while not frontier.empty():
+        current = frontier.get()
+        for rule in workflows[current].rules:
+            if rule.destination not in came_from:
+                came_from[rule.destination] = current
+                if rule.destination not in ("A","R"):
+                    frontier.put(rule.destination)
+
+
+    start = "A"
+    while came_from[start] != "in":
+        print(f"{start} -> {came_from[start]}")
+        start = came_from[start]
+    print(f"{start} -> in")
+    return 0,0
+    
 def star_1(path: str) -> int:
   accepted = 0
   with open(path,'r') as f:
@@ -106,23 +137,30 @@ def star_1(path: str) -> int:
               accepted += p.rating()
 
   return accepted
+
+def star_2(path: str) -> int:
+  accepted = 0
+  with open(path,'r') as f:
+      parts, workflows = load(path)
+      make_graph(workflows,"in")
+      """ 
+      x = max([v for f,v in max_v if f == "x"]) - min([v for f,v in min_v if f == "x"])
+      m = max([v for f,v in max_v if f == "m"]) - min([v for f,v in min_v if f == "m"])
+      a = max([v for f,v in max_v if f == "a"]) - min([v for f,v in min_v if f == "a"])
+      s = max([v for f,v in max_v if f == "s"]) - min([v for f,v in min_v if f == "s"])
+      print(x,m,a,s)
+      print(x * m * a * s)
+      """
+  return 0
   
-print("Star 1:",star_1("input.txt"))
+#print("Star 1:",star_1("input.txt"))
+print("Star 2:",star_2("sample.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-: Star 1: 323625
-
-** Day 19 star 2
-*** Problem statement
-*** Solution
-#+BEGIN_SRC python :results output
-def star_2(path: str) -> int:
-  with open(path,'r') as f:
-     pass
-  return 0
-  
-print("Star 2:", star_2("sample.txt"))
-#+END_SRC
+: A -> px
+: px -> in
+: Star 2: 0
+*** 
 
