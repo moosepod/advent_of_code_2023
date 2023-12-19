@@ -12,6 +12,9 @@ class R(BaseModel):
     a: int 
     b: int
 
+    def __len__(self) -> int:
+        return abs(self.b-self.a)
+
     def overlap(self, r: 'R') -> bool:
         return max(self.a, r.a) <= min(self.b, r.b)
 

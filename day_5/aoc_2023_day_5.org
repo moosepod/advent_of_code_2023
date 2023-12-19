@@ -319,8 +319,8 @@ first line of the almanac. What is the lowest location number that
 corresponds to any of the initial seed numbers?
 
 *** Alternative approach to star 1/star 2
-#+BEGIN_SRC python :session :results output
-import 
+#+BEGIN_SRC python :results output
+import re
 try:
     def extract_seeds(s: str) -> list[int]:
         m = re.match("seeds: (.+)", s)
@@ -390,6 +390,13 @@ except Exception as e:
 #+END_SRC
 
 #+RESULTS:
+: [(98, 99, -48), (50, 97, 2)]
+: [(15, 51, -15), (52, 53, -15), (0, 14, 39)]
+: [(53, 60, -4), (11, 52, -11), (0, 6, 42), (7, 10, 50)]
+: [(18, 24, 70), (25, 94, -7)]
+: [(77, 99, -32), (45, 63, 36), (64, 76, 4)]
+: [(69, 69, -69), (0, 68, 1)]
+: Error: name 'lowest' is not defined
 
 *** Yet another approach to star 1
 #+BEGIN_SRC python :session session_day_5a :results output
@@ -665,24 +672,40 @@ def star_2(path: str):
         seeds = [R(a=raw_seeds[i], b=raw_seeds[i]+raw_seeds[i+1]-1) for i in range(0,len(raw_seeds)-1, 2)]
         for mappings in re.findall(r"(\w+)-to-(\w+) map:\n(.+?)\n\n", text, re.DOTALL):
             stage_from, stage_to, mapping_text = mappings
+            print('From',stage_from,'to',stage_to)
             seed_length = len(seeds)
             for seed_idx in range(0, seed_length):
+                print('..seed',seed_idx+1,seeds[seed_idx])
                 for mapping in mapping_text.strip().split('\n'):
                     dest,src,count = [int(x) for x in mapping.split(' ')]
                     r = R(a=src, b=src+count)
                     if seeds[seed_idx] in r:
                         o = r - seeds[seed_idx]
-                        print('....',r,'-',seeds[seed_idx],'=', o)
+                        print('.... overlap ',r,'-',seeds[seed_idx],'=', o)
+                        if o.a != seeds[seed_idx].a or o.b != seeds[seed_idx].b:
+                            s1 = R(a=seeds[seed_idx].a,b=o.a)
+                            s2 = R(a=o.b, b=seeds[seed_idx].b)
+                            print('........ partial overlap')
+                            if len(s1) > 1:
+                                print('............ splitting off',s1)
+                                seeds.append(s1)
+                            if len(s2) > 2:
+                                s2.a += 1
+                                print('............ splitting off',s2)
+                                seeds.append(s2)
+
                         seeds[seed_idx] = o + (dest - src)
-                        print('.... now', seeds[seed_idx])
+                        
+                        print('........ after offset', seeds[seed_idx])
                         # Next steps
                         # Figure out how to handle parts of seed that _don't_ totally overlap
                         # Make sure seed ranges are de-duped
                     else:
                         # Seed can be left alone, not mapped
+                        print('.... no overlap of mapping',r,'and seed',seeds[seed_idx])
                         pass
+            print(seeds)
 
-    print(seeds)
     return min([x.a for x in seeds])
 
 print(star_2("sample.txt"))
@@ -690,25 +713,104 @@ print(star_2("sample.txt"))
 
 #+RESULTS:
 #+begin_example
-.... a=50 b=98 - a=79 b=92 = a=79 b=92
-.... now a=81 b=94
-.... a=50 b=98 - a=55 b=67 = a=55 b=67
-.... now a=57 b=69
-.... a=53 b=61 - a=57 b=69 = a=57 b=61
-.... now a=53 b=57
-.... a=11 b=53 - a=53 b=57 = a=53 b=53
-.... now a=42 b=42
-.... a=25 b=95 - a=81 b=94 = a=81 b=94
-.... now a=74 b=87
-.... a=25 b=95 - a=42 b=42 = a=42 b=42
-.... now a=35 b=35
-.... a=77 b=100 - a=74 b=87 = a=77 b=87
-.... now a=45 b=55
-.... a=45 b=64 - a=45 b=55 = a=45 b=55
-.... now a=81 b=91
-.... a=0 b=69 - a=35 b=35 = a=35 b=35
-.... now a=36 b=36
-[R(a=81, b=91), R(a=36, b=36)]
+From seed to soil
+..seed 1 a=79 b=92
+.... no overlap of mapping a=98 b=100 and seed a=79 b=92
+.... overlap  a=50 b=98 - a=79 b=92 = a=79 b=92
+........ after offset a=81 b=94
+..seed 2 a=55 b=67
+.... no overlap of mapping a=98 b=100 and seed a=55 b=67
+.... overlap  a=50 b=98 - a=55 b=67 = a=55 b=67
+........ after offset a=57 b=69
+[R(a=81, b=94), R(a=57, b=69)]
+From soil to fertilizer
+..seed 1 a=81 b=94
+.... no overlap of mapping a=15 b=52 and seed a=81 b=94
+.... no overlap of mapping a=52 b=54 and seed a=81 b=94
+.... no overlap of mapping a=0 b=15 and seed a=81 b=94
+..seed 2 a=57 b=69
+.... no overlap of mapping a=15 b=52 and seed a=57 b=69
+.... no overlap of mapping a=52 b=54 and seed a=57 b=69
+.... no overlap of mapping a=0 b=15 and seed a=57 b=69
+[R(a=81, b=94), R(a=57, b=69)]
+From fertilizer to water
+..seed 1 a=81 b=94
+.... no overlap of mapping a=53 b=61 and seed a=81 b=94
+.... no overlap of mapping a=11 b=53 and seed a=81 b=94
+.... no overlap of mapping a=0 b=7 and seed a=81 b=94
+.... no overlap of mapping a=7 b=11 and seed a=81 b=94
+..seed 2 a=57 b=69
+.... overlap  a=53 b=61 - a=57 b=69 = a=57 b=61
+........ partial overlap
+............ splitting off a=62 b=69
+........ after offset a=53 b=57
+.... overlap  a=11 b=53 - a=53 b=57 = a=53 b=53
+........ partial overlap
+............ splitting off a=54 b=57
+........ after offset a=42 b=42
+.... no overlap of mapping a=0 b=7 and seed a=42 b=42
+.... no overlap of mapping a=7 b=11 and seed a=42 b=42
+[R(a=81, b=94), R(a=42, b=42), R(a=62, b=69), R(a=54, b=57)]
+From water to light
+..seed 1 a=81 b=94
+.... no overlap of mapping a=18 b=25 and seed a=81 b=94
+.... overlap  a=25 b=95 - a=81 b=94 = a=81 b=94
+........ after offset a=74 b=87
+..seed 2 a=42 b=42
+.... no overlap of mapping a=18 b=25 and seed a=42 b=42
+.... overlap  a=25 b=95 - a=42 b=42 = a=42 b=42
+........ after offset a=35 b=35
+..seed 3 a=62 b=69
+.... no overlap of mapping a=18 b=25 and seed a=62 b=69
+.... overlap  a=25 b=95 - a=62 b=69 = a=62 b=69
+........ after offset a=55 b=62
+..seed 4 a=54 b=57
+.... no overlap of mapping a=18 b=25 and seed a=54 b=57
+.... overlap  a=25 b=95 - a=54 b=57 = a=54 b=57
+........ after offset a=47 b=50
+[R(a=74, b=87), R(a=35, b=35), R(a=55, b=62), R(a=47, b=50)]
+From light to temperature
+..seed 1 a=74 b=87
+.... overlap  a=77 b=100 - a=74 b=87 = a=77 b=87
+........ partial overlap
+............ splitting off a=74 b=77
+........ after offset a=45 b=55
+.... overlap  a=45 b=64 - a=45 b=55 = a=45 b=55
+........ after offset a=81 b=91
+.... no overlap of mapping a=64 b=77 and seed a=81 b=91
+..seed 2 a=35 b=35
+.... no overlap of mapping a=77 b=100 and seed a=35 b=35
+.... no overlap of mapping a=45 b=64 and seed a=35 b=35
+.... no overlap of mapping a=64 b=77 and seed a=35 b=35
+..seed 3 a=55 b=62
+.... no overlap of mapping a=77 b=100 and seed a=55 b=62
+.... overlap  a=45 b=64 - a=55 b=62 = a=55 b=62
+........ after offset a=91 b=98
+.... no overlap of mapping a=64 b=77 and seed a=91 b=98
+..seed 4 a=47 b=50
+.... no overlap of mapping a=77 b=100 and seed a=47 b=50
+.... overlap  a=45 b=64 - a=47 b=50 = a=47 b=50
+........ after offset a=83 b=86
+.... no overlap of mapping a=64 b=77 and seed a=83 b=86
+[R(a=81, b=91), R(a=35, b=35), R(a=91, b=98), R(a=83, b=86), R(a=74, b=77)]
+From temperature to humidity
+..seed 1 a=81 b=91
+.... no overlap of mapping a=69 b=70 and seed a=81 b=91
+.... no overlap of mapping a=0 b=69 and seed a=81 b=91
+..seed 2 a=35 b=35
+.... no overlap of mapping a=69 b=70 and seed a=35 b=35
+.... overlap  a=0 b=69 - a=35 b=35 = a=35 b=35
+........ after offset a=36 b=36
+..seed 3 a=91 b=98
+.... no overlap of mapping a=69 b=70 and seed a=91 b=98
+.... no overlap of mapping a=0 b=69 and seed a=91 b=98
+..seed 4 a=83 b=86
+.... no overlap of mapping a=69 b=70 and seed a=83 b=86
+.... no overlap of mapping a=0 b=69 and seed a=83 b=86
+..seed 5 a=74 b=77
+.... no overlap of mapping a=69 b=70 and seed a=74 b=77
+.... no overlap of mapping a=0 b=69 and seed a=74 b=77
+[R(a=81, b=91), R(a=36, b=36), R(a=91, b=98), R(a=83, b=86), R(a=74, b=77)]
 36
 #+end_example
 
