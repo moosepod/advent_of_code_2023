@@ -172,7 +172,8 @@ CHANGE_DIR = {"F": {UP: RIGHT, LEFT: DOWN},
 def star_2(path: str, start_char: str) -> int:
   grid = load_grid(path)
   grid.cells[grid.start] = start_char
-  
+
+  """
   polygon = Polygon(verticies=[grid.start.clone()])
 
   p = None
@@ -187,13 +188,15 @@ def star_2(path: str, start_char: str) -> int:
       polygon.verticies.append(p)
 
   #polygon.verticies.pop()
-  #for v in polygon.verticies:
-  #  print(v)
-
+  #for i,v in enumerate(polygon.verticies):
+  #print(i,v)
+  
   #path = find_loop_path(grid)
+  """
+  grid.flood_fill(P(),'O')
   dump_grid(grid)
 
-  return polygon.area()
+  return len([x for x in grid.cells.values() if x == '.'])
 
 print()
 print('Star 2:',star_2("sample_7.txt","F"))
@@ -201,7 +204,7 @@ print('Star 2:',star_2("sample.txt","F"))
 print('Star 2:',star_2("sample_8.txt","F"))
 print('Star 2:',star_2("sample_3.txt","F"))
 print('Star 2:',star_2("sample_5.txt","F"))
-print('Star 2:',star_2("sample_4.txt","F"))
+#print('Star 2:',star_2("sample_4.txt","F"))
 #+END_SRC
 
 #+RESULTS:
@@ -209,70 +212,56 @@ print('Star 2:',star_2("sample_4.txt","F"))
 
 Starting at x=1 y=1 z=0
 ......
+.OOOO.
+.OF7O.
+.OLJO.
+.OOOO.
 ......
-..F7..
-..LJ..
-......
-......
-Star 2: 3.5
+Star 2: 0
 Starting at x=1 y=1 z=0
 .......
+.OOOOO.
+.OF-7O.
+.O|.|O.
+.OL-JO.
+.OOOOO.
 .......
-..F-7..
-..|.|..
-..L-J..
-.......
-.......
-Star 2: 2.5
+Star 2: 1
 Starting at x=1 y=1 z=0
 ........
+.OOOOOO.
+.OF--7O.
+.O|..|O.
+.OL--JO.
+.OOOOOO.
 ........
-..F--7..
-..|..|..
-..L--J..
-........
-........
-Star 2: 2.5
+Star 2: 2
 Starting at x=1 y=1 z=0
 .............
+.OOOOOOOOOOO.
+.OF-------7O.
+.O|F-----7|O.
+.O||OOOOO||O.
+.O||OOOOO||O.
+.O|L-7OF-J|O.
+.O|..|O|..|O.
+.OL--JOL--JO.
+.OOOOOOOOOOO.
 .............
-..F-------7..
-..|F-----7|..
-..||.....||..
-..||.....||..
-..|L-7.F-J|..
-..|..|.|..|..
-..L--J.L--J..
-.............
-.............
-Star 2: 28.5
+Star 2: 4
 Starting at x=1 y=1 z=0
 ............
+.OOOOOOOOOO.
+.OF------7O.
+.O|F----7|O.
+.O||....||O.
+.O||....||O.
+.O|L-7F-J|O.
+.O|..||..|O.
+.OL--JL--JO.
+.OOOOOOOOOO.
 ............
-..F------7..
-..|F----7|..
-..||....||..
-..||....||..
-..|L-7F-J|..
-..|..||..|..
-..L--JL--J..
-............
-............
-Star 2: 23.5
-Starting at x=12 y=4 z=0
-......................
-..F----7F7F7F7F-7.....
-..|F--7||||||||FJ.....
-..||.FJ||||||||L7.....
-.FJL7L7LJLJ||LJ.L-7...
-.L--J.L7...LJF7F-7L7..
-.....F-J..F7FJ|L7L7L7.
-.....L7.F7||L7|.L7L7|.
-......|FJLJ|FJ|F7|.LJ.
-.....FJL-7.||.||||....
-.....L---J.LJ.LJLJ....
-......................
-Star 2: 934.5
+Star 2: 12
 #+end_example
 
 #+begin_example

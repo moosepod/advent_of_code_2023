@@ -1,3 +1,4 @@
+from queue import Queue
 from typing import Optional
 from pydantic import BaseModel, model_validator
 
@@ -38,7 +39,8 @@ class Polygon(BaseModel):
         j = len(self.verticies)-1
 
         for i in range(0,len(self.verticies)):
-            # Subtract 1 for special case of day10 where the pipes are zero width
+            #print(i,j,'x',self.verticies[j].x,self.verticies[i].x,self.verticies[j].x + self.verticies[i].x)
+            #print(i,j,'y',self.verticies[j].y,self.verticies[i].y,self.verticies[j].y - self.verticies[i].y)
             area += (self.verticies[j].x + self.verticies[i].x) * (self.verticies[j].y - self.verticies[i].y);
             j = i
             
@@ -111,18 +113,27 @@ class Grid(BaseModel):
     cells: dict[P, str]
     start: P
 
-    def flood_fill(self, c: str, Q: list, visited: {}):
-        while Q:
-            p,d = Q.pop()
-            if not visited.get(p):
-                visited[p.clone()] = True
-                if self.cells.get(p) == ".":
-                    self.cells[p.clone()] = c
-                    Q.append((p+DOWN,DOWN))
-                    Q.append((p+UP,UP))
-                    Q.append((p+LEFT,LEFT))
-                    Q.append((p+RIGHT,RIGHT))
-                    
+    def passable(self, p: P, d: P) -> bool:
+        return self.in_bounds(p) and self.cells.get(p,'.') == '.'
+
+    def flood_fill(self, p: P, c: str):
+        frontier = Queue()
+        frontier.put(p)
+        reached = set()
+
+        while not frontier.empty():
+            current = frontier.get()
+            if current not in reached:
+                if self.passable(current + UP, UP):
+                    frontier.put(current + UP)
+                if self.passable(current + DOWN, DOWN):
+                    frontier.put(current + DOWN)
+                if self.passable(current + RIGHT, RIGHT):
+                    frontier.put(current + RIGHT)
+                if self.passable(current + LEFT, LEFT):
+                    frontier.put(current + LEFT)
+                reached.add(current)
+                self.cells[current] = c
 
     def connect(self, p1: P, p2: P):
         c = self.cells[P1]
