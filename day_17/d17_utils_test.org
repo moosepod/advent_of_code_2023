@@ -18,16 +18,19 @@ import re
 from pydantic import BaseModel
 from d17_utils import Grid, load_grid, dump_grid, P, load_grid_from_str
 
-def find_path(s: str, debug=False) -> list[P]:
+def find_path(s: str, debug=True) -> list[P]:
     g = load_grid_from_str(s)
     start = g.find_first_value(2)
     end = g.find_first_value(3)
 
     if debug:
         print(f'Find path from {start} to {end}')
-        dump_grid(g,{})
 
-    return g.bfs(start,end)
+    for p in g.bfs_pathfind(start,end):
+        if p:
+            g.cells[p] = "x"
+
+    dump_grid(g,{})
 
 # Clear
 print(find_path("""
@@ -73,7 +76,41 @@ print(find_path("""
 #+END_SRC
 
 #+RESULTS:
-: [P(x=7, y=3)]
-: [P(x=7, y=3)]
-: [P(x=7, y=3)]
-: []
+#+begin_example
+Find path from x=3 y=2 to x=7 y=3
+11111111
+10000001
+100x0001
+100xxxx3
+10000001
+11111111
+
+None
+Find path from x=3 y=2 to x=7 y=3
+11111111
+10001001
+100x1001
+100x1xx3
+100xxx01
+11111111
+
+None
+Find path from x=3 y=2 to x=7 y=3
+11111111
+1xxx1001
+1x1x1011
+1x111xx3
+1xxxxx11
+11111111
+
+None
+Find path from x=3 y=2 to x=7 y=3
+11111111
+10001001
+10021001
+10001003
+10001001
+11111111
+
+None
+#+end_example

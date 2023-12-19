@@ -1,5 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, model_validator
+from queue import Queue
 
 class P(BaseModel):
     """ A point """
@@ -77,30 +78,69 @@ LEFT=P(x=-1,y=0)
 UP=P(x=0,y=-1)
 DOWN=P(x=0,y=1)
 
+EMPTY = 0
+END = 3
+
 class Grid(BaseModel):
     size: S
     cells: dict[P, int]
 
     def is_blocked(self, p: P) -> bool:
-        return self.cells.get(p,0) != 0
+        return self.cells.get(p,0) not in (EMPTY,END)
+
+    def neighbors(self,p: P) -> list[P]:
+        for d in (UP,DOWN,LEFT,RIGHT):
+            if not self.is_blocked(p + d):
+                yield p + d
     
     def bfs(self, start: P, end: P) -> list[P]:
-        frontier = [start]
-        reached = {}
+        """ Look for path from start to end. If end reached, return it """
+        frontier = Queue()
+        frontier.put(start.clone())
+        reached = set()
+        reached.add(start.clone())
 
-        while frontier:
-            p = frontier.pop()
-            if p == end:
-                return [p]
-            if p == start or (not self.is_blocked(p) and not reached.get(p)):
-                reached[p] = True
-                frontier.append(p + UP)
-                frontier.append(p + DOWN)
-                frontier.append(p + LEFT)
-                frontier.append(p + RIGHT)
+        while not frontier.empty():
+            p = frontier.get()
+            for n in self.neighbors(p):
+                if n == end:
+                    return [p]
+
+                if n not in reached:
+                    frontier.put(n)
+                    reached.add(n)
 
         return []
-            
+
+    def find_path(self, came_from: dict, end: P) -> list[P]:
+        p = end
+        path = []
+        while p:
+            path.append(came_from[p])
+            p = came_from[p]
+
+        return path
+        
+    def bfs_pathfind(self, start: P, end: P) -> list[P]:
+        """ Look for path from start to end. If found, return it """
+        frontier = Queue()
+        frontier.put(start.clone())
+        came_from = dict()
+        came_from[start.clone()] = None
+
+        while not frontier.empty():
+            p = frontier.get()
+            for n in self.neighbors(p):
+                if n == end:
+                    came_from[n] = p
+                    return self.find_path(came_from, end)
+
+                if n not in came_from:
+                    frontier.put(n)
+                    came_from[n] = p
+
+        return []
+
     def find_first_value(self, v: int) -> P | None:
         for y in range(0,self.size.height):
             for x in range(0,self.size.width):

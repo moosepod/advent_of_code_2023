@@ -23,6 +23,7 @@ Nodes can be revisited
 *** Solution
 #+BEGIN_SRC python :results output
 import re
+import queue
 from pydantic import BaseModel
 from d17_utils import Grid, load_grid, dump_grid, P
 
