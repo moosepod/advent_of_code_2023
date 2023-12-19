@@ -6,17 +6,16 @@ class P(BaseModel):
     """ A point """
     x: int = 0
     y: int = 0
-    z: int = 0
 
     def clone(self):
-        return P(x=self.x,y=self.y,z=self.z)
+        return P(x=self.x,y=self.y)
     
     def __hash__(self):
-        return hash(f'{self.x}x{self.y}x{self.z}')
+        return hash(f'{self.x}x{self.y}')
 
     def __add__(self, value):
         # Assume adding a P
-        return P(x=self.x+value.x, y=self.y+value.y, z=self.z+value.z)
+        return P(x=self.x+value.x, y=self.y+value.y)
 
 class Polygon(BaseModel):
     verticies: list[P]
@@ -113,27 +112,53 @@ class Grid(BaseModel):
     cells: dict[P, str]
     start: P
 
-    def passable(self, p: P, d: P) -> bool:
-        return self.in_bounds(p) and self.cells.get(p,'.') == '.'
+    def passable(self, p: P, d: P,from_c: P) -> bool:
+        if self.in_bounds(p):
+            c = self.cells.get(p,'.')
 
-    def flood_fill(self, p: P, c: str):
+            if d in (UP,DOWN) and from_c == '-':
+                return False
+            if d in (LEFT,RIGHT) and from_c  == '|':
+                return False
+            
+            s1 = self.cells.get(P(x=p.x-1,y=p.y),'.') + c
+            s2 = c + self.cells.get(P(x=p.x+1,y=p.y),'.') 
+            s3 = self.cells.get(P(x=p.x,y=p.y-1),'.') + c
+            s4 = c + self.cells.get(P(x=p.x,y=p.y+1),'.')
+            if d in (UP,DOWN) and (s1 in ("||","JL","7F") or s2 in ("||","JL","7F")):
+                return True
+            elif d in (LEFT,RIGHT) and (s1 in ("--","L","7F") or s2 in ("||","JL","7F")):
+                return True
+            elif c == '.':
+                return True
+
+        return False
+
+    def flood_fill(self, p: P, fill_c: str, iteration_max=0):
         frontier = Queue()
         frontier.put(p)
         reached = set()
 
+        count = 0
         while not frontier.empty():
+            if iteration_max and count > iteration_max:
+                break
+            count+=1
             current = frontier.get()
+            c = self.cells.get(current,'.')
             if current not in reached:
-                if self.passable(current + UP, UP):
+                if self.passable(current + UP, UP, c):
                     frontier.put(current + UP)
-                if self.passable(current + DOWN, DOWN):
+                if self.passable(current + DOWN, DOWN, c):
                     frontier.put(current + DOWN)
-                if self.passable(current + RIGHT, RIGHT):
+                if self.passable(current + RIGHT, RIGHT,c):
                     frontier.put(current + RIGHT)
-                if self.passable(current + LEFT, LEFT):
+                if self.passable(current + LEFT, LEFT,c):
                     frontier.put(current + LEFT)
                 reached.add(current)
-                self.cells[current] = c
+                if self.cells.get(current,'.') == '.':
+                    self.cells[current] = fill_c
+        self.cells[current] = "!"
 
     def connect(self, p1: P, p2: P):
         c = self.cells[P1]
@@ -144,7 +169,7 @@ class Grid(BaseModel):
         return False
 
     def in_bounds(self,p: P) -> bool:
-        return p.x >=0 and p.y >=0 and p.x < self.size.width and p.y < self.size.height
+        return p.x >=self.start.x and p.y >=self.start.y and p.x < self.size.width and p.y < self.size.height
     
     def connected_points(self, p1: P) -> list:
         points = []

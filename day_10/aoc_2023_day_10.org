@@ -159,7 +159,7 @@ import re
 from pydantic import BaseModel
 from d10_utils import P,S, Grid, load_grid, dump_grid, find_loop_path, RIGHT, DOWN, LEFT, UP, Polygon
 
-BOX_MAPPING = {"|": "│", "7": "┐", "F": "┌", "L": "└","J": "┘","-": "─"}
+BOX_MAPPING = {"|": "│", "7": "┐", "F": "┌", "L": "└","J": "┘","-": "─",".": "I","O":"O","!":"!"}
 
 START_DIR = {"|": UP, "F": RIGHT, "-": RIGHT, "7": DOWN,
              "J": LEFT, "L": UP}
@@ -173,30 +173,26 @@ def star_2(path: str, start_char: str) -> int:
   grid = load_grid(path)
   grid.cells[grid.start] = start_char
 
-  """
-  polygon = Polygon(verticies=[grid.start.clone()])
+  # Add an outer ring of '.' chars to help fill algorithn
+  for x in range(0, grid.size.width):
+    grid.cells[P(x=x,y=-1)] = '.'
+    grid.cells[P(x=x,y=grid.size.height)] = '.'
+  for y in range(0, grid.size.height):
+    grid.cells[P(x=-1,y=y)] = '.'
+    grid.cells[P(x=grid.size.width,y=y)] = '.'
 
-  p = None
-  d = None
-  while p != grid.start:
-    if p == None:
-      p = grid.start
-      d = START_DIR[grid.cells[p]]
-    p = p + d
-    if CHANGE_DIR.get(grid.cells[p]):
-      d = CHANGE_DIR[grid.cells[p]][d]
-      polygon.verticies.append(p)
-
-  #polygon.verticies.pop()
-  #for i,v in enumerate(polygon.verticies):
-  #print(i,v)
-  
-  #path = find_loop_path(grid)
-  """
+  grid.start = P(x=-1,y=-1)
+  grid.size.width += 1
+  grid.size.height += 1
   grid.flood_fill(P(),'O')
-  dump_grid(grid)
 
-  return len([x for x in grid.cells.values() if x == '.'])
+  for y in range(grid.start.y, grid.size.height):
+    for x in range(grid.start.x, grid.size.width):
+      grid.cells[P(x=x,y=y)] = BOX_MAPPING[grid.cells.get(P(x=x,y=y),'.')]
+
+  dump_grid(grid)
+        
+  return len([x for x in grid.cells.values() if x == 'I'])
 
 print()
 print('Star 2:',star_2("sample_7.txt","F"))
@@ -204,64 +200,84 @@ print('Star 2:',star_2("sample.txt","F"))
 print('Star 2:',star_2("sample_8.txt","F"))
 print('Star 2:',star_2("sample_3.txt","F"))
 print('Star 2:',star_2("sample_5.txt","F"))
-#print('Star 2:',star_2("sample_4.txt","F"))
+print('Star 2:',star_2("sample_4.txt","F"))
 #+END_SRC
 
 #+RESULTS:
 #+begin_example
 
-Starting at x=1 y=1 z=0
-......
-.OOOO.
-.OF7O.
-.OLJO.
-.OOOO.
-......
+Starting at x=-1 y=-1
+OOOOOO.
+OOOOOO.
+OO┌┐OO.
+OO└┘OO.
+OOOOOO.
+OOOOO!.
+.......
 Star 2: 0
-Starting at x=1 y=1 z=0
-.......
-.OOOOO.
-.OF-7O.
-.O|.|O.
-.OL-JO.
-.OOOOO.
-.......
+Starting at x=-1 y=-1
+OOOOOOO.
+OOOOOOO.
+OO┌─┐OO.
+OO│I│OO.
+OO└─┘OO.
+OOOOOOO.
+OOOOOO!.
+........
 Star 2: 1
-Starting at x=1 y=1 z=0
-........
-.OOOOOO.
-.OF--7O.
-.O|..|O.
-.OL--JO.
-.OOOOOO.
-........
+Starting at x=-1 y=-1
+OOOOOOOO.
+OOOOOOOO.
+OO┌──┐OO.
+OO│II│OO.
+OO└──┘OO.
+OOOOOOOO.
+OOOOOOO!.
+.........
 Star 2: 2
-Starting at x=1 y=1 z=0
-.............
-.OOOOOOOOOOO.
-.OF-------7O.
-.O|F-----7|O.
-.O||OOOOO||O.
-.O||OOOOO||O.
-.O|L-7OF-J|O.
-.O|..|O|..|O.
-.OL--JOL--JO.
-.OOOOOOOOOOO.
+Starting at x=-1 y=-1
+OOOOOOOOOOOOO.
+OOOOOOOOOOOOO.
+OO┌───────┐OO.
+OO│┌─────┐│OO.
+OO││OOOOO││OO.
+OO││OOOOO!│OO.
+OO│└─┐O┌─┘│OO.
+OO│II│O│II│OO.
+OO└──┘O└──┘OO.
+OOOOOOOOOOOOO.
+OOOOOOOOOOOOO.
+..............
+Star 2: 4
+Starting at x=-1 y=-1
+OOOOOOOOOOOO.
+OOOOOOOOOOOO.
+OO┌──────┐OO.
+OO│┌────┐│OO.
+OO││OOOO││OO.
+OO││OOOO!│OO.
+OO│└─┐┌─┘│OO.
+OO│II││II│OO.
+OO└──┘└──┘OO.
+OOOOOOOOOOOO.
+OOOOOOOOOOOO.
 .............
 Star 2: 4
-Starting at x=1 y=1 z=0
-............
-.OOOOOOOOOO.
-.OF------7O.
-.O|F----7|O.
-.O||....||O.
-.O||....||O.
-.O|L-7F-J|O.
-.O|..||..|O.
-.OL--JL--JO.
-.OOOOOOOOOO.
-............
-Star 2: 12
+Starting at x=-1 y=-1
+OOOOOOOOOOOOOOOOOOOOOO.
+OO┌────┐┌┐┌┐┌┐┌─┐OOOOO.
+OO│┌──┐││││││││┌┘OOOOO.
+OO││I┌┘││││││││└┐OOOOO.
+O┌┘└┐└┐└┘└┘││└┘I└─┐OOO.
+O└──┘I└┐OOO└┘┌┐┌─┐└┐OO.
+OOOOO┌─┘OO┌┐┌┘│└┐└┐└┐O.
+OOOOO└┐I┌┐││└┐│I└┐└┐│O.
+OOOOOO│┌┘└┘│┌┘│┌┐│O└┘O.
+OOOOO┌┘└─┐O││O││││OOOO.
+OOOOO└───┘O└┘O└┘└┘OOOO.
+OOOOOOOOOOOOOOOOOOOOO!.
+.......................
+Star 2: 5
 #+end_example
 
 #+begin_example
