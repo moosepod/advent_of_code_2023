@@ -24,6 +24,9 @@ class Part(BaseModel):
     a: int
     s: int
 
+    def rating(self):
+        return self.x + self.m + self.a + self.s
+    
 class Filter(BaseModel):
     field: str
     operator: str
@@ -95,24 +98,21 @@ def load(path: str) -> tuple[list[Part], dict[str,Workflow]]:
     return parts, workflows
 
 def star_1(path: str) -> int:
+  accepted = 0
   with open(path,'r') as f:
       parts, workflows = load(path)
       for p in parts:
-          print(p,process_workflows(p,workflows))
+          if process_workflows(p,workflows):
+              accepted += p.rating()
 
-  return 0
+  return accepted
   
-print("Star 1:",star_1("sample.txt"))
+print("Star 1:",star_1("input.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-: x=787 m=2655 a=1222 s=2876 True
-: x=1679 m=44 a=2067 s=496 False
-: x=2036 m=264 a=79 s=2244 True
-: x=2461 m=1339 a=466 s=291 False
-: x=2127 m=1623 a=2188 s=1013 True
-: Star 1: 0
+: Star 1: 323625
 
 ** Day 19 star 2
 *** Problem statement
