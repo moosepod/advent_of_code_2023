@@ -38,6 +38,7 @@ class Polygon(BaseModel):
         j = len(self.verticies)-1
 
         for i in range(0,len(self.verticies)):
+            # Subtract 1 for special case of day10 where the pipes are zero width
             area += (self.verticies[j].x + self.verticies[i].x) * (self.verticies[j].y - self.verticies[i].y);
             j = i
             

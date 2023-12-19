@@ -1,0 +1,114 @@
+
+* AOC 2023 Day 19
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Day 19 star 1
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+import re
+from pydantic import BaseModel
+
+class Part(BaseModel):
+    x: int
+    m: int
+    a: int
+    s: int
+
+class Filter(BaseModel):
+    field: str
+    operator: str
+    v: int
+
+class Rule(BaseModel):
+    filter: Filter | None = None
+    action: str 
+
+class Workflow(BaseModel):
+    name: str
+    rules: list[Rule]
+
+def load(path: str) -> tuple[list[Part], list[Workflow]]:
+    parts = []
+    workflows = []
+
+    for line in open(path).read().split("\n"):
+        if line.strip():
+            m = re.match(r"^{x=(\d+),m=(\d+),a=(\d+),s=(\d+)}$",line.strip())
+            if m:
+                parts.append(Part(x=int(m.group(1)),m=int(m.group(2)),a=int(m.group(3)),s=int(m.group(4))))
+            else:
+                m = re.match(r"^(\w+){(.+)}$",line.strip())
+                if m:
+                    workflow = Workflow(name=m.group(1),rules=[])
+                    workflow_parts = m.group(2).split(",")
+
+                    for rule_s in workflow_parts[0:-1]:
+                        m = re.match(r"^(\w+)([<>])(\d+):(\w+)$", rule_s)
+                        if not m:
+                            raise Exception("Unparseable workflow")
+                        workflow.rules.append(Rule(action=m.group(4),filter=Filter(field=m.group(1), operator=m.group(2),v=int(m.group(3)))))
+
+                    workflow.rules.append(Rule(action=workflow_parts[-1]))
+                    workflows.append(workflow)
+                else:
+                    raise Exception(f"Unhandled line {line}")
+        
+    return parts, workflows
+
+def star_1(path: str) -> int:
+  with open(path,'r') as f:
+      parts, workflows = load(path)
+      for p in parts:
+          print(p)
+      for w in workflows:
+          print(w)
+
+  return 0
+  
+print("Star 1:",star_1("sample.txt"))
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+x=787 m=2655 a=1222 s=2876
+x=1679 m=44 a=2067 s=496
+x=2036 m=264 a=79 s=2244
+x=2461 m=1339 a=466 s=291
+x=2127 m=1623 a=2188 s=1013
+name='px' rules=[Rule(filter=Filter(field='a', operator='<', v=2006), action='qkq'), Rule(filter=Filter(field='m', operator='>', v=2090), action='A'), Rule(filter=None, action='rfg')]
+name='pv' rules=[Rule(filter=Filter(field='a', operator='>', v=1716), action='R'), Rule(filter=None, action='A')]
+name='lnx' rules=[Rule(filter=Filter(field='m', operator='>', v=1548), action='A'), Rule(filter=None, action='A')]
+name='rfg' rules=[Rule(filter=Filter(field='s', operator='<', v=537), action='gd'), Rule(filter=Filter(field='x', operator='>', v=2440), action='R'), Rule(filter=None, action='A')]
+name='qs' rules=[Rule(filter=Filter(field='s', operator='>', v=3448), action='A'), Rule(filter=None, action='lnx')]
+name='qkq' rules=[Rule(filter=Filter(field='x', operator='<', v=1416), action='A'), Rule(filter=None, action='crn')]
+name='crn' rules=[Rule(filter=Filter(field='x', operator='>', v=2662), action='A'), Rule(filter=None, action='R')]
+name='in' rules=[Rule(filter=Filter(field='s', operator='<', v=1351), action='px'), Rule(filter=None, action='qqz')]
+name='qqz' rules=[Rule(filter=Filter(field='s', operator='>', v=2770), action='qs'), Rule(filter=Filter(field='m', operator='<', v=1801), action='hdj'), Rule(filter=None, action='R')]
+name='gd' rules=[Rule(filter=Filter(field='a', operator='>', v=3333), action='R'), Rule(filter=None, action='R')]
+name='hdj' rules=[Rule(filter=Filter(field='m', operator='>', v=838), action='A'), Rule(filter=None, action='pv')]
+Star 1: 0
+#+end_example
+
+** Day 19 star 2
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+def star_2(path: str) -> int:
+  with open(path,'r') as f:
+     pass
+  return 0
+  
+print("Star 2:", star_2("sample.txt"))
+#+END_SRC
+
