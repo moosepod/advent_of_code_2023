@@ -58,7 +58,18 @@ def make_pulse(source: str, dest: str, p: bool) -> Pulse:
     debug_pulse(pulse)
     return pulse
 
-class Broadcast(BaseModel):
+
+class NodeMixin:
+    def dump(self, modules: dict, seen: dict):
+        if hasattr(self,"destinations"):
+            for d in self.destinations:
+                print(f"{self.name}>{d}")
+                if not seen.get(d):
+                    seen[d] = True
+                    modules[d].dump(modules, seen)
+                    
+                
+class Broadcast(BaseModel, NodeMixin):
     destinations: list
     name: str
 
@@ -66,8 +77,10 @@ class Broadcast(BaseModel):
         for d in self.destinations:
             queue.put(make_pulse(self.name, d, pulse.p))
 
+         
 
-class FlipFlop(BaseModel):
+
+class FlipFlop(BaseModel, NodeMixin):
     destinations: list
     state: bool = False
     name: str
@@ -82,8 +95,11 @@ class FlipFlop(BaseModel):
                 self.state = True
                 for d in self.destinations:
                     queue.put(make_pulse(self.name, d, True))
-           
-class Conjunction(BaseModel):
+
+    def get_state(self) -> bool:
+       return self.state
+   
+class Conjunction(BaseModel,NodeMixin):
     inputs: dict[str,bool]
     destinations: list
     name: str
@@ -93,14 +109,18 @@ class Conjunction(BaseModel):
         b = not len([x for x in self.inputs.values() if x == True]) == len(self.inputs)
         for d in self.destinations: 
            queue.put(make_pulse(self.name, d, b))
-                        
-class Output(BaseModel):
-    result: bool | None = None
 
+    def get_state(self) -> bool:
+       return len([x for x in self.inputs.values() if x == True]) == len(self.inputs)
+
+class Output(BaseModel,NodeMixin):
+    result: bool | None = None
+    name: str = "output"
+    
     def tick(self, pulse: Pulse, modules: dict, queue: Queue):
         self.result = pulse.p
 
-class Target(BaseModel):
+class Target(BaseModel,NodeMixin):
     name: str
     
     def tick(self, pulse: Pulse, modules: dict, queue: Queue):
@@ -163,23 +183,49 @@ def star_1(path: str) -> int:
      for i in range(0,1000):
          b.press()
   return pulse_count_high,pulse_count_low,pulse_count_low*pulse_count_high
-  
-print("Star 1:",star_1("input.txt"))
+
+def star_2(path: str) -> int:
+  global pulse_count_high
+  global pulse_count_low
+  pulse_count_high = 0
+  pulse_count_low = 0
+
+  # Key nodes (from looking at graph)
+  # qq->ft->xm
+  # jc->sv->xm
+  # fj->jz->xm
+  # vm->ng->xm
+  watched = ["qq","jc","fj","vm","gv"]
+  with open(path,'r') as f:
+     b = load(path)
+     swaps = {}
+
+     states = {m.name: m.get_state() for m in b.modules.values() if hasattr(m, "get_state")}
+     
+     for i in range(0,10000):
+         b.press()
+         for m in b.modules.values():
+             if hasattr(m,"get_state"):
+                 ns = m.get_state()
+                 if ns != states[m.name]:
+                     if not swaps.get(m.name):
+                         swaps[m.name] = []
+                         swaps[m.name].append(i)
+                         states[m.name] = ns
+
+     for k,v in swaps.items():
+         if k in watched:
+             print(k,[v[i] - v[i-1] for i in range(1,len(v))][-20:-1])
+
+     #b.modules["broadcaster"].dump(b.modules,{})
+
+  return pulse_count_high,pulse_count_low,pulse_count_low*pulse_count_high
+ 
+print("Star 2:",star_2("input.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-: Star 1: (45824, 17198, 788081152)
-
-** Day 20 star 2
-*** Problem statement
-*** Solution
-#+BEGIN_SRC python :results output
-def star_2(path: str) -> int:
-  with open(path,'r') as f:
-     pass
-  return 0
-  
-print("Star 2:", star_2("sample.txt"))
-#+END_SRC
+: gv []
+: Star 2: (459560, 172602, 79320975120)
 
