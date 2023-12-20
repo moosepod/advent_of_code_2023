@@ -202,7 +202,7 @@ def star_2(path: str) -> int:
 
      states = {m.name: m.get_state() for m in b.modules.values() if hasattr(m, "get_state")}
      
-     for i in range(0,10000):
+     for i in range(0,100000):
          b.press()
          for m in b.modules.values():
              if hasattr(m,"get_state"):
@@ -227,5 +227,5 @@ print("Star 2:",star_2("input.txt"))
 
 #+RESULTS:
 : gv []
-: Star 2: (459560, 172602, 79320975120)
+: Star 2: (45970964, 17268074, 793830008203336)
 
