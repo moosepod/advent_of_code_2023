@@ -89,17 +89,38 @@ def star_1(path: str) -> int:
   with open(path,'r') as f:
      grid = load_grid(path)
 
-     p = C(p=P(), v=P())
+     p = P()
      t = P(x=grid.size.width-1,y=grid.size.height-1)
+     path = {p: "x" for p in grid.bfs_pathfind(p,t)}
 
+     dump_grid(grid, path)
+          
      visited = {}
-     return find_target(grid,p,t, visited)
+     #return find_target(grid,p,t, visited)
+     return 0
   
-print("Star 1:",star_1("input.txt"))
+print("Star 1:",star_1("sample.txt"))
 
 #+END_SRC
 
 #+RESULTS:
+#+begin_example
+x413432311323
+x215453535623
+x255245654254
+x446585845452
+x546657867536
+x438598798454
+x457876987766
+x637877979653
+x654967986887
+x564679986453
+x224686865563
+x546548887735
+xxxxxxxxxxxx3
+
+Star 1: 0
+#+end_example
 
 *** 
 

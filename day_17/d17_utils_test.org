@@ -20,17 +20,20 @@ from d17_utils import Grid, load_grid, dump_grid, P, load_grid_from_str
 
 def find_path(s: str, debug=True) -> list[P]:
     g = load_grid_from_str(s)
+    g.blocked = [1]
     start = g.find_first_value(2)
     end = g.find_first_value(3)
 
     if debug:
         print(f'Find path from {start} to {end}')
 
-    for p in g.bfs_pathfind(start,end):
+    path = g.bfs_pathfind(start,end)
+    for p in path:
         if p:
             g.cells[p] = "x"
 
     dump_grid(g,{})
+    return(path)
 
 # Clear
 print(find_path("""
@@ -62,6 +65,16 @@ print(find_path("""
 11111111
 """))
 
+# Check bounds
+print(find_path("""
+00000000
+00001000
+00121010
+00111003
+00000010
+00000000
+"""))
+
 # Blocked
 print(find_path("""
 11111111
@@ -85,7 +98,7 @@ Find path from x=3 y=2 to x=7 y=3
 10000001
 11111111
 
-None
+[P(x=6, y=3), P(x=5, y=3), P(x=4, y=3), P(x=3, y=3), P(x=3, y=2), None]
 Find path from x=3 y=2 to x=7 y=3
 11111111
 10001001
@@ -94,7 +107,7 @@ Find path from x=3 y=2 to x=7 y=3
 100xxx01
 11111111
 
-None
+[P(x=6, y=3), P(x=5, y=3), P(x=5, y=4), P(x=4, y=4), P(x=3, y=4), P(x=3, y=3), P(x=3, y=2), None]
 Find path from x=3 y=2 to x=7 y=3
 11111111
 1xxx1001
@@ -103,7 +116,16 @@ Find path from x=3 y=2 to x=7 y=3
 1xxxxx11
 11111111
 
-None
+[P(x=6, y=3), P(x=5, y=3), P(x=5, y=4), P(x=4, y=4), P(x=3, y=4), P(x=2, y=4), P(x=1, y=4), P(x=1, y=3), P(x=1, y=2), P(x=1, y=1), P(x=2, y=1), P(x=3, y=1), P(x=3, y=2), None]
+Find path from x=3 y=2 to x=7 y=3
+000xxx00
+000x1x00
+001x1x10
+00111xx3
+00000010
+00000000
+
+[P(x=6, y=3), P(x=5, y=3), P(x=5, y=2), P(x=5, y=1), P(x=5, y=0), P(x=4, y=0), P(x=3, y=0), P(x=3, y=1), P(x=3, y=2), None]
 Find path from x=3 y=2 to x=7 y=3
 11111111
 10001001
@@ -112,5 +134,5 @@ Find path from x=3 y=2 to x=7 y=3
 10001001
 11111111
 
-None
+[]
 #+end_example

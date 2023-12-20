@@ -84,9 +84,10 @@ END = 3
 class Grid(BaseModel):
     size: S
     cells: dict[P, int]
+    blocked: list
 
     def is_blocked(self, p: P) -> bool:
-        return self.cells.get(p,0) not in (EMPTY,END)
+        return self.cells.get(p,0) in self.blocked or not self.in_bounds(p)
 
     def neighbors(self,p: P) -> list[P]:
         for d in (UP,DOWN,LEFT,RIGHT):
@@ -122,7 +123,8 @@ class Grid(BaseModel):
         return path
         
     def bfs_pathfind(self, start: P, end: P) -> list[P]:
-        """ Look for path from start to end. If found, return it """
+        """ Look for path from start to end. If found, return it.
+            Uses early exit."""
         frontier = Queue()
         frontier.put(start.clone())
         came_from = dict()
@@ -173,7 +175,7 @@ def load_grid_from_str(s: str) -> Grid:
           cells[p] = int(col)
         y+=1
 
-  return Grid(size=S(width=width,height=height),cells=cells)
+  return Grid(size=S(width=width,height=height),cells=cells, blocked=[])
 
 def dump_grid_s(grid: Grid, path: dict) -> str:
   s = ""
