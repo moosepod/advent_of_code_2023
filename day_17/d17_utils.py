@@ -17,6 +17,9 @@ class P(BaseModel):
     def __mul__(self,value):
         # Assume multiplying by int
         return P(x=self.x*value, y=self.y*value)
+
+    def __lt__(self,value):
+        return self.x < value.x or self.y < value.y
     
     def __eq__(self, value):
         return self.x == value.x and self.y == value.y
@@ -81,7 +84,24 @@ DOWN=P(x=0,y=1)
 EMPTY = 0
 END = 3
 
+import heapq
+
+class PriorityQueue:
+    """ From https://www.redblobgames.com/pathfinding/a-star/implementation.html#python-dijkstra """
+    def __init__(self):
+        self.elements: list[tuple[float, T]] = []
+    
+    def empty(self) -> bool:
+        return not self.elements
+    
+    def put(self, item: P, priority: float):
+        heapq.heappush(self.elements, (priority, item))
+    
+    def get(self) -> P:
+        return heapq.heappop(self.elements)[1]
+
 class Grid(BaseModel):
+    """ Pathfinding adapted from https://www.redblobgames.com/pathfinding/a-star/introduction.html """
     size: S
     cells: dict[P, int]
     blocked: list
@@ -121,7 +141,29 @@ class Grid(BaseModel):
             p = came_from[p]
 
         return path
-        
+
+    def dijkstra_pathfind(self, start: P, end: P) -> list[P]:
+        """ Look for path from start to end using a modified dijkstra (uniform cost search) """
+        frontier = PriorityQueue()
+        frontier.put(start, 0)
+        came_from = {start: None}
+        cost_so_far = {start: 0}
+
+        while not frontier.empty():
+            current = frontier.get()
+
+            if current == end:
+                return self.find_path(came_from, end)
+
+            for n in self.neighbors(current):
+                new_cost = cost_so_far[current] + self.cells.get(n,0)
+                if n not in cost_so_far or new_cost < cost_so_far[n]:
+                    cost_so_far[n] = new_cost
+                    frontier.put(n, new_cost)
+                    came_from[n] = current
+
+        return []
+    
     def bfs_pathfind(self, start: P, end: P) -> list[P]:
         """ Look for path from start to end. If found, return it.
             Uses early exit."""

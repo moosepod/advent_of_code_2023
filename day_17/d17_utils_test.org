@@ -9,9 +9,6 @@
 : t
 
 ** Testing breadth first search
-
-- [ ] Do a basic BFS
-- [ ] Rework to handle grid going into negative space
   
 #+BEGIN_SRC python :results output
 import re
@@ -135,4 +132,171 @@ Find path from x=3 y=2 to x=7 y=3
 11111111
 
 []
+#+end_example
+
+** Testing Dijkstra
+  
+#+BEGIN_SRC python :results output
+import re
+from pydantic import BaseModel
+from d17_utils import Grid, load_grid, dump_grid, P, load_grid_from_str
+
+def find_path(s: str, debug=True) -> list[P]:
+    g = load_grid_from_str(s)
+    g.blocked = [1]
+    start = g.find_first_value(2)
+    end = g.find_first_value(3)
+    g.cells[end] = 0
+    g.cells[start] = 0
+
+    if debug:
+        print(f'Find path from {start} to {end}')
+
+    path = g.dijkstra_pathfind(start,end)
+    for p in path:
+        if p:
+            g.cells[p] = "x"
+
+    dump_grid(g,{})
+    return('Dijsktra',len(path))
+
+# Clear
+print(find_path("""
+11111111
+10000001
+10020001
+10000003
+10000001
+11111111
+"""))
+
+# Almost blocked
+print(find_path("""
+11111111
+10001001
+10021001
+10001003
+10000001
+11111111
+"""))
+
+# Maze!
+print(find_path("""
+11111111
+10001001
+10121011
+10111003
+10000011
+11111111
+"""))
+
+# Check bounds
+print(find_path("""
+00000000
+00001000
+00121010
+00111003
+00000010
+00000000
+"""))
+
+# Blocked
+print(find_path("""
+11111111
+10001001
+10021001
+10001003
+10001001
+11111111
+"""))
+
+# Weights
+print(find_path("""
+99999999
+90445009
+90429009
+90600603
+90075009
+99999999
+"""))
+
+print(find_path("""
+00000000
+01456410
+01256410
+01456410
+01456413
+01456410
+00000000
+"""))
+
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Find path from x=3 y=2 to x=7 y=3
+11111111
+10000001
+100xx001
+1000xxx0
+10000001
+11111111
+
+('Dijsktra', 6)
+Find path from x=3 y=2 to x=7 y=3
+11111111
+10001001
+10xx1001
+10x01xx0
+10xxxx01
+11111111
+
+('Dijsktra', 10)
+Find path from x=3 y=2 to x=7 y=3
+11111111
+1xxx1001
+1x1x1011
+1x111xx0
+1xxxxx11
+11111111
+
+('Dijsktra', 14)
+Find path from x=3 y=2 to x=7 y=3
+000xxx00
+000x1x00
+001x1x10
+00111xx0
+00000010
+00000000
+
+('Dijsktra', 10)
+Find path from x=3 y=2 to x=7 y=3
+11111111
+10001001
+10001001
+10001000
+10001001
+11111111
+
+('Dijsktra', 0)
+Find path from x=3 y=2 to x=7 y=3
+99999999
+90445009
+904x9009
+906xx6x0
+9007xxx9
+99999999
+
+('Dijsktra', 8)
+Find path from x=2 y=2 to x=7 y=4
+00xxxxxx
+01x5641x
+01x5641x
+0145641x
+01456410
+01456410
+00000000
+
+('Dijsktra', 12)
 #+end_example
