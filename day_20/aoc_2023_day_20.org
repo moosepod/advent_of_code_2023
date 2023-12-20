@@ -1,0 +1,179 @@
+* AOC 2023 Day 20
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Day 20 star 1
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+import re
+from queue import Queue
+from pydantic import BaseModel
+
+DEBUG = False
+
+class Pulse(BaseModel):
+    source: str
+    dest: str
+    p: bool
+
+    def level(self):
+        if self.p:
+            return "high"
+
+        return "low"
+
+
+def map_pulse(p: bool) -> str:
+    if p:
+        return "high"
+
+    return "low"
+
+def debug_pulse(p: Pulse):
+    if DEBUG:
+        print(f"{p.source} -{p.level()}-> {p.dest}")
+
+pulse_count_high = 0
+pulse_count_low = 0
+
+def make_pulse(source: str, dest: str, p: bool) -> Pulse:
+    global pulse_count_high
+    global pulse_count_low
+
+    if p:
+        pulse_count_high+=1
+    else:
+        pulse_count_low += 1
+    
+    pulse = Pulse(source=source, dest=dest, p=p)
+    debug_pulse(pulse)
+    return pulse
+
+class Broadcast(BaseModel):
+    destinations: list
+    name: str
+
+    def tick(self, pulse: Pulse, modules: dict, queue: Queue):
+        for d in self.destinations:
+            queue.put(make_pulse(self.name, d, pulse.p))
+
+
+class FlipFlop(BaseModel):
+    destinations: list
+    state: bool = False
+    name: str
+
+    def tick(self, pulse: Pulse, modules: dict, queue: Queue):
+        if not pulse.p:
+            if self.state:
+                self.state = False
+                for d in self.destinations:
+                    queue.put(make_pulse(self.name, d, False))
+            else:
+                self.state = True
+                for d in self.destinations:
+                    queue.put(make_pulse(self.name, d, True))
+           
+class Conjunction(BaseModel):
+    inputs: dict[str,bool]
+    destinations: list
+    name: str
+
+    def tick(self, pulse: Pulse, modules: dict, queue: Queue):
+        self.inputs[pulse.source] = pulse.p
+        b = not len([x for x in self.inputs.values() if x == True]) == len(self.inputs)
+        for d in self.destinations: 
+           queue.put(make_pulse(self.name, d, b))
+                        
+class Output(BaseModel):
+    result: bool | None = None
+
+    def tick(self, pulse: Pulse, modules: dict, queue: Queue):
+        self.result = pulse.p
+    
+class Button(BaseModel):
+    broadcast: Broadcast
+    modules: dict
+
+    def press(self) -> int:
+        queue: Queue = Queue()
+        queue.put(make_pulse("button","broadcaster",False))
+
+        while not queue.empty():
+            pulse = queue.get()
+            if self.modules.get(pulse.dest):
+                self.modules[pulse.dest].tick(pulse, self.modules, queue)
+                  
+def load(path: str) -> Button:
+    modules: dict = {"output": Output()}
+    
+    with open(path) as f:
+        for line in f.read().split("\n"):
+            m = re.search(r"^(.)?(\w+) -> (.+)",line.strip())
+            if m:
+                module_type, module_name, destination_s = m.groups()
+                if module_type == "b":
+                    module_name = "broadcaster"
+                elif module_type == "o":
+                    module_name = "output"
+                destinations = destination_s.split(", ")
+                if module_type == "b":
+                    modules[module_name] = Broadcast(destinations=destinations, name=module_name)
+                elif module_type == "o":
+                    modules[module_name] = Output(name=module_name)
+                elif module_type == "o":
+                    modules[module_name] = Output(destinations=destinations,name=module_name)
+                elif module_type == "%":
+                    modules[module_name] = FlipFlop(destinations=destinations,state=False,name=module_name, pulses={})
+                elif module_type == "&":
+                    modules[module_name] = Conjunction(destinations=destinations,inputs={},name=module_name)
+
+        # Map inputs for conjuctions
+        for module in modules.values():
+            if hasattr(module,"destinations"):
+                for d in module.destinations:
+                    if modules.get(d) and hasattr(modules[d],"inputs"):
+                        modules[d].inputs[module.name] = False
+                    
+    return Button(broadcast=modules["broadcaster"], modules=modules)
+    
+def star_1(path: str) -> int:
+  global pulse_count_high
+  global pulse_count_low
+  pulse_count_high = 0
+  pulse_count_low = 0
+  
+  with open(path,'r') as f:
+     b = load(path)
+     for i in range(0,1000):
+         b.press()
+  return pulse_count_high,pulse_count_low,pulse_count_low*pulse_count_high
+  
+print("Star 1:",star_1("input.txt"))
+
+#+END_SRC
+
+#+RESULTS:
+: Star 1: (45824, 17198, 788081152)
+
+** Day 20 star 2
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+def star_2(path: str) -> int:
+  with open(path,'r') as f:
+     pass
+  return 0
+  
+print("Star 2:", star_2("sample.txt"))
+#+END_SRC
+
