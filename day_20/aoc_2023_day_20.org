@@ -99,7 +99,14 @@ class Output(BaseModel):
 
     def tick(self, pulse: Pulse, modules: dict, queue: Queue):
         self.result = pulse.p
+
+class Target(BaseModel):
+    name: str
     
+    def tick(self, pulse: Pulse, modules: dict, queue: Queue):
+        if not pulse.p:
+            raise Exception("target",self.name,"reached")
+        
 class Button(BaseModel):
     broadcast: Broadcast
     modules: dict
@@ -110,11 +117,10 @@ class Button(BaseModel):
 
         while not queue.empty():
             pulse = queue.get()
-            if self.modules.get(pulse.dest):
-                self.modules[pulse.dest].tick(pulse, self.modules, queue)
+            self.modules[pulse.dest].tick(pulse, self.modules, queue)
                   
 def load(path: str) -> Button:
-    modules: dict = {"output": Output()}
+    modules: dict = {"output": Output(), "rx": Target(name="rx")}
     
     with open(path) as f:
         for line in f.read().split("\n"):
@@ -141,7 +147,7 @@ def load(path: str) -> Button:
         for module in modules.values():
             if hasattr(module,"destinations"):
                 for d in module.destinations:
-                    if modules.get(d) and hasattr(modules[d],"inputs"):
+                    if hasattr(modules[d],"inputs"):
                         modules[d].inputs[module.name] = False
                     
     return Button(broadcast=modules["broadcaster"], modules=modules)
