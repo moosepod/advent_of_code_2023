@@ -91,13 +91,11 @@ def star_1(path: str) -> int:
 
      p = P()
      t = P(x=grid.size.width-1,y=grid.size.height-1)
-     path = {p: "x" for p in grid.dijkstra_pathfind(p,t)}
+     path = {p: "x" for p in grid.dijkstra_pathfind_with_max(p,t,max_d=4)}
+     print(path)
 
      dump_grid(grid, path)
-          
-     visited = {}
-     #return find_target(grid,p,t, visited)
-     return 0
+     return sum([grid.cells.get(p,0) for p in path.keys()]) - grid.cells[p]
   
 print("Star 1:",star_1("sample.txt"))
 
@@ -105,21 +103,22 @@ print("Star 1:",star_1("sample.txt"))
 
 #+RESULTS:
 #+begin_example
-xxxxxxxxxxxx3
-32154535356xx
-325524565425x
-344658584545x
-454665786753x
-143859879845x
-445787698776x
-363787797965x
-465496798688x
-456467998645x
-122468686556x
-254654888773x
-4322674655533
+{P(x=11, y=12): 'x', P(x=11, y=11): 'x', P(x=11, y=10): 'x', P(x=10, y=10): 'x', P(x=10, y=9): 'x', P(x=10, y=8): 'x', P(x=10, y=7): 'x', P(x=11, y=7): 'x', P(x=11, y=6): 'x', P(x=11, y=5): 'x', P(x=11, y=4): 'x', P(x=10, y=4): 'x', P(x=10, y=3): 'x', P(x=10, y=2): 'x', P(x=9, y=2): 'x', P(x=9, y=1): 'x', P(x=8, y=1): 'x', P(x=8, y=0): 'x', P(x=7, y=0): 'x', P(x=6, y=0): 'x', P(x=5, y=0): 'x', P(x=5, y=1): 'x', P(x=4, y=1): 'x', P(x=3, y=1): 'x', P(x=2, y=1): 'x', P(x=2, y=0): 'x', P(x=1, y=0): 'x', P(x=0, y=0): 'x', None: 'x'}
+xxx34xxxx1323
+32xxxx35xx623
+325524565xx54
+3446585845x52
+4546657867xx6
+14385987984x4
+44578769877x6
+3637877979xx3
+4654967986x87
+4564679986x53
+1224686865xx3
+25465488877x5
+43226746555x3
 
-Star 1: 0
+Star 1: 106
 #+end_example
 
 *** 

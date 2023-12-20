@@ -14,6 +14,10 @@ class P(BaseModel):
         # Assume adding a P
         return P(x=self.x+value.x, y=self.y+value.y)
 
+    def __sub__(self, value):
+        # Assume adding a P
+        return P(x=self.x-value.x, y=self.y-value.y)
+
     def __mul__(self,value):
         # Assume multiplying by int
         return P(x=self.x*value, y=self.y*value)
@@ -113,6 +117,19 @@ class Grid(BaseModel):
         for d in (UP,DOWN,LEFT,RIGHT):
             if not self.is_blocked(p + d):
                 yield p + d
+
+    def neighbors_with_max(self,p: P,came_from: dict, max_d: int) -> list[P]:
+        for d in (UP,DOWN,LEFT,RIGHT):
+            if not self.is_blocked(p + d):
+                path_sum = P()
+                t = p
+                for i in range(0,max_d):
+                    if came_from.get(t):
+                        path_sum += t - came_from.get(t)
+                        t = came_from.get(t)
+
+                if abs(path_sum.x) < max_d and abs(path_sum.y) < max_d:
+                    yield p + d
     
     def bfs(self, start: P, end: P) -> list[P]:
         """ Look for path from start to end. If end reached, return it """
@@ -163,7 +180,31 @@ class Grid(BaseModel):
                     came_from[n] = current
 
         return []
-    
+
+    def dijkstra_pathfind_with_max(self, start: P, end: P,max_d:int ) -> list[P]:
+        """ Look for path from start to end using a modified dijkstra (uniform cost search)
+        Modified so max_d steps in a straight line counts as blocked
+        """
+        frontier = PriorityQueue()
+        frontier.put(start, 0)
+        came_from = {start: None}
+        cost_so_far = {start: 0}
+
+        while not frontier.empty():
+            current = frontier.get()
+
+            if current == end:
+                return self.find_path(came_from, end)
+
+            for n in self.neighbors_with_max(current, came_from, max_d):
+                new_cost = cost_so_far[current] + self.cells.get(n,0)
+                if n not in cost_so_far or new_cost < cost_so_far[n]:
+                    cost_so_far[n] = new_cost
+                    frontier.put(n, new_cost)
+                    came_from[n] = current
+
+        return []
+
     def bfs_pathfind(self, start: P, end: P) -> list[P]:
         """ Look for path from start to end. If found, return it.
             Uses early exit."""
