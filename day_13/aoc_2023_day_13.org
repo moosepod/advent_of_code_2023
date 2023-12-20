@@ -109,12 +109,56 @@ def star_1(path: str) -> int:
   
   return total
   
-print("Star 1:",star_1("input.txt"))
+#print("Star 1:",star_1("input.txt"))
 
+def flip_point(grid: Grid, p: P):
+    if grid.cells[p] == '.':
+        grid.cells[p] = '#'
+    else:
+        grid.cells[p] = '.'
+
+def unsmudge(grid: Grid, v: int, h: int):
+    for x in range(0,grid.size.width):
+        for y in range(0, grid.size.height):
+            flip_point(grid,P(x=x,y=y))
+
+            nv = max(find_vertical(grid))
+            nh = max(find_horizontal(grid))
+            
+            flip_point(grid,P(x=x,y=y))
+
+            if nv != v or nh != nh:
+                return nv,nh
+    return v,h
+    
+def star_2(path: str) -> int:
+  total = 0
+  with open(path,'r') as f:
+    grids = [load_grid_from_str(s) for s in f.read().split("\n\n") if len(s.strip())]
+
+    for idx,grid in enumerate(grids):
+        #dump_grid(grid)
+        old_total = total
+
+        v = max(find_vertical(grid))
+        h = max(find_horizontal(grid))
+
+        v, h = unsmudge(grid, v, h)
+
+        total += v
+        total += h * 100
+
+        if total == old_total:
+            print('Nothing found for',idx)
+  
+  return total
+
+print("Star 2:",star_2("sample.txt"))
 #+END_SRC
 
 #+RESULTS:
-: Star 1: 39939
+: Nothing found for 0
+: Star 2: 400
 
 ** First result -- this is too low
 : Star 1: 800
@@ -123,19 +167,4 @@ print("Star 1:",star_1("input.txt"))
 
 ** Too low
 17973
-
-** Day 13 star 2
-*** Problem statement
-*** Solution
-#+BEGIN_SRC python :results output
-def star_2(path: str) -> int:
-  with open(path,'r') as f:
-     pass
-  return 0
-  
-print("Star 2:", star_2("sample.txt"))
-#+END_SRC
-
-#+RESULTS:
-: Star 2: 0
 
