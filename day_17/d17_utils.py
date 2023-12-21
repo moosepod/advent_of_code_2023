@@ -128,7 +128,7 @@ class Grid(BaseModel):
                         path_sum += t - came_from.get(t)
                         t = came_from.get(t)
 
-                if abs(path_sum) < max_d and abs(path_sum.y) < max_d:
+                if abs(path_sum.x) < max_d and abs(path_sum.y) < max_d:
                     yield p + d
     
     def bfs(self, start: P, end: P) -> list[P]:
@@ -181,7 +181,7 @@ class Grid(BaseModel):
 
         return []
 
-    def dijkstra_pathfind_with_max(self, start: P, end: P,max_d:int ) -> list[P]:
+    def dijkstra_pathfind_with_max(self, start: P, end: P,max_d:int ) -> list[P] | None:
         """ Look for path from start to end using a modified dijkstra (uniform cost search)
         Modified so max_d steps in a straight line counts as blocked
         """
@@ -195,7 +195,7 @@ class Grid(BaseModel):
 
             if current == end:
                 return self.find_path(came_from, end)
-
+            
             for n in self.neighbors_with_max(current, came_from, max_d):
                 new_cost = cost_so_far[current] + self.cells.get(n,0)
                 if n not in cost_so_far or new_cost < cost_so_far[n]:
@@ -203,7 +203,7 @@ class Grid(BaseModel):
                     frontier.put(n, new_cost)
                     came_from[n] = current
 
-        return []
+        return None
 
     def bfs_pathfind(self, start: P, end: P) -> list[P]:
         """ Look for path from start to end. If found, return it.

@@ -184,7 +184,7 @@ def star_2(path: str, start_char: str) -> int:
   grid.start = P(x=-1,y=-1)
   grid.size.width += 1
   grid.size.height += 1
-  grid.flood_fill(P(),'O')
+  grid.flood_fill(P(),'O',96)
 
   for y in range(grid.start.y, grid.size.height):
     for x in range(grid.start.x, grid.size.width):
@@ -195,11 +195,11 @@ def star_2(path: str, start_char: str) -> int:
   return len([x for x in grid.cells.values() if x == 'I'])
 
 print()
-print('Star 2:',star_2("sample_7.txt","F"))
-print('Star 2:',star_2("sample.txt","F"))
-print('Star 2:',star_2("sample_8.txt","F"))
-print('Star 2:',star_2("sample_3.txt","F"))
-print('Star 2:',star_2("sample_5.txt","F"))
+#print('Star 2:',star_2("sample_7.txt","F"))
+#print('Star 2:',star_2("sample.txt","F"))
+#print('Star 2:',star_2("sample_8.txt","F"))
+#print('Star 2:',star_2("sample_3.txt","F"))
+#print('Star 2:',star_2("sample_5.txt","F"))
 print('Star 2:',star_2("sample_4.txt","F"))
 #+END_SRC
 
@@ -207,77 +207,20 @@ print('Star 2:',star_2("sample_4.txt","F"))
 #+begin_example
 
 Starting at x=-1 y=-1
-OOOOOO.
-OOOOOO.
-OO┌┐OO.
-OO└┘OO.
-OOOOOO.
-OOOOO!.
-.......
-Star 2: 0
-Starting at x=-1 y=-1
-OOOOOOO.
-OOOOOOO.
-OO┌─┐OO.
-OO│I│OO.
-OO└─┘OO.
-OOOOOOO.
-OOOOOO!.
-........
-Star 2: 1
-Starting at x=-1 y=-1
-OOOOOOOO.
-OOOOOOOO.
-OO┌──┐OO.
-OO│II│OO.
-OO└──┘OO.
-OOOOOOOO.
-OOOOOOO!.
-.........
-Star 2: 2
-Starting at x=-1 y=-1
-OOOOOOOOOOOOO.
-OOOOOOOOOOOOO.
-OO┌───────┐OO.
-OO│┌─────┐│OO.
-OO││OOOOO││OO.
-OO││OOOOO!│OO.
-OO│└─┐O┌─┘│OO.
-OO│II│O│II│OO.
-OO└──┘O└──┘OO.
-OOOOOOOOOOOOO.
-OOOOOOOOOOOOO.
-..............
-Star 2: 4
-Starting at x=-1 y=-1
-OOOOOOOOOOOO.
-OOOOOOOOOOOO.
-OO┌──────┐OO.
-OO│┌────┐│OO.
-OO││OOOO││OO.
-OO││OOOO!│OO.
-OO│└─┐┌─┘│OO.
-OO│II││II│OO.
-OO└──┘└──┘OO.
-OOOOOOOOOOOO.
-OOOOOOOOOOOO.
-.............
-Star 2: 4
-Starting at x=-1 y=-1
-OOOOOOOOOOOOOOOOOOOOOO.
-OO┌────┐┌┐┌┐┌┐┌─┐OOOOO.
-OO│┌──┐││││││││┌┘OOOOO.
-OO││I┌┘││││││││└┐OOOOO.
-O┌┘└┐└┐└┘└┘││└┘I└─┐OOO.
-O└──┘I└┐OOO└┘┌┐┌─┐└┐OO.
-OOOOO┌─┘OO┌┐┌┘│└┐└┐└┐O.
-OOOOO└┐I┌┐││└┐│I└┐└┐│O.
-OOOOOO│┌┘└┘│┌┘│┌┐│O└┘O.
-OOOOO┌┘└─┐O││O││││OOOO.
-OOOOO└───┘O└┘O└┘└┘OOOO.
-OOOOOOOOOOOOOOOOOOOOO!.
+OOOOOOOOOOOOOIIIIIIIII.
+OO┌────┐┌┐┌┐┌┐┌─┐IIIII.
+OO│┌──┐││││││││┌┘IIIII.
+OO││I┌┘│!││││││└┐IIIII.
+O┌┘└┐└┐└┘└┘││└┘I└─┐III.
+O└──┘I└┐III└┘┌┐┌─┐└┐II.
+OOOOO┌─┘II┌┐┌┘│└┐└┐└┐I.
+OOOOO└┐I┌┐││└┐│I└┐└┐│I.
+OOOOOI│┌┘└┘│┌┘│┌┐│I└┘I.
+OOOOI┌┘└─┐I││I││││IIII.
+OOOII└───┘I└┘I└┘└┘IIII.
+OOIIIIIIIIIIIIIIIIIIII.
 .......................
-Star 2: 5
+Star 2: 79
 #+end_example
 
 #+begin_example

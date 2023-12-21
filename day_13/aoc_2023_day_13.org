@@ -109,7 +109,7 @@ def star_1(path: str) -> int:
   
   return total
   
-#print("Star 1:",star_1("input.txt"))
+#print("Star 1:",star_1("sample_2.txt"))
 
 def flip_point(grid: Grid, p: P):
     if grid.cells[p] == '.':
@@ -122,16 +122,13 @@ def unsmudge(grid: Grid, v: int, h: int):
         for y in range(0, grid.size.height):
             flip_point(grid,P(x=x,y=y))
 
-            # need to fix this logic
-
             va = [x for x in find_vertical(grid) if x != v]
             ha = [x for x in find_horizontal(grid) if x != h]
             nv = va[0] if len(va) else 0
             nh = ha[0] if len(ha) else 0
-                
             flip_point(grid,P(x=x,y=y))
 
-            if (nv,nh) != (v,h):
+            if (nv or nh) and (nv,nh) != (v,h):
                 return nv,nh
 
     return v,h
@@ -149,7 +146,6 @@ def star_2(path: str) -> int:
         h = max(find_horizontal(grid))
 
         v, h = unsmudge(grid, v, h)
-        print(v,h)
         
         total += v
         total += h * 100
@@ -159,16 +155,11 @@ def star_2(path: str) -> int:
   
   return total
 
-print("Star 2:",star_2("sample.txt"))
+print("Star 2:",star_2("input.txt"))
 #+END_SRC
 
 #+RESULTS:
-: 0 3
-: 0 0
-: Nothing found for 1
-: Star 2: 300
 
 ** Too high
 : Star 2: 60169
-
-
+: Star 2: 32659

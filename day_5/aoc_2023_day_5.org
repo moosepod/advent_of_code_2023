@@ -636,11 +636,11 @@ def star_1(path: str):
             
     return min(seeds)
 
-return star_1("input.txt")
+return star_1("sample.txt")
 #+END_SRC
 
 #+RESULTS:
-: 346433842
+: 35
 
 ** Star 2 redux
 #+BEGIN_SRC python :results output
@@ -689,11 +689,11 @@ def star_2(path: str):
 
     return min([x.a for x in seeds])
 
-print(star_2("input.txt"))
+print(star_2("input_2.txt"))
 #+END_SRC
 
 #+RESULTS:
-: 87968960
+: 46
 
 
 ** not right
