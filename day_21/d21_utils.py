@@ -150,6 +150,24 @@ class Grid(BaseModel):
 
         return []
 
+    def bfs_distances(self, start: P) -> dict:
+        """ Look for path from start to end. If end reached, return it """
+        frontier = Queue()
+        frontier.put((start.clone(),0))
+        reached = set()
+        reached.add(start.clone())
+        distances = {}
+
+        while not frontier.empty():
+            p,d = frontier.get()
+            for n in self.neighbors(p):
+                if n not in reached:
+                    distances[n] = d+1
+                    frontier.put((n,d+1))
+                    reached.add(n)
+
+        return distances
+
     def bfs_max_distance(self, start: P, max_distance: int, at_distance: dict) -> int:
         """ Look for path from start to end. If end reached, return it. Stop after max distance. Return count. """
         frontier = Queue()

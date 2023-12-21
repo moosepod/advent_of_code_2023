@@ -23,31 +23,32 @@ def star_1(path: str, steps: int) -> int:
     grid = load_grid(path)
     grid.blocked = ["#"]
     start = grid.find_first_value("S")
-    at_distance={}
-    count = grid.bfs_max_distance(start, steps, at_distance)
+    distances = grid.bfs_distances(start)
+    
+    at_distance={p:"O" for p,v in distances.items() if v == steps}
     dump_grid(grid,at_distance)
 
-  return count
+  return len(at_distance)
   
-print("Star 1:",star_1("sample.txt",10))
+print("Star 1:",star_1("sample.txt",6))
 
 #+END_SRC
 
 #+RESULTS:
 #+begin_example
-O.....O.O.O
-.O...###.#.
-O###.##.O#O
-.O#O#O.O#O.
-O.O.#.#.O.O
-.##O.O####.
-O##.O#O.O#O
-.O.O.O.##..
-O##.#.####.
+...........
+.....###.#.
+.###.##.O#.
+.O#.#...#..
+O...#.#.O..
+.##..S####.
+.##..#O..#.
+.O.....##..
+.##.#.####.
 .##O.##.##.
-O.O.O.O....
+...........
 
-Star 1: 33
+Star 1: 7
 #+end_example
 
 ** Day 21 star 2
