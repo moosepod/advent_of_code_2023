@@ -118,6 +118,11 @@ class Grid(BaseModel):
             if not self.is_blocked(p + d):
                 yield p + d
 
+    def neighbors_with_direction(self,p: P) -> list[tuple[P,P]]:
+        for d in (UP,DOWN,LEFT,RIGHT):
+            if not self.is_blocked(p + d):
+                yield (p + d,d)
+
     def neighbors_with_max(self,p: P,came_from: dict, max_d: int) -> list[P]:
         for d in (UP,DOWN,LEFT,RIGHT):
             if not self.is_blocked(p + d):
@@ -156,6 +161,15 @@ class Grid(BaseModel):
         while p:
             path.append(came_from[p])
             p = came_from[p]
+
+        return path
+
+    def find_path_with_directions(self, came_from: dict, end: P) -> list[tuple[P,P]]:
+        p = end
+        path = []
+        while p:
+            path.append(came_from[p])
+            p,d = came_from[p]
 
         return path
 
@@ -270,6 +284,33 @@ class Grid(BaseModel):
                 
         return []
 
+    def a_star_with_max_straight(self, start: P, end: P, heuristic, max_straight: int) -> list[P]:
+        frontier = PriorityQueue()
+        frontier.put((start,RIGHT),0 )
+        came_from = {start: (None, None)}
+        cost_so_far = {start: 0}
+
+        while not frontier.empty():
+            current, current_d = frontier.get()
+
+            for n,d in self.neighbors_with_direction(current):
+                if n == end:
+                    came_from[n] = (current, d)
+                    return self.find_path_with_directions(came_from, end)
+
+                new_cost = cost_so_far[current] + self.cells[n]
+                if d == current_d:
+                    new_cost = 10000000
+                    
+                if n not in cost_so_far or new_cost < cost_so_far[n]:
+                    cost_so_far[n] = new_cost
+                    h_val = heuristic(end, n)
+                    priority = new_cost + h_val
+                    frontier.put((n,d),priority)
+                    came_from[n] = (current,d)
+                
+        return []
+
     def find_first_value(self, v: int) -> P | None:
         for y in range(0,self.size.height):
             for x in range(0,self.size.width):
@@ -319,3 +360,21 @@ def dump_grid(grid: Grid, path: dict):
 
 def manhattan_distance(p1: P, p2: P) -> int:
     return abs(p1.x -p2.x) + abs(p1.y - p2.y)
+
+def d_to_c(d: P) -> str:
+    if not d:
+        return 'x'
+    
+    if d == RIGHT:
+        return ">"
+
+    if d == LEFT:
+        return "<"
+
+    if d == UP:
+        return "^"
+
+    if d == DOWN:
+        return "v"
+
+    return "x"

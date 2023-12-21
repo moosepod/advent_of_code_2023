@@ -25,7 +25,7 @@ Nodes can be revisited
 import re
 import queue
 from pydantic import BaseModel
-from d17_utils import Grid, load_grid, dump_grid, P
+from d17_utils import Grid, load_grid, dump_grid, P, manhattan_distance, d_to_c
 
 D_INF = 10000000000
 
@@ -89,20 +89,35 @@ def star_1(path: str) -> int:
   with open(path,'r') as f:
      grid = load_grid(path)
 
-     p = P()
-     t = P(x=grid.size.width-1,y=grid.size.height-1)
-     path = {p: "x" for p in grid.dijkstra_pathfind_with_max(p,t,max_d=4)}
-     path[t] = "x"
-     print(path)
+     start = P()
+     end = P(x=grid.size.width-1,y=grid.size.height-1)
+     path = {p: d_to_c(d) for p,d in grid.a_star_with_max_straight(start,end, heuristic=manhattan_distance,max_straight=2)}
+     #print(path)
 
      dump_grid(grid, path)
      return sum([grid.cells.get(p,0) for p in path.keys()]) - grid.cells[p]
   
-print("Star 1:",star_1("sample_2.txt"))
+print("Star 1:",star_1("sample.txt"))
 
 #+END_SRC
 
 #+RESULTS:
+#+begin_example
+v413432311323
+>v15453535623
+3>v5245654254
+34>v585845452
+454>v57867536
+1438>v8798454
+44578>v987766
+363787>v79653
+4654967>v6887
+45646799>v453
+122468686>v63
+2546548887>v5
+43226746555>3
+
+#+end_example
 
 Star 1: 106
 #+end_example
