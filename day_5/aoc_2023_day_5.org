@@ -221,17 +221,33 @@ def load_data(path) -> Data:
       v.sort(key=lambda x:x.start)
     return Data(seeds=seeds,ranges=ranges, mappings=mappings)
 
-data = load_data("sample.txt")
+data = load_data("input.txt")
 #print(data.values())
 return data.values()
 #+END_SRC
 
 #+RESULTS:
-| Seed | Soil | Fertilizer | Water | Light | Temperature | Humidity | Location |
-|   79 |   81 |         81 |    81 |    74 |          78 |       78 |       82 |
-|   14 |   14 |         53 |    49 |    42 |          42 |       43 |       43 |
-|   55 |   57 |         57 |    53 |    46 |          82 |       82 |       86 |
-|   13 |   13 |         52 |    41 |    34 |          34 |       35 |       35 |
+|       Seed |       Soil | Fertilizer |      Water |      Light | Temperature |   Humidity |   Location |
+|  919339981 | 1207346789 |  347905731 | 1590062784 | 2626966462 |  2075442149 | 1928759079 | 1287215595 |
+|  562444630 | 2673932408 |  868203614 |  185404129 |  529679060 |   924776077 |  871288015 | 2210756272 |
+| 3366006921 | 3366006921 | 1463141451 |  954159079 |  187330696 |   582427713 | 1598187509 | 3615278925 |
+|   67827214 | 1563148127 | 3923332414 | 1998915529 | 1387168782 |  1788466234 | 1718052072 |  378361518 |
+| 1496677366 | 2372696839 |  566968045 | 3860617465 | 2522050512 |  1970526199 |  279188743 | 2716560539 |
+|  101156779 | 1596477692 | 3956661979 | 2032245094 | 1420498347 |  2205889165 |   71710860 | 4142405792 |
+| 4140591657 | 4140591657 | 2607378779 | 3443907209 | 3834172737 |  3738564780 | 3451943713 | 1013518473 |
+|    5858311 | 1501179224 | 3030484483 |  579005820 |  923280751 |  1127390324 | 2253112924 | 1653623890 |
+| 2566406753 | 2507699500 |  701970706 | 3995620126 | 2947115902 |  1345817919 |  402316681 | 2927978869 |
+|   71724353 | 1567045266 | 3927229553 | 2002812668 | 1391065921 |  1792363373 | 1721949211 |  382258657 |
+| 2721360939 | 2721360939 |  915632145 |  232832660 |  577107591 |   100356533 | 1116116329 | 3213843288 |
+|   35899538 | 1531220451 | 3891404738 | 1966987853 | 1355241106 |  1756538558 | 1686124396 |  346433842 |
+|  383860877 |  483651822 | 2138350281 | 2787408244 | 4133542746 |  4037934789 | 3540821413 | 1102396173 |
+|  424668759 |  524459704 | 2179158163 | 2828216126 | 4174350628 |  4078742671 | 3581629295 | 1856435158 |
+| 3649554897 | 3649554897 | 3108525329 | 3184200876 | 3574466404 |  3478858447 | 2968043771 | 2450179186 |
+|  442182562 |  541973507 | 2196671966 | 2845729929 | 4191864431 |  4096256474 | 3599143098 | 1873948961 |
+| 2846055542 | 2846055542 | 1040326748 |  737918683 |  315365231 |   710462248 |  656974186 |  471665171 |
+|   49953829 | 1545274742 | 3905459029 | 1981042144 | 1369295397 |  1770592849 | 1700178687 |  360488133 |
+| 2988140126 | 2988140126 | 1134088300 | 4123571376 | 1087418299 |  1488715751 | 2081686346 |  647772167 |
+|  256306471 | 1751627384 | 4111811671 | 2568632764 | 1956886017 |  2742276835 | 2742276835 | 1822648163 |
 
 
 ** Day 5 star 1
@@ -643,17 +659,25 @@ return star_1("sample.txt")
 : 35
 
 ** Star 2 redux
-#+BEGIN_SRC python :results output
+#+BEGIN_SRC python :results values
 import re
 from utils import P,R
 debug = False
 def star_2(path: str):
+    results = [["seed"]]
     with open(path,'r') as f:
         text = f.read()
+        if not text.endswith("\n\n"):
+            text += "\n" # ensure at least two newlines at end
         raw_seeds = [int(n) for n in re.match(f"seeds: (.+)", text).group(1).split(' ')]
         seeds = [R(a=raw_seeds[i], b=raw_seeds[i]+raw_seeds[i+1]-1) for i in range(0,len(raw_seeds)-1, 2)]
+        #for seed in seeds:
+        #    results.append([seed.a])
+            
         for mappings in re.findall(r"(\w+)-to-(\w+) map:\n(.+?)\n\n", text, re.DOTALL):
             stage_from, stage_to, mapping_text = mappings
+            #results[0].append(stage_to)
+                            
             if debug: print('From',stage_from,'to',stage_to)
             seed_length = len(seeds)
             for seed_idx in range(0, seed_length):
@@ -686,16 +710,22 @@ def star_2(path: str):
                         pass
                 seeds.extend(new_seeds)
             if debug: print(seeds)
+            #for seed_idx in range(0, seed_length):
+                #results[seed_idx+1].append(seeds[seed_idx].a)
+
+
+    #return results
 
     return min([x.a for x in seeds])
 
-print(star_2("input_2.txt"))
+return star_2("input.txt")
 #+END_SRC
 
 #+RESULTS:
-: 46
+: 87968960
 
 
 ** not right
 : 87968960
+: 19150242
 
