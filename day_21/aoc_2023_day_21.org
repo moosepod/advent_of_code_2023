@@ -25,31 +25,17 @@ def star_1(path: str, steps: int) -> int:
     start = grid.find_first_value("S")
     distances = grid.bfs_distances(start)
     
-    at_distance={p:"O" for p,v in distances.items() if v == steps}
-    dump_grid(grid,at_distance)
+    at_distance={p:"O" for p,v in distances.items() if v in range(2,steps+1,2)}
+    #dump_grid(grid,at_distance)
 
-  return len(at_distance)
+  return len(at_distance) + 1
   
-print("Star 1:",star_1("sample.txt",6))
+print("Star 1:",star_1("input.txt",64))
 
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
-...........
-.....###.#.
-.###.##.O#.
-.O#.#...#..
-O...#.#.O..
-.##..S####.
-.##..#O..#.
-.O.....##..
-.##.#.####.
-.##O.##.##.
-...........
-
-Star 1: 7
-#+end_example
+: Star 1: 3591
 
 ** Day 21 star 2
 *** Problem statement
