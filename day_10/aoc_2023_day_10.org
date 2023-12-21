@@ -28,7 +28,9 @@ If the animal had entered this loop in the northwest corner, the sketch would in
 - Each pipe only has _one_ connection
     
 *** Solution
-#+BEGIN_SRC python :results output
+#+BEGIN_SRC python :results outputprint('Star 2:',star_2("sample_5.txt","F"))
+#print('Star 2:',star_2("sample_4.txt","F"))
+#
 import re
 from pydantic import BaseModel
 from d10_utils import P,S, Grid, load_grid, dump_grid, find_loop_path
@@ -186,9 +188,14 @@ def make_nice(grid: Grid) -> Grid:
 
   return new_grid
 
+def is_pipe(grid: Grid, p: P):
+  return  grid.cells.get(p) in ("-","|","F","L","7","J")
+  
 def star_2(path: str, start_char: str) -> int:
   grid = load_grid(path)
   grid.cells[grid.start] = start_char
+  path = find_loop_path(grid)
+  
   grid.start = P(x=-1,y=-1)
   grid.size.width += 1
   grid.size.height += 1
@@ -202,11 +209,22 @@ def star_2(path: str, start_char: str) -> int:
     grid.cells[P(x=grid.size.width,y=y)] = '.'
 
   dump_grid(make_nice(grid))
-  
+
+  # All disconnected pipe should be turned into empty space
+  # per the last example of part 2
+
+  for x in range(grid.start.x,  grid.size.width):
+    for y in range(grid.start.y, grid.size.height):
+      p = P(x=x,y=y)
+      if is_pipe(grid, p) and not p in path:
+        grid.cells[p] = "."
+
+
+  dump_grid(grid)
+  #dump_grid(make_nice(grid))
+  return 0
   grid = grid.expanded(EXPAND,S(width=3,height=3))
 
-
-  
   grid.flood_fill(P(),'O')
 
   dump_grid(make_nice(grid))
@@ -219,8 +237,8 @@ print()
 #print('Star 2:',star_2("sample_8.txt","F"))
 #print('Star 2:',star_2("sample_3.txt","F"))
 #print('Star 2:',star_2("sample_5.txt","F"))
-#print('Star 2:',star_2("sample_4.txt","F"))
-print('Star 2:',star_2("sample_9.txt","F"))
+print('Star 2:',star_2("sample_4.txt","F"))
+#print('Star 2:',star_2("sample_9.txt","F"))
 #+END_SRC
 
 #+RESULTS:
@@ -228,54 +246,32 @@ print('Star 2:',star_2("sample_9.txt","F"))
 
 Starting at x=-1 y=-1
 IIIIIIIIIIIIIIIIIIIIII.
-I┌┌┐┌┌┌┐┌┐┌┐┌┐┌┐┌───┐I.
-I└│└┘││││││││││││┌──┘I.
-I┌└─┐└┘└┘││││││└┘└─┐┐I.
-I┌──┘┌──┐││└┘└┘┐┌┐┌┘─I.
-I└───┘┌─┘└┘I││─┌┘└┘┘┐I.
-I│┌│┌─┘┌───┐┌┐─└┐└│┐│I.
-I│┌┌┘┌┐└┐┌─┘┌┐│┘└───┐I.
-I┐─└─┘└┐││┌┐│└┐┌─┐┌┐│I.
-I└I└┐└┌┘│││││┌┘└┐││└┘I.
-I└┐┘└┘└─┘└┘└┘└──┘└┘I└I.
+II┌────┐┌┐┌┐┌┐┌─┐IIIII.
+II│┌──┐││││││││┌┘IIIII.
+II││I┌┘││││││││└┐IIIII.
+I┌┘└┐└┐└┘└┘││└┘I└─┐III.
+I└──┘I└┐III└┘┌┐┌─┐└┐II.
+IIIII┌─┘II┌┐┌┘│└┐└┐└┐I.
+IIIII└┐I┌┐││└┐│I└┐└┐│I.
+IIIIII│┌┘└┘│┌┘│┌┐│I└┘I.
+IIIII┌┘└─┐I││I││││IIII.
+IIIII└───┘I└┘I└┘└┘IIII.
 IIIIIIIIIIIIIIIIIIIIII.
 .......................
-Starting at x=0 y=0
-.................................................................
-.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.
-.x┌─x┌──┐xx┌─x┌─x┌──┐xx┌──┐xx┌──┐xx┌──┐xx┌──┐xx┌───────────┐xxOx.
-.x│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xxxxxxxxxxx│xxxx.
-.x│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xxxxxxxxxxx│xxxx.
-.x└─x│xx└──┘xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx┌────────┘xxOx.
-.xxxx│xxxxxxxx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xxxxxxxxxxxxx.
-.xxxx│xxxxxxxx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xxxxxxxxxxxxx.
-.x┌─x└─────┐xx└──┘xx└──┘xx│xx│xx│xx│xx│xx│xx└──┘xx└─────┐x─┐xxOx.
-.x│xxxxxxxx│xxxxxxxxxxxxxx│xx│xx│xx│xx│xx│xxxxxxxxxxxxxx│xx│xxxx.
-.xxxxxxxxxx│xxxxxxxxxxxxxx│xx│xx│xx│xx│xx│xxxxxxxxxxxxxx│xxxxxxx.
-.x┌────────┘xx┌────────┐xx│xx│xx└──┘xx└──┘x─┐xx┌──┐xx┌──┘x───xOx.
-.x│xxxxxxxxxxx│xxxxxxxx│xx│xx│xxxxxxxxxxxxxx│xx│xx│xx│xxxxxxxxxx.
-.x│xxxxxxxxxxx│xxxxxxxx│xx│xx│xxxxx│xx│xxxxxxxx│xx│xx│xx│xxxxxxx.
-.x└───────────┘xx┌─────┘xx└──┘xxOxx│xx│x───x┌──┘xx└──┘x─┘x─┐xxOx.
-.xxxxxxxxxxxxxxxx│xxxxxxxxxxxxxxxxx│xx│xxxxx│xxxxxxxxxxxxxx│xxxx.
-.x│xxxxx│xxxxxxxx│xxxxxxxxxxxxxxxxxxxxxxxxxx│xxxxx│xx│xxxxx│xxxx.
-.x│xx┌─x│xx┌─────┘xx┌───────────┐xx┌──┐x───x└──┐xx└─x│x─┐xx│xxOx.
-.x│xx│xx│xx│xxxxxxxx│xxxxxxxxxxx│xx│xx│xxxxxxxx│xxxxx│xx│xx│xxxx.
-.x│xxxxxxxx│xxxxxxxx│xxxxxxxxxxx│xxxxxxxx│xx│xx│xxxxxxxxxxxxxxxx.
-.x│xx┌─x┌──┘xx┌──┐xx└──┐xx┌─────┘xx┌──┐xx│x─┘xx└───────────┐xxOx.
-.x│xx│xx│xxxxx│xx│xxxxx│xx│xxxxxxxx│xx│xx│xxxxxxxxxxxxxxxxx│xxxx.
-.xxxxxxx│xxxxx│xx│xxxxx│xx│xxxxxxxx│xx│xxxxxxxxxxxxxxxxxxxx│xxxx.
-.─┐x───x└─────┘xx└──┐xx│xx│xx┌──┐xx│xx└──┐xx┌─────┐xx┌──┐xx│xxOx.
-.x│xxxxxxxxxxxxxxxxx│xx│xx│xx│xx│xx│xxxxx│xx│xxxxx│xx│xx│xx│xxxx.
-.x│xxxxx│xxxxx│xxxxx│xx│xx│xx│xx│xx│xxxxx│xx│xxxxx│xx│xx│xx│xxxx.
-.x└─xOxx└──┐xx└─x┌──┘xx│xx│xx│xx│xx│xx┌──┘xx└──┐xx│xx│xx└──┘xxOx.
-.xxxxxxxxxx│xxxxx│xxxxx│xx│xx│xx│xx│xx│xxxxxxxx│xx│xx│xxxxxxxxxx.
-.x│xxxxx│xx│xx│xx│xxxxx│xx│xx│xx│xx│xx│xxxxxxxx│xx│xx│xxxxx│xxxx.
-.x└──┐x─┘xx└──┘xx└─────┘xx└──┘xx└──┘xx└────────┘xx└──┘xxOxx└─xOx.
-.xxxx│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.
-.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.
-.xOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOx.
-.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx!x.
-.................................................................
+Starting at x=-1 y=-1
+.......................
+.......................
+.......................
+.......................
+.......................
+.............F7F-7L7...
+.............J|L7L7L7..
+..............|.L7L7|..
+..............|F7|.LJ..
+..............||||.....
+..............LJLJ.....
+.......................
+.......................
 Star 2: 0
 #+end_example
 
