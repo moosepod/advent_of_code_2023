@@ -1,0 +1,64 @@
+
+* AOC 2023 Day 21
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Day 21 star 1
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+import re
+from d21_utils import Grid, load_grid, dump_grid
+
+def star_1(path: str, steps: int) -> int:
+  with open(path,'r') as f:
+    grid = load_grid(path)
+    grid.blocked = ["#"]
+    start = grid.find_first_value("S")
+    at_distance={}
+    count = grid.bfs_max_distance(start, steps, at_distance)
+    dump_grid(grid,at_distance)
+
+  return count
+  
+print("Star 1:",star_1("sample.txt",10))
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+O.....O.O.O
+.O...###.#.
+O###.##.O#O
+.O#O#O.O#O.
+O.O.#.#.O.O
+.##O.O####.
+O##.O#O.O#O
+.O.O.O.##..
+O##.#.####.
+.##O.##.##.
+O.O.O.O....
+
+Star 1: 33
+#+end_example
+
+** Day 21 star 2
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+def star_2(path: str) -> int:
+  with open(path,'r') as f:
+     pass
+  return 0
+  
+print("Star 2:", star_2("sample.txt"))
+#+END_SRC
+

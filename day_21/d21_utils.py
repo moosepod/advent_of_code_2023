@@ -107,7 +107,7 @@ class PriorityQueue:
 class Grid(BaseModel):
     """ Pathfinding adapted from https://www.redblobgames.com/pathfinding/a-star/introduction.html """
     size: S
-    cells: dict[P, int]
+    cells: dict[P, str]
     blocked: list
 
     def is_blocked(self, p: P) -> bool:
@@ -128,7 +128,7 @@ class Grid(BaseModel):
                         path_sum += t - came_from.get(t)
                         t = came_from.get(t)
 
-                if abs(path_sum) < max_d and abs(path_sum.y) < max_d:
+                if abs(path_sum.x) < max_d and abs(path_sum.y) < max_d:
                     yield p + d
     
     def bfs(self, start: P, end: P) -> list[P]:
@@ -150,6 +150,26 @@ class Grid(BaseModel):
 
         return []
 
+    def bfs_max_distance(self, start: P, max_distance: int, at_distance: dict) -> int:
+        """ Look for path from start to end. If end reached, return it. Stop after max distance. Return count. """
+        frontier = Queue()
+        frontier.put((start.clone(),0))
+        count = 0
+
+        while not frontier.empty():
+            p,d = frontier.get()
+            if d == max_distance:
+                if not at_distance.get(p):
+                    count += 1
+                    at_distance[p] = "O"
+                continue
+
+            for n in self.neighbors(p):
+                if n not in at_distance:
+                    frontier.put((n,d+1))
+
+        return count
+    
     def find_path(self, came_from: dict, end: P) -> list[P]:
         p = end
         path = []
@@ -226,11 +246,11 @@ class Grid(BaseModel):
 
         return []
 
-    def find_first_value(self, v: int) -> P | None:
+    def find_first_value(self, c: str) -> P | None:
         for y in range(0,self.size.height):
             for x in range(0,self.size.width):
                 p = P(x=x,y=y)
-                if self.cells.get(p) == v:
+                if self.cells.get(p) == c:
                     return p
         return None
     
@@ -255,7 +275,7 @@ def load_grid_from_str(s: str) -> Grid:
         height +=1 
         for x, col in enumerate(row.strip()):
           p = P(x=x,y=y)
-          cells[p] = int(col)
+          cells[p] = col
         y+=1
 
   return Grid(size=S(width=width,height=height),cells=cells, blocked=[])

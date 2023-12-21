@@ -122,13 +122,18 @@ def unsmudge(grid: Grid, v: int, h: int):
         for y in range(0, grid.size.height):
             flip_point(grid,P(x=x,y=y))
 
-            nv = max(find_vertical(grid))
-            nh = max(find_horizontal(grid))
-            
+            # need to fix this logic
+
+            va = [x for x in find_vertical(grid) if x != v]
+            ha = [x for x in find_horizontal(grid) if x != h]
+            nv = va[0] if len(va) else 0
+            nh = ha[0] if len(ha) else 0
+                
             flip_point(grid,P(x=x,y=y))
 
-            if nv != v or nh != nh:
+            if (nv,nh) != (v,h):
                 return nv,nh
+
     return v,h
     
 def star_2(path: str) -> int:
@@ -144,7 +149,8 @@ def star_2(path: str) -> int:
         h = max(find_horizontal(grid))
 
         v, h = unsmudge(grid, v, h)
-
+        print(v,h)
+        
         total += v
         total += h * 100
 
@@ -157,14 +163,12 @@ print("Star 2:",star_2("sample.txt"))
 #+END_SRC
 
 #+RESULTS:
-: Nothing found for 0
-: Star 2: 400
+: 0 3
+: 0 0
+: Nothing found for 1
+: Star 2: 300
 
-** First result -- this is too low
-: Star 1: 800
-** Second result -- too low
-29616
+** Too high
+: Star 2: 60169
 
-** Too low
-17973
 
