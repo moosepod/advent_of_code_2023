@@ -13,7 +13,7 @@
 #+BEGIN_SRC python :results output
 import re
 from pydantic import BaseModel
-from d17_utils import Grid, load_grid, dump_grid, P, load_grid_from_str
+from d17_utils import Grid, load_grid, dump_grid, P, load_grid_from_str, manhattan_distance
 
 def find_path(s: str, debug=True) -> list[P]:
     g = load_grid_from_str(s)
@@ -24,7 +24,7 @@ def find_path(s: str, debug=True) -> list[P]:
     if debug:
         print(f'Find path from {start} to {end}')
 
-    path = g.bfs_pathfind(start,end)
+    path = g.greedy_best_first_search(start,end, heuristic=manhattan_distance)
     for p in path:
         if p:
             g.cells[p] = "x"
@@ -90,12 +90,12 @@ print(find_path("""
 Find path from x=3 y=2 to x=7 y=3
 11111111
 10000001
-100x0001
-100xxxx3
+100xxxx1
+100000x3
 10000001
 11111111
 
-[P(x=6, y=3), P(x=5, y=3), P(x=4, y=3), P(x=3, y=3), P(x=3, y=2), None]
+[P(x=6, y=3), P(x=6, y=2), P(x=5, y=2), P(x=4, y=2), P(x=3, y=2), None]
 Find path from x=3 y=2 to x=7 y=3
 11111111
 10001001
@@ -115,14 +115,14 @@ Find path from x=3 y=2 to x=7 y=3
 
 [P(x=6, y=3), P(x=5, y=3), P(x=5, y=4), P(x=4, y=4), P(x=3, y=4), P(x=2, y=4), P(x=1, y=4), P(x=1, y=3), P(x=1, y=2), P(x=1, y=1), P(x=2, y=1), P(x=3, y=1), P(x=3, y=2), None]
 Find path from x=3 y=2 to x=7 y=3
-000xxx00
-000x1x00
-001x1x10
-00111xx3
+000xxxxx
+000x100x
+001x101x
+00111003
 00000010
 00000000
 
-[P(x=6, y=3), P(x=5, y=3), P(x=5, y=2), P(x=5, y=1), P(x=5, y=0), P(x=4, y=0), P(x=3, y=0), P(x=3, y=1), P(x=3, y=2), None]
+[P(x=7, y=2), P(x=7, y=1), P(x=7, y=0), P(x=6, y=0), P(x=5, y=0), P(x=4, y=0), P(x=3, y=0), P(x=3, y=1), P(x=3, y=2), None]
 Find path from x=3 y=2 to x=7 y=3
 11111111
 10001001

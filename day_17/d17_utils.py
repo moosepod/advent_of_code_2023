@@ -226,6 +226,26 @@ class Grid(BaseModel):
 
         return []
 
+    def greedy_best_first_search(self, start: P, end: P, heuristic) -> list[P]:
+        frontier = PriorityQueue()
+        frontier.put(start, 0)
+        came_from = {start: None}
+
+        while not frontier.empty():
+            current = frontier.get()
+
+            for n in self.neighbors(current):
+                if n == end:
+                    came_from[n] = current
+                    return self.find_path(came_from, end)
+                    
+                if n not in came_from:
+                    priority = heuristic(end, n)
+                    frontier.put(n,priority)
+                    came_from[n] = current
+                
+        return []
+
     def find_first_value(self, v: int) -> P | None:
         for y in range(0,self.size.height):
             for x in range(0,self.size.width):
@@ -273,3 +293,5 @@ def dump_grid_s(grid: Grid, path: dict) -> str:
 def dump_grid(grid: Grid, path: dict):
     print(dump_grid_s(grid, path))
 
+def manhattan_distance(p1: P, p2: P) -> int:
+    return abs(p1.x -p2.x) + abs(p1.y - p2.y)
