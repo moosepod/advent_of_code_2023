@@ -25,7 +25,7 @@ def find_path(s: str, debug=True) -> list[P]:
         print()
         print(f'Find path from {start} to {end}')
 
-    path = {p: d_to_c(d) for p,d in g.a_star_with_max_straight(start,end, heuristic=manhattan_distance,max_straight=2)}
+    path = {p: d_to_c(d) for p,d in g.a_star_with_max_straight(start,end, heuristic=manhattan_distance,max_straight=1)}
     path[start] = "S"
     dump_grid(g,path)
     
@@ -109,12 +109,12 @@ print(find_path("""
 Find path from x=3 y=2 to x=7 y=3
 11111111
 10000001
-100S>v01
-100>^>>3
+100Sv>v1
+1000>^>3
 10000001
 11111111
 
-{P(x=6, y=3): '>', P(x=5, y=3): '>', P(x=5, y=2): 'v', P(x=4, y=2): '>', P(x=4, y=3): '^', P(x=3, y=3): '>', P(x=3, y=2): 'S', None: 'x'}
+{P(x=6, y=3): '>', P(x=6, y=2): 'v', P(x=5, y=2): '>', P(x=5, y=3): '^', P(x=4, y=3): '>', P(x=4, y=2): 'v', P(x=3, y=2): 'S', None: 'x'}
 
 Find path from x=3 y=2 to x=7 y=3
 11111111

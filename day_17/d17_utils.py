@@ -26,6 +26,9 @@ class P(BaseModel):
         return self.x < value.x or self.y < value.y
     
     def __eq__(self, value):
+        if value == None:
+            return False
+        
         return self.x == value.x and self.y == value.y
     
     def clone(self) -> 'P':
@@ -284,6 +287,21 @@ class Grid(BaseModel):
                 
         return []
 
+    def is_straight_path(self, p: P, d: P, current: P, came_from: dict, max_straight: int) -> bool:
+        i = 0
+        while i < max_straight:
+            if not came_from.get(current):
+                return False
+            np, nd = came_from.get(current)
+            if nd != d:
+                return False
+            d = nd
+            p = np
+            i+=1
+
+        return True
+        
+        
     def a_star_with_max_straight(self, start: P, end: P, heuristic, max_straight: int) -> list[P]:
         frontier = PriorityQueue()
         frontier.put((start,RIGHT),0 )
@@ -299,7 +317,7 @@ class Grid(BaseModel):
                     return self.find_path_with_directions(came_from, end)
 
                 new_cost = cost_so_far[current] + self.cells[n]
-                if d == current_d:
+                if self.is_straight_path(n, d, current, came_from, max_straight):
                     new_cost = 10000000
                     
                 if n not in cost_so_far or new_cost < cost_so_far[n]:
