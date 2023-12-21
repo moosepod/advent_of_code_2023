@@ -113,26 +113,19 @@ class Grid(BaseModel):
     start: P
 
     def passable(self, p: P, d: P,from_c: P) -> bool:
-        if self.in_bounds(p):
-            c = self.cells.get(p,'.')
+        return self.in_bounds(p) and self.cells.get(p,'.') in ('.','x')
 
-            if d in (UP,DOWN) and from_c == '-':
-                return False
-            if d in (LEFT,RIGHT) and from_c  == '|':
-                return False
-            
-            s1 = self.cells.get(P(x=p.x-1,y=p.y),'.') + c
-            s2 = c + self.cells.get(P(x=p.x+1,y=p.y),'.') 
-            s3 = self.cells.get(P(x=p.x,y=p.y-1),'.') + c
-            s4 = c + self.cells.get(P(x=p.x,y=p.y+1),'.')
-            if d in (UP,DOWN) and (s1 in ("||","JL","7F") or s2 in ("||","JL","7F")):
-                return True
-            elif d in (LEFT,RIGHT) and (s1 in ("--","L","7F") or s2 in ("||","JL","7F")):
-                return True
-            elif c == '.':
-                return True
+    def expanded(self, mapping: dict[P,str], sd: S, default_char='.') -> 'Grid':
+        grid = Grid(cells={}, start=P(), size=S(width=self.size.width*sd.width, height=self.size.height*sd.height))
+        for x in range(0, self.size.width):
+            for y in range(0,self.size.height):
+                c = self.cells.get(P(x=x,y=y)) or default_char
+                for i in range(0,sd.width):
+                    for j in range(0,sd.height):
+                        
+                        grid.cells[P(x=(x*sd.width)+i,y=(y*sd.height)+j)] = mapping[c][j][i]
 
-        return False
+        return grid
 
     def flood_fill(self, p: P, fill_c: str, iteration_max=0):
         frontier = Queue()

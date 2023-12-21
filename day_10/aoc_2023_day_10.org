@@ -159,7 +159,7 @@ import re
 from pydantic import BaseModel
 from d10_utils import P,S, Grid, load_grid, dump_grid, find_loop_path, RIGHT, DOWN, LEFT, UP, Polygon
 
-BOX_MAPPING = {"|": "│", "7": "┐", "F": "┌", "L": "└","J": "┘","-": "─",".": "I","O":"O","!":"!"}
+BOX_MAPPING = {"|": "│", "7": "┐", "F": "┌", "L": "└","J": "┘","-": "─",".": "I","O":"O","!":"!","x":"x"}
 
 START_DIR = {"|": UP, "F": RIGHT, "-": RIGHT, "7": DOWN,
              "J": LEFT, "L": UP}
@@ -169,9 +169,29 @@ CHANGE_DIR = {"F": {UP: RIGHT, LEFT: DOWN},
               "J": {DOWN: LEFT, RIGHT: UP},
               "7": {RIGHT: DOWN, UP: LEFT}}
 
+EXPAND = {".": ("xxx","x.x","xxx"),
+          "|": ("x|x","x|x","x|x"),
+          "-": ("xxx","---","xxx"),
+          "F": ("xxx","xF-","x|x"),
+          "L": ("x|x","xL-","xxx"),
+          "7": ("xxx","-7x","x|x"),
+          "J": ("x|x","-Jx","xxx")}
+
+def make_nice(grid: Grid) -> Grid:
+  new_grid = Grid(start=P(x=grid.start.x,y=grid.start.y), cells={}, size=S(width=grid.size.width, height=grid.size.height))
+  
+  for y in range(grid.start.y, grid.size.height):
+    for x in range(grid.start.x, grid.size.width):
+      new_grid.cells[P(x=x,y=y)] = BOX_MAPPING[grid.cells.get(P(x=x,y=y),'.')]
+
+  return new_grid
+
 def star_2(path: str, start_char: str) -> int:
   grid = load_grid(path)
   grid.cells[grid.start] = start_char
+  grid.start = P(x=-1,y=-1)
+  grid.size.width += 1
+  grid.size.height += 1
 
   # Add an outer ring of '.' chars to help fill algorithn
   for x in range(0, grid.size.width):
@@ -181,18 +201,17 @@ def star_2(path: str, start_char: str) -> int:
     grid.cells[P(x=-1,y=y)] = '.'
     grid.cells[P(x=grid.size.width,y=y)] = '.'
 
-  grid.start = P(x=-1,y=-1)
-  grid.size.width += 1
-  grid.size.height += 1
-  grid.flood_fill(P(),'O',96)
+  dump_grid(make_nice(grid))
+  
+  grid = grid.expanded(EXPAND,S(width=3,height=3))
 
-  for y in range(grid.start.y, grid.size.height):
-    for x in range(grid.start.x, grid.size.width):
-      grid.cells[P(x=x,y=y)] = BOX_MAPPING[grid.cells.get(P(x=x,y=y),'.')]
 
-  dump_grid(grid)
+  
+  grid.flood_fill(P(),'O')
+
+  dump_grid(make_nice(grid))
         
-  return len([x for x in grid.cells.values() if x == 'I'])
+  return len([x for x in grid.cells.values() if x == '.'])
 
 print()
 #print('Star 2:',star_2("sample_7.txt","F"))
@@ -200,66 +219,64 @@ print()
 #print('Star 2:',star_2("sample_8.txt","F"))
 #print('Star 2:',star_2("sample_3.txt","F"))
 #print('Star 2:',star_2("sample_5.txt","F"))
-print('Star 2:',star_2("sample_4.txt","F"))
+#print('Star 2:',star_2("sample_4.txt","F"))
+print('Star 2:',star_2("sample_9.txt","F"))
 #+END_SRC
 
 #+RESULTS:
 #+begin_example
 
 Starting at x=-1 y=-1
-OOOOOOOOOOOOOIIIIIIIII.
-OO┌────┐┌┐┌┐┌┐┌─┐IIIII.
-OO│┌──┐││││││││┌┘IIIII.
-OO││I┌┘│!││││││└┐IIIII.
-O┌┘└┐└┐└┘└┘││└┘I└─┐III.
-O└──┘I└┐III└┘┌┐┌─┐└┐II.
-OOOOO┌─┘II┌┐┌┘│└┐└┐└┐I.
-OOOOO└┐I┌┐││└┐│I└┐└┐│I.
-OOOOOI│┌┘└┘│┌┘│┌┐│I└┘I.
-OOOOI┌┘└─┐I││I││││IIII.
-OOOII└───┘I└┘I└┘└┘IIII.
-OOIIIIIIIIIIIIIIIIIIII.
+IIIIIIIIIIIIIIIIIIIIII.
+I┌┌┐┌┌┌┐┌┐┌┐┌┐┌┐┌───┐I.
+I└│└┘││││││││││││┌──┘I.
+I┌└─┐└┘└┘││││││└┘└─┐┐I.
+I┌──┘┌──┐││└┘└┘┐┌┐┌┘─I.
+I└───┘┌─┘└┘I││─┌┘└┘┘┐I.
+I│┌│┌─┘┌───┐┌┐─└┐└│┐│I.
+I│┌┌┘┌┐└┐┌─┘┌┐│┘└───┐I.
+I┐─└─┘└┐││┌┐│└┐┌─┐┌┐│I.
+I└I└┐└┌┘│││││┌┘└┐││└┘I.
+I└┐┘└┘└─┘└┘└┘└──┘└┘I└I.
+IIIIIIIIIIIIIIIIIIIIII.
 .......................
-Star 2: 79
-#+end_example
-
-#+begin_example
-
-x=1 y=1 z=0
-x=3 y=1 z=0
-x=3 y=3 z=0
-x=1 y=3 z=0
-Starting at x=1 y=1 z=0
- 012345
-0......
-1.F-7..
-2.|.|..
-3.L-J..
-4......
-
-tar 2: -4.0
-#+end_example
-
-
-22.5
-.... x=1 y=3 z=0
-.... x=1 y=4 z=0
-.... x=8 y=3 z=0
-.... x=8 y=4 z=0
-Starting at x=0 y=0 z=0
-
-#+begin_example
-  0123456789
-0 OOOOOOOOOO
-1 O*──────┐O
-2 O│┌────┐│O
-3 O││....││O
-4 O││....││O
-5 O│└─┐┌─┘│O
-6 O│..││..│O
-7 O└──┘└──┘O
-8 OOOOOOOOOO
-Star 2: 12
+Starting at x=0 y=0
+.................................................................
+.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.
+.x┌─x┌──┐xx┌─x┌─x┌──┐xx┌──┐xx┌──┐xx┌──┐xx┌──┐xx┌───────────┐xxOx.
+.x│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xxxxxxxxxxx│xxxx.
+.x│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xxxxxxxxxxx│xxxx.
+.x└─x│xx└──┘xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx┌────────┘xxOx.
+.xxxx│xxxxxxxx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xxxxxxxxxxxxx.
+.xxxx│xxxxxxxx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xx│xxxxxxxxxxxxx.
+.x┌─x└─────┐xx└──┘xx└──┘xx│xx│xx│xx│xx│xx│xx└──┘xx└─────┐x─┐xxOx.
+.x│xxxxxxxx│xxxxxxxxxxxxxx│xx│xx│xx│xx│xx│xxxxxxxxxxxxxx│xx│xxxx.
+.xxxxxxxxxx│xxxxxxxxxxxxxx│xx│xx│xx│xx│xx│xxxxxxxxxxxxxx│xxxxxxx.
+.x┌────────┘xx┌────────┐xx│xx│xx└──┘xx└──┘x─┐xx┌──┐xx┌──┘x───xOx.
+.x│xxxxxxxxxxx│xxxxxxxx│xx│xx│xxxxxxxxxxxxxx│xx│xx│xx│xxxxxxxxxx.
+.x│xxxxxxxxxxx│xxxxxxxx│xx│xx│xxxxx│xx│xxxxxxxx│xx│xx│xx│xxxxxxx.
+.x└───────────┘xx┌─────┘xx└──┘xxOxx│xx│x───x┌──┘xx└──┘x─┘x─┐xxOx.
+.xxxxxxxxxxxxxxxx│xxxxxxxxxxxxxxxxx│xx│xxxxx│xxxxxxxxxxxxxx│xxxx.
+.x│xxxxx│xxxxxxxx│xxxxxxxxxxxxxxxxxxxxxxxxxx│xxxxx│xx│xxxxx│xxxx.
+.x│xx┌─x│xx┌─────┘xx┌───────────┐xx┌──┐x───x└──┐xx└─x│x─┐xx│xxOx.
+.x│xx│xx│xx│xxxxxxxx│xxxxxxxxxxx│xx│xx│xxxxxxxx│xxxxx│xx│xx│xxxx.
+.x│xxxxxxxx│xxxxxxxx│xxxxxxxxxxx│xxxxxxxx│xx│xx│xxxxxxxxxxxxxxxx.
+.x│xx┌─x┌──┘xx┌──┐xx└──┐xx┌─────┘xx┌──┐xx│x─┘xx└───────────┐xxOx.
+.x│xx│xx│xxxxx│xx│xxxxx│xx│xxxxxxxx│xx│xx│xxxxxxxxxxxxxxxxx│xxxx.
+.xxxxxxx│xxxxx│xx│xxxxx│xx│xxxxxxxx│xx│xxxxxxxxxxxxxxxxxxxx│xxxx.
+.─┐x───x└─────┘xx└──┐xx│xx│xx┌──┐xx│xx└──┐xx┌─────┐xx┌──┐xx│xxOx.
+.x│xxxxxxxxxxxxxxxxx│xx│xx│xx│xx│xx│xxxxx│xx│xxxxx│xx│xx│xx│xxxx.
+.x│xxxxx│xxxxx│xxxxx│xx│xx│xx│xx│xx│xxxxx│xx│xxxxx│xx│xx│xx│xxxx.
+.x└─xOxx└──┐xx└─x┌──┘xx│xx│xx│xx│xx│xx┌──┘xx└──┐xx│xx│xx└──┘xxOx.
+.xxxxxxxxxx│xxxxx│xxxxx│xx│xx│xx│xx│xx│xxxxxxxx│xx│xx│xxxxxxxxxx.
+.x│xxxxx│xx│xx│xx│xxxxx│xx│xx│xx│xx│xx│xxxxxxxx│xx│xx│xxxxx│xxxx.
+.x└──┐x─┘xx└──┘xx└─────┘xx└──┘xx└──┘xx└────────┘xx└──┘xxOxx└─xOx.
+.xxxx│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.
+.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.
+.xOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOxxOx.
+.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx!x.
+.................................................................
+Star 2: 0
 #+end_example
 
 
