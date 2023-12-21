@@ -246,6 +246,30 @@ class Grid(BaseModel):
                 
         return []
 
+    def a_star(self, start: P, end: P, heuristic) -> list[P]:
+        frontier = PriorityQueue()
+        frontier.put(start, 0)
+        came_from = {start: None}
+        cost_so_far = {start: 0}
+
+        while not frontier.empty():
+            current = frontier.get()
+
+            for n in self.neighbors(current):
+                if n == end:
+                    came_from[n] = current
+                    return self.find_path(came_from, end)
+
+                new_cost = cost_so_far[current] + self.cells[n]
+                    
+                if n not in cost_so_far or new_cost < cost_so_far[n]:
+                    cost_so_far[n] = new_cost
+                    priority = new_cost + heuristic(end, n)
+                    frontier.put(n,priority)
+                    came_from[n] = current
+                
+        return []
+
     def find_first_value(self, v: int) -> P | None:
         for y in range(0,self.size.height):
             for x in range(0,self.size.width):

@@ -22,9 +22,10 @@ def find_path(s: str, debug=True) -> list[P]:
     end = g.find_first_value(3)
 
     if debug:
+        print()
         print(f'Find path from {start} to {end}')
 
-    path = g.greedy_best_first_search(start,end, heuristic=manhattan_distance)
+    path = g.a_star(start,end, heuristic=manhattan_distance)
     for p in path:
         if p:
             g.cells[p] = "x"
@@ -87,6 +88,7 @@ print(find_path("""
 
 #+RESULTS:
 #+begin_example
+
 Find path from x=3 y=2 to x=7 y=3
 11111111
 10000001
@@ -96,6 +98,7 @@ Find path from x=3 y=2 to x=7 y=3
 11111111
 
 [P(x=6, y=3), P(x=6, y=2), P(x=5, y=2), P(x=4, y=2), P(x=3, y=2), None]
+
 Find path from x=3 y=2 to x=7 y=3
 11111111
 10001001
@@ -105,6 +108,7 @@ Find path from x=3 y=2 to x=7 y=3
 11111111
 
 [P(x=6, y=3), P(x=5, y=3), P(x=5, y=4), P(x=4, y=4), P(x=3, y=4), P(x=3, y=3), P(x=3, y=2), None]
+
 Find path from x=3 y=2 to x=7 y=3
 11111111
 1xxx1001
@@ -114,6 +118,7 @@ Find path from x=3 y=2 to x=7 y=3
 11111111
 
 [P(x=6, y=3), P(x=5, y=3), P(x=5, y=4), P(x=4, y=4), P(x=3, y=4), P(x=2, y=4), P(x=1, y=4), P(x=1, y=3), P(x=1, y=2), P(x=1, y=1), P(x=2, y=1), P(x=3, y=1), P(x=3, y=2), None]
+
 Find path from x=3 y=2 to x=7 y=3
 000xxxxx
 000x100x
@@ -123,6 +128,7 @@ Find path from x=3 y=2 to x=7 y=3
 00000000
 
 [P(x=7, y=2), P(x=7, y=1), P(x=7, y=0), P(x=6, y=0), P(x=5, y=0), P(x=4, y=0), P(x=3, y=0), P(x=3, y=1), P(x=3, y=2), None]
+
 Find path from x=3 y=2 to x=7 y=3
 11111111
 10001001
