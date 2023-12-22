@@ -63,8 +63,8 @@ class Brick(BaseModel):
             self.add(grid)
              
         return moved
-        
-def star_1(path: str) -> int:
+
+def star_1(path: str,debug=False) -> int:
   with open(path,'r') as f:
       bricks = []
       m = P()
@@ -85,17 +85,16 @@ def star_1(path: str) -> int:
       for brick in bricks:
          brick.add(grid)
 
-      print("-- Before drop --")
-
-      print(" x ")
-      print("012")
-      dump_grid_x(grid)
+      if debug:
+          print("-- Before drop --")
+          print(" x ")
+          print("012")
+          dump_grid_x(grid)
       
-      print(" y ")
-      print("012")
-      dump_grid_y(grid)
+          print(" y ")
+          print("012")
+          dump_grid_y(grid)
 
-      
       moved = True
       i = 0
       while moved:
@@ -103,97 +102,55 @@ def star_1(path: str) -> int:
           moved = False
           for brick in bricks:
               if brick.drop(grid):
-                  print(brick.n)
                   moved = True
 
-      print(" x ")
-      print("012")
-      dump_grid_x(grid)
-      print(" y ")
-      print("012")
-      dump_grid_y(grid)
+      if debug:
+          print("-- After drop --")
+          print(" x ")
+          print("012")
+          dump_grid_x(grid)
+          print(" y ")
+          print("012")
+          dump_grid_y(grid)
 
-      supporting = set()
+      supports = {brick.n: [] for brick in bricks}
+      supported = {brick.n: [] for brick in bricks}
+      
       for brick in bricks:
           for b in list(brick.resting_on(grid)):
-              supporting.add(b)
+              supports[b].append(brick.n)
+              supported[brick.n].append(b)
 
-      print(supporting)
+      removeable = {}
+      for brick in bricks:
+          can_remove = True
+          for sb in supports[brick.n]:
+              can_remove=False
+              if len([x for x in supported[sb] if x != brick.n]):
+                  #print(f"....{sb} supported by other brick {b}")
+                  can_remove= True
+                  break
+          if can_remove:
+              removeable[brick.n] = True
+
+      if debug:
+          for brick in bricks:
+              if removeable.get(brick.n):
+                  print(f"Brick {chr(brick.n+64)} can be removed.")
+              else:
+                  print(f"Brick {chr(brick.n+64)} cannot be removed.")
       
-  return 0
+  return len(removeable)
   
 
-print("Star 1:",star_1("sample.txt"))
+print("Star 1:",star_1("input.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
--- Before drop --
- x 
-012
-... 10
-.G. 9
-.G. 8
-... 7
-FFF 6
-..E 5
-D.. 4
-CCC 3
-BBB 2
-.A. 1
---- 0
 
- y 
-012
-... 10
-.G. 9
-.G. 8
-... 7
-.F. 6
-EEE 5
-DDD 4
-..C 3
-B.. 2
-AAA 1
---- 0
-
-3
-4
-5
-6
-7
- x 
-012
-... 10
-... 9
-... 8
-... 7
-.G. 6
-.G. 5
-FFF 4
-D.E 3
-BBB 2
-.A. 1
---- 0
-
- y 
-012
-... 10
-... 9
-... 8
-... 7
-.G. 6
-.G. 5
-.F. 4
-DDD 3
-B.C 2
-AAA 1
---- 0
-
-{1, 2, 3, 4, 5, 6}
-Star 1: 0
-#+end_example
+** Too high
+: Star 1: 612
 
 ** Day 22 star 2
 *** Problem statement
