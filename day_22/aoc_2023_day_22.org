@@ -27,11 +27,16 @@ class Brick(BaseModel):
     n: int
     
     def add(self,grid: Grid):
-        print(f"Adding {self.n} from {self.a} to {self.b}")
         for x in range(self.a.x, self.b.x+1):
             for y in range(self.a.y,self.b.y+1):
                 for z in range(self.a.z, self.b.z+1):
                     grid.cells[P(x=x,y=y,z=z)] = self.n
+
+    def remove(self,grid: Grid):
+        for x in range(self.a.x, self.b.x+1):
+            for y in range(self.a.y,self.b.y+1):
+                for z in range(self.a.z, self.b.z+1):
+                    grid.cells[P(x=x,y=y,z=z)] = None
 
     def resting_on(self,grid: Grid) -> set:
         touching = set()
@@ -39,11 +44,26 @@ class Brick(BaseModel):
         for x in range(self.a.x, self.b.x+1):
             for y in range(self.a.y, self.b.y+1):
                 t = grid.cells.get(P(x=x,y=y,z=min_z-1))
-                if t:
+                if t and t != self.n:
                     touching.add(t)
 
         return touching
-                
+
+    def drop(self, grid: Grid) -> bool:
+        min_z = min(self.a.z, self.b.z)
+        moved = False
+        
+        if min_z > 1:
+            self.remove(grid)
+            while min_z > 1 and not self.resting_on(grid):
+                self.a.z-=1
+                self.b.z-=1
+                moved = True
+                min_z = min(self.a.z, self.b.z)
+            self.add(grid)
+             
+        return moved
+        
 def star_1(path: str) -> int:
   with open(path,'r') as f:
       bricks = []
@@ -65,11 +85,41 @@ def star_1(path: str) -> int:
       for brick in bricks:
          brick.add(grid)
 
+      print("-- Before drop --")
+
+      print(" x ")
+      print("012")
       dump_grid_x(grid)
+      
+      print(" y ")
+      print("012")
       dump_grid_y(grid)
+
+      
+      moved = True
+      i = 0
+      while moved:
+          i+=1
+          moved = False
+          for brick in bricks:
+              if brick.drop(grid):
+                  print(brick.n)
+                  moved = True
+
+      print(" x ")
+      print("012")
+      dump_grid_x(grid)
+      print(" y ")
+      print("012")
+      dump_grid_y(grid)
+
+      supporting = set()
       for brick in bricks:
-          print(f"{brick.n}: {brick.resting_on(grid)}")
-                 
+          for b in list(brick.resting_on(grid)):
+              supporting.add(b)
+
+      print(supporting)
+      
   return 0
   
 
@@ -79,44 +129,69 @@ print("Star 1:",star_1("sample.txt"))
 
 #+RESULTS:
 #+begin_example
-Adding 1 from x=1 y=0 z=1 to x=1 y=2 z=1
-Adding 2 from x=0 y=0 z=2 to x=2 y=0 z=2
-Adding 3 from x=0 y=2 z=3 to x=2 y=2 z=3
-Adding 4 from x=0 y=0 z=4 to x=0 y=2 z=4
-Adding 5 from x=2 y=0 z=5 to x=2 y=2 z=5
-Adding 6 from x=0 y=1 z=6 to x=2 y=1 z=6
-Adding 7 from x=1 y=1 z=8 to x=1 y=1 z=9
-...
-.G.
-.G.
-...
-FFF
-..E
-D..
-CCC
-BBB
-.A.
-...
+-- Before drop --
+ x 
+012
+... 10
+.G. 9
+.G. 8
+... 7
+FFF 6
+..E 5
+D.. 4
+CCC 3
+BBB 2
+.A. 1
+--- 0
 
-...
-.G.
-.G.
-...
-.F.
-EEE
-DDD
-..C
-B..
-AAA
-...
+ y 
+012
+... 10
+.G. 9
+.G. 8
+... 7
+.F. 6
+EEE 5
+DDD 4
+..C 3
+B.. 2
+AAA 1
+--- 0
 
-1: set()
-2: {1}
-3: set()
-4: {3}
-5: set()
-6: {5}
-7: set()
+3
+4
+5
+6
+7
+ x 
+012
+... 10
+... 9
+... 8
+... 7
+.G. 6
+.G. 5
+FFF 4
+D.E 3
+BBB 2
+.A. 1
+--- 0
+
+ y 
+012
+... 10
+... 9
+... 8
+... 7
+.G. 6
+.G. 5
+.F. 4
+DDD 3
+B.C 2
+AAA 1
+--- 0
+
+{1, 2, 3, 4, 5, 6}
 Star 1: 0
 #+end_example
 

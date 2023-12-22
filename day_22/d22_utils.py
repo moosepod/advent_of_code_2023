@@ -309,13 +309,17 @@ def dump_grid_x(grid: Grid):
         c = None
         for y in range(0,grid.size.height):
             p = P(x=x,y=y,z=z)
+            if z == 0:
+                s+="-"
+                c="-"
+                break
             c = grid.cells.get(p)
             if c:
                 s+=chr(c+64)
                 break
         if not c:
             s+="."
-    s+="\n"
+    s+=f" {z}\n"
   print(s)
 
 def dump_grid_y(grid: Grid):
@@ -325,11 +329,16 @@ def dump_grid_y(grid: Grid):
         c = None
         for x in range(0,grid.size.width):
             p = P(x=x,y=y,z=z)
+            if z == 0:
+                s+="-"
+                c="-"
+                break
+            
             c = grid.cells.get(p)
             if c:
                 s+=chr(c+64)
                 break
         if not c:
             s+="."
-      s+="\n"
+      s+=f" {z}\n"
   print(s)
