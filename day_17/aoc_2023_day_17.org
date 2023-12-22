@@ -102,7 +102,7 @@ def star_1(path: str) -> int:
 
      start = P()
      end = P(x=grid.size.width-1,y=grid.size.height-1)
-     paths = [path for path in grid.dijkstra_k_shortest_paths(start, end, 100) if is_valid(path)]
+     path = grid.dijkstra_max_length(start, end, 4)
      if len(paths) == 0:
          print("Iteration count too small")
          return -1

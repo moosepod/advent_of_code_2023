@@ -168,7 +168,29 @@ class Grid(BaseModel):
                 B.put(np, C + (self.cells.get(v,0)+1))
                     
         return P
-    
+
+    def dijkstra_max_length(self, s: P, t: P, L: int) -> list[P]:
+        """ Run dijkstras with no path longer than L """
+        B = PriorityQueue()
+        B.put([s],0)
+        visited = set()
+        visited.add(s)
+
+        while not B.empty():
+            C, p_u = B.get_with_priority()
+            u = p_u[-1]
+            if u == t:
+                return p_u
+            for v in self.neighbors(u):
+                np = [p for p in p_u]
+                np.append(v)
+
+                if below_max_length(np, L) and v not in visited:
+                    B.put(np, C + (self.cells.get(v,0)+1))
+                    visited.add(v)
+                    
+        return []
+
     def bfs(self, start: P, end: P) -> list[P]:
         """ Look for path from start to end. If end reached, return it """
         frontier = Queue()
@@ -426,3 +448,20 @@ def d_to_c(d: P) -> str:
         return "v"
 
     return "x"
+
+def below_max_length(path: list[P], L: int)->bool:
+    if len(path) <= L:
+        return True
+
+    for i in range(L,len(path)):
+        dx = 0
+        dy = 0
+        for j in range(1,L):
+            dx += (path[i].x - path[i-j].x)
+            dy += (path[i].y - path[i-j].y)
+            print(i,j,dx,dy,path[i],path[i-j])
+
+        if abs(dx) > L or abs(dy) > L:
+            return False
+
+    return True

@@ -45,17 +45,12 @@ def find_path(s: str, debug=True) -> list[P]:
         print()
         print(f'Find path from {start} to {end}')
 
-    paths = g.dijkstra_k_shortest_paths(start,end, 5) or [[]]
-    #paths = [g.dijkstra_pathfind(start,end)]
-    #for idx,path in enumerate(paths):
-    #    print(idx,path)
-
-    path = {p: "x" for p in paths[0]}
+    path = {p: "x" for p in g.dijkstra_max_length(start,end, 40)}
     path[start] = "S"
     dump_grid(g,path)
     
     #return(path)
-    return []
+    return path
 
 print(find_path("""
 11111
@@ -145,17 +140,17 @@ Find path from x=2 y=1 to x=4 y=2
 100xx
 11111
 
-[]
+{P(x=2, y=1): 'S', P(x=3, y=1): 'x', P(x=3, y=2): 'x', P(x=4, y=2): 'x'}
 
 Find path from x=3 y=2 to x=7 y=3
 11111111
 10000001
-100S0001
-100xxxxx
+100Sxxx1
+100000xx
 10000001
 11111111
 
-[]
+{P(x=3, y=2): 'S', P(x=4, y=2): 'x', P(x=5, y=2): 'x', P(x=6, y=2): 'x', P(x=6, y=3): 'x', P(x=7, y=3): 'x'}
 
 Find path from x=3 y=2 to x=7 y=3
 11111111
@@ -165,7 +160,7 @@ Find path from x=3 y=2 to x=7 y=3
 100xxx01
 11111111
 
-[]
+{P(x=3, y=2): 'S', P(x=3, y=3): 'x', P(x=3, y=4): 'x', P(x=4, y=4): 'x', P(x=5, y=4): 'x', P(x=5, y=3): 'x', P(x=6, y=3): 'x', P(x=7, y=3): 'x'}
 
 Find path from x=3 y=2 to x=7 y=3
 11111111
@@ -175,17 +170,17 @@ Find path from x=3 y=2 to x=7 y=3
 1xxxxx11
 11111111
 
-[]
+{P(x=3, y=2): 'S', P(x=3, y=1): 'x', P(x=2, y=1): 'x', P(x=1, y=1): 'x', P(x=1, y=2): 'x', P(x=1, y=3): 'x', P(x=1, y=4): 'x', P(x=2, y=4): 'x', P(x=3, y=4): 'x', P(x=4, y=4): 'x', P(x=5, y=4): 'x', P(x=5, y=3): 'x', P(x=6, y=3): 'x', P(x=7, y=3): 'x'}
 
 Find path from x=3 y=2 to x=7 y=3
-000xxx00
-000x1x00
-001S1x10
-00111xxx
+000xxxxx
+000x100x
+001S101x
+0011100x
 00000010
 00000000
 
-[]
+{P(x=3, y=2): 'S', P(x=3, y=1): 'x', P(x=3, y=0): 'x', P(x=4, y=0): 'x', P(x=5, y=0): 'x', P(x=6, y=0): 'x', P(x=7, y=0): 'x', P(x=7, y=1): 'x', P(x=7, y=2): 'x', P(x=7, y=3): 'x'}
 
 Find path from x=3 y=2 to x=7 y=3
 11111111
@@ -195,7 +190,7 @@ Find path from x=3 y=2 to x=7 y=3
 10001001
 11111111
 
-[]
+{P(x=3, y=2): 'S'}
 
 Find path from x=3 y=2 to x=7 y=3
 99999999
@@ -205,7 +200,7 @@ Find path from x=3 y=2 to x=7 y=3
 90075009
 99999999
 
-[]
+{P(x=3, y=2): 'S', P(x=3, y=3): 'x', P(x=4, y=3): 'x', P(x=5, y=3): 'x', P(x=6, y=3): 'x', P(x=7, y=3): 'x'}
 
 Find path from x=2 y=2 to x=7 y=4
 00xxxxxx
@@ -216,7 +211,7 @@ Find path from x=2 y=2 to x=7 y=4
 01456410
 00000000
 
-[]
+{P(x=2, y=2): 'S', P(x=2, y=1): 'x', P(x=2, y=0): 'x', P(x=3, y=0): 'x', P(x=4, y=0): 'x', P(x=5, y=0): 'x', P(x=6, y=0): 'x', P(x=7, y=0): 'x', P(x=7, y=1): 'x', P(x=7, y=2): 'x', P(x=7, y=3): 'x', P(x=7, y=4): 'x'}
 #+end_example
 
 ** Testing Dijkstra
