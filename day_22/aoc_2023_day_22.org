@@ -1,0 +1,134 @@
+
+* AOC 2023 Day 22
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Day 22 star 1
+*** Solution
+#+BEGIN_SRC python :results output
+import re
+from d22_utils import Grid, P,S,dump_grid_x, dump_grid_y
+from pydantic import BaseModel
+
+def p_from_a(a: list):
+    return P(x=int(a[0]),y=int(a[1]),z=int(a[2]))
+
+class Brick(BaseModel):
+    a: P
+    b: P
+    n: int
+    
+    def add(self,grid: Grid):
+        print(f"Adding {self.n} from {self.a} to {self.b}")
+        for x in range(self.a.x, self.b.x+1):
+            for y in range(self.a.y,self.b.y+1):
+                for z in range(self.a.z, self.b.z+1):
+                    grid.cells[P(x=x,y=y,z=z)] = self.n
+
+    def resting_on(self,grid: Grid) -> set:
+        touching = set()
+        min_z = min(self.a.z, self.b.z)
+        for x in range(self.a.x, self.b.x+1):
+            for y in range(self.a.y, self.b.y+1):
+                t = grid.cells.get(P(x=x,y=y,z=min_z-1))
+                if t:
+                    touching.add(t)
+
+        return touching
+                
+def star_1(path: str) -> int:
+  with open(path,'r') as f:
+      bricks = []
+      m = P()
+      n = 1
+      for l in f.read().split("\n"):
+          if l:
+              a,b = l.strip().split("~")
+              brick = Brick(n=n, a=p_from_a(a.split(",")),b=p_from_a(b.split(",")))
+              bricks.append(brick)
+              if brick.a.x > m.x: m.x = brick.a.x
+              if brick.b.x > m.x: m.x = brick.b.x
+              if brick.a.y > m.y: m.y = brick.a.y
+              if brick.b.y > m.y: m.y = brick.b.y
+              if brick.a.z > m.z: m.z = brick.a.z
+              if brick.b.z > m.z: m.z = brick.b.z
+              n+=1
+      grid = Grid(cells={},size=S(width=m.x+1, height=m.y+1, depth=m.z+1), blocked=[])
+      for brick in bricks:
+         brick.add(grid)
+
+      dump_grid_x(grid)
+      dump_grid_y(grid)
+      for brick in bricks:
+          print(f"{brick.n}: {brick.resting_on(grid)}")
+                 
+  return 0
+  
+
+print("Star 1:",star_1("sample.txt"))
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Adding 1 from x=1 y=0 z=1 to x=1 y=2 z=1
+Adding 2 from x=0 y=0 z=2 to x=2 y=0 z=2
+Adding 3 from x=0 y=2 z=3 to x=2 y=2 z=3
+Adding 4 from x=0 y=0 z=4 to x=0 y=2 z=4
+Adding 5 from x=2 y=0 z=5 to x=2 y=2 z=5
+Adding 6 from x=0 y=1 z=6 to x=2 y=1 z=6
+Adding 7 from x=1 y=1 z=8 to x=1 y=1 z=9
+...
+.G.
+.G.
+...
+FFF
+..E
+D..
+CCC
+BBB
+.A.
+...
+
+...
+.G.
+.G.
+...
+.F.
+EEE
+DDD
+..C
+B..
+AAA
+...
+
+1: set()
+2: {1}
+3: set()
+4: {3}
+5: set()
+6: {5}
+7: set()
+Star 1: 0
+#+end_example
+
+** Day 22 star 2
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+def star_2(path: str) -> int:
+  with open(path,'r') as f:
+     pass
+  return 0
+  
+print("Star 2:", star_2("sample.txt"))
+#+END_SRC
+
