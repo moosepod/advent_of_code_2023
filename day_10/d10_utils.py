@@ -208,23 +208,27 @@ def dump_grid(grid: Grid):
       s+=c
     print(s)
 
-def find_loop_path(grid: Grid) -> list[P]:
-  visited: dict[P,bool] = {grid.start: 0}
+from queue import Queue
+
+def find_loop_path(grid: Grid,max_counter=0,start_p=None) -> list[P]:
+  visited: dict[P,bool] = {grid.start: True}
   max_depth = 0
-  p = grid.start
-  to_visit = [*grid.connected_points(p)]
+  p = start_p or grid.start
+  to_visit = Queue()
+  for p in grid.connected_points(p):
+      to_visit.put(p)
 
   # use DFS to find the path
   counter = 0
   path = [p]
-  while len(to_visit) and counter < 100000:
+  while not to_visit.empty():
       counter+=1
-      p2 = to_visit[0]#.pop()
-      del to_visit[0]
-      if not visited.get(p2):
-          visited[p2] = True
-          #print('Visited',p2,grid.cells[p2],'from',p,visited[p2])
-          to_visit.extend([np for np in grid.connected_points(p2) if not visited.get(np)])
-          path.append(p2)
-
+      if max_counter and counter >= max_counter:
+          break
+      p2 = to_visit.get()
+      visited[p2] = True
+      for n in [np for np in grid.connected_points(p2) if not visited.get(np)]:
+          to_visit.put(n)
+      path.append(p2)
+  print(f"Ended after {counter} steps")
   return path

@@ -161,7 +161,16 @@ import re
 from pydantic import BaseModel
 from d10_utils import P,S, Grid, load_grid, dump_grid, find_loop_path, RIGHT, DOWN, LEFT, UP, Polygon
 
-BOX_MAPPING = {"|": "│", "7": "┐", "F": "┌", "L": "└","J": "┘","-": "─",".": "I","O":"O","!":"!","x":"x"}
+BOX_MAPPING = {"|": "│",
+               "7": "┐",
+               "F": "┌",
+               "L": "└",
+               "J": "┘",
+               "-": "─",
+               ".": "I"
+               ,"O":"O",
+               "!":"!",
+               "x":"x"}
 
 START_DIR = {"|": UP, "F": RIGHT, "-": RIGHT, "7": DOWN,
              "J": LEFT, "L": UP}
@@ -193,8 +202,11 @@ def is_pipe(grid: Grid, p: P):
   
 def star_2(path: str, start_char: str) -> int:
   grid = load_grid(path)
-  grid.cells[grid.start] = start_char
-  path = find_loop_path(grid)
+  loop_start = grid.start
+  grid.start = P()
+  grid.cells[loop_start] = start_char
+
+  path = find_loop_path(grid,start_p=loop_start)
   
   grid.start = P(x=-1,y=-1)
   grid.size.width += 1
@@ -208,7 +220,7 @@ def star_2(path: str, start_char: str) -> int:
     grid.cells[P(x=-1,y=y)] = '.'
     grid.cells[P(x=grid.size.width,y=y)] = '.'
 
-  dump_grid(make_nice(grid))
+  #dump_grid(make_nice(grid))
 
   # All disconnected pipe should be turned into empty space
   # per the last example of part 2
@@ -220,14 +232,15 @@ def star_2(path: str, start_char: str) -> int:
         grid.cells[p] = "."
 
 
-  dump_grid(grid)
+  #dump_grid(grid)
   #dump_grid(make_nice(grid))
-  return 0
+
   grid = grid.expanded(EXPAND,S(width=3,height=3))
 
   grid.flood_fill(P(),'O')
 
-  dump_grid(make_nice(grid))
+  #dump_grid(grid)
+  #dump_grid(make_nice(grid))
         
   return len([x for x in grid.cells.values() if x == '.'])
 
@@ -237,44 +250,19 @@ print()
 #print('Star 2:',star_2("sample_8.txt","F"))
 #print('Star 2:',star_2("sample_3.txt","F"))
 #print('Star 2:',star_2("sample_5.txt","F"))
-print('Star 2:',star_2("sample_4.txt","F"))
-#print('Star 2:',star_2("sample_9.txt","F"))
+#print('Star 2:',star_2("sample_4.txt","F"))
+#print('Star 2:',star_2("sample_9.txt","7"))
+print('Star 2:',star_2("input.txt","L"))
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
-
-Starting at x=-1 y=-1
-IIIIIIIIIIIIIIIIIIIIII.
-II┌────┐┌┐┌┐┌┐┌─┐IIIII.
-II│┌──┐││││││││┌┘IIIII.
-II││I┌┘││││││││└┐IIIII.
-I┌┘└┐└┐└┘└┘││└┘I└─┐III.
-I└──┘I└┐III└┘┌┐┌─┐└┐II.
-IIIII┌─┘II┌┐┌┘│└┐└┐└┐I.
-IIIII└┐I┌┐││└┐│I└┐└┐│I.
-IIIIII│┌┘└┘│┌┘│┌┐│I└┘I.
-IIIII┌┘└─┐I││I││││IIII.
-IIIII└───┘I└┘I└┘└┘IIII.
-IIIIIIIIIIIIIIIIIIIIII.
-.......................
-Starting at x=-1 y=-1
-.......................
-.......................
-.......................
-.......................
-.......................
-.............F7F-7L7...
-.............J|L7L7L7..
-..............|.L7L7|..
-..............|F7|.LJ..
-..............||||.....
-..............LJLJ.....
-.......................
-.......................
-Star 2: 0
-#+end_example
+: 
+: Ended after 14206 steps
+: Star 2: 363
 
 
 Too High
 Star 2: 616
+
+Too high
+Star 2: 2290

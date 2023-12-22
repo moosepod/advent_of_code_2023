@@ -1,4 +1,4 @@
-
+Ee
 * AOC 2023 Day 22
 
 ** Initialize 
@@ -13,13 +13,27 @@
 
 ** Day 22 star 1
 *** Notes
+
+#+begin_example
 012345
 ..D.EE
 .CCCCF
 AAABBB
+#+end_example
+
+#+begin_example
+012345
+..DD..
+..CE..
+.BBE..
+.AAAA.
+#+end_example
+
+
 *** Solution
 #+BEGIN_SRC python :results output
 import re
+import time
 from d22_utils import Grid, P,S,dump_grid_x, dump_grid_y
 from pydantic import BaseModel, model_validator
 
@@ -88,10 +102,21 @@ def sole_support(n: int, supports: dict, supported: dict, debug=False) -> bool:
     for sb in supports[n]:
         if debug: print('...',b_to_c(sb),supported[sb])
         if len([x for x in supported[sb] if x != n]) > 0:
-            if debug: print(f"....{b_to_c(sb)} supported by other brick {b_to_c(b)}")
+            if debug: print(f"....{b_to_c(sb)} supported by other brick {b_to_c(n)}")
             c +=1
 
     return c == len(supports[n])
+
+def support_count(n: int, supports: dict, supported: dict, debug=False) -> int:
+    total = 0
+
+    for sb in supports[n]:
+        if sole_support(sb, supports, supported, debug=debug):
+            if debug: print(f"...{b_to_c(n)} is sole support for {b_to_c(sb)}")
+            total += 1
+            total += support_count(sb, supports, supported, debug=debug)
+    
+    return total
 
 def calculate(path: str,debug=False) -> tuple:
   with open(path,'r') as f:
@@ -172,26 +197,32 @@ def star_1(path: str, debug: bool) -> int:
   removeable, supports, supported, grid = calculate(path, debug)
   return len([x for x,v in removeable.items() if v])
     
-#print("Star 1:",star_1("sample_2.txt",debug=False))
+#print("Star 1:",star_1("sample_3.txt",debug=False))
 
 def star_2(path: str, debug: bool) -> int:
+  t = time.time()
   removeable, supports, supported, grid = calculate(path, debug)
-
+  total = 0
+  
   for nr in [x for x,v in removeable.items() if not v]:
-      print(b_to_c(nr))
+      c =  support_count(nr, supports, supported, debug)
+      if debug: print(b_to_c(nr), c)
+      total += c
+  print(f"Elapsed: {time.time() - t:.2f}")
+  return total
 
-  return 0
-
-print("Star 2:",star_2("sample_2.txt",debug=False))
+print("Star 2:",star_2("input.txt",debug=False))
 
 #+END_SRC
 
 #+RESULTS:
-: Took 1 iterations
-: B
-: C
-: Star 2: 0
+: Took 89 iterations
+: Elapsed: 3.62
+: Star 2: 544
 
 ** Too high
 : Star 1: 612
+
+** Part 2 too low
+544
 
