@@ -85,39 +85,41 @@ def find_target(grid: Grid, c: C, t: P, visited: dict) -> int:
     
     return max_len
 
+def is_valid(path: list[P])->bool:
+    if len(path) < 3:
+        return True
+
+    for i in range(2,len(path)):
+        p = path[i]+path[i-1]+ path[i-2]
+        if abs(p.x) >= 3 or abs(p.y) >= 3:
+            return False
+
+    return True
+
 def star_1(path: str) -> int:
   with open(path,'r') as f:
      grid = load_grid(path)
 
      start = P()
      end = P(x=grid.size.width-1,y=grid.size.height-1)
-     path = {p: d_to_c(d) for p,d in grid.a_star_with_max_straight(start,end, heuristic=manhattan_distance,max_straight=2)}
-     #print(path)
+     paths = [path for path in grid.dijkstra_k_shortest_paths(start, end, 100) if is_valid(path)]
+     if len(paths) == 0:
+         print("Iteration count too small")
+         return -1
+         
+     path = {p: "x" for p in paths[0]}
+     #pprint(path)
 
      dump_grid(grid, path)
-     return sum([grid.cells.get(p,0) for p in path.keys()]) - grid.cells[p]
+     return sum([grid.cells.get(p,0) for p in path.keys()]) - grid.cells[start]
   
 print("Star 1:",star_1("sample.txt"))
 
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
-v413432311323
->v15453535623
-3>v5245654254
-34>v585845452
-454>v57867536
-1438>v8798454
-44578>v987766
-363787>v79653
-4654967>v6887
-45646799>v453
-122468686>v63
-2546548887>v5
-43226746555>3
-
-#+end_example
+: Iteration count too small
+: Star 1: -1
 
 Star 1: 106
 #+end_example

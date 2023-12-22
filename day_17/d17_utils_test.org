@@ -9,7 +9,27 @@
 : t
 
 ** Testing breadth first search
-  
+
+#+BEGIN_SRC python :results output
+from d17_utils import PriorityQueue
+
+q = PriorityQueue()
+q.put("a",3)
+q.put("b",2)
+q.put("c",1)
+
+print(q.get_with_priority())
+print(q.get_with_priority())
+print(q.get_with_priority())
+
+
+#+END_SRC
+
+#+RESULTS:
+: (1, 'c')
+: (2, 'b')
+: (3, 'a')
+
 #+BEGIN_SRC python :results output
 import re
 from pydantic import BaseModel
@@ -25,11 +45,24 @@ def find_path(s: str, debug=True) -> list[P]:
         print()
         print(f'Find path from {start} to {end}')
 
-    path = {p: d_to_c(d) for p,d in g.a_star_with_max_straight(start,end, heuristic=manhattan_distance,max_straight=1)}
+    paths = g.dijkstra_k_shortest_paths(start,end, 5) or [[]]
+    #paths = [g.dijkstra_pathfind(start,end)]
+    #for idx,path in enumerate(paths):
+    #    print(idx,path)
+
+    path = {p: "x" for p in paths[0]}
     path[start] = "S"
     dump_grid(g,path)
     
-    return(path)
+    #return(path)
+    return []
+
+print(find_path("""
+11111
+10201
+10003
+11111
+"""))
 
 # Clear
 print(find_path("""
@@ -106,45 +139,53 @@ print(find_path("""
 #+RESULTS:
 #+begin_example
 
+Find path from x=2 y=1 to x=4 y=2
+11111
+10Sx1
+100xx
+11111
+
+[]
+
 Find path from x=3 y=2 to x=7 y=3
 11111111
 10000001
-100Sv>v1
-1000>^>3
+100S0001
+100xxxxx
 10000001
 11111111
 
-{P(x=6, y=3): '>', P(x=6, y=2): 'v', P(x=5, y=2): '>', P(x=5, y=3): '^', P(x=4, y=3): '>', P(x=4, y=2): 'v', P(x=3, y=2): 'S', None: 'x'}
+[]
 
 Find path from x=3 y=2 to x=7 y=3
 11111111
 10001001
 100S1001
-10v<1>>3
-10>>>^01
+100x1xxx
+100xxx01
 11111111
 
-{P(x=6, y=3): '>', P(x=5, y=3): '>', P(x=5, y=4): '^', P(x=4, y=4): '>', P(x=3, y=4): '>', P(x=2, y=4): '>', P(x=2, y=3): 'v', P(x=3, y=3): '<', P(x=3, y=2): 'S', None: 'x'}
+[]
 
 Find path from x=3 y=2 to x=7 y=3
 11111111
-1v<<1001
-1v1S1011
-1v111>>3
-1>>>>^11
+1xxx1001
+1x1S1011
+1x111xxx
+1xxxxx11
 11111111
 
-{P(x=6, y=3): '>', P(x=5, y=3): '>', P(x=5, y=4): '^', P(x=4, y=4): '>', P(x=3, y=4): '>', P(x=2, y=4): '>', P(x=1, y=4): '>', P(x=1, y=3): 'v', P(x=1, y=2): 'v', P(x=1, y=1): 'v', P(x=2, y=1): '<', P(x=3, y=1): '<', P(x=3, y=2): 'S', None: 'x'}
+[]
 
 Find path from x=3 y=2 to x=7 y=3
-0v<00000
-v<^<1000
->v1S1010
-v<111>>3
->v>v>^10
-0>^>^000
+000xxx00
+000x1x00
+001S1x10
+00111xxx
+00000010
+00000000
 
-{P(x=6, y=3): '>', P(x=5, y=3): '>', P(x=5, y=4): '^', P(x=4, y=4): '>', P(x=4, y=5): '^', P(x=3, y=5): '>', P(x=3, y=4): 'v', P(x=2, y=4): '>', P(x=2, y=5): '^', P(x=1, y=5): '>', P(x=1, y=4): 'v', P(x=0, y=4): '>', P(x=0, y=3): 'v', P(x=1, y=3): '<', P(x=1, y=2): 'v', P(x=0, y=2): '>', P(x=0, y=1): 'v', P(x=1, y=1): '<', P(x=1, y=0): 'v', P(x=2, y=0): '<', P(x=2, y=1): '^', P(x=3, y=1): '<', P(x=3, y=2): 'S', None: 'x'}
+[]
 
 Find path from x=3 y=2 to x=7 y=3
 11111111
@@ -154,28 +195,28 @@ Find path from x=3 y=2 to x=7 y=3
 10001001
 11111111
 
-{P(x=3, y=2): 'S'}
+[]
 
 Find path from x=3 y=2 to x=7 y=3
 99999999
 90445009
 904S9009
-906>v>>3
-9007>^09
+906xxxxx
+90075009
 99999999
 
-{P(x=6, y=3): '>', P(x=5, y=3): '>', P(x=5, y=4): '^', P(x=4, y=4): '>', P(x=4, y=3): 'v', P(x=3, y=3): '>', P(x=3, y=2): 'S', None: 'x'}
+[]
 
 Find path from x=2 y=2 to x=7 y=4
-00000000
+00xxxxxx
+01x5641x
+01S5641x
+0145641x
+0145641x
 01456410
-01S56410
-01>v6410
-014>v413
-0145>v1^
-00000>>^
+00000000
 
-{P(x=7, y=5): '^', P(x=7, y=6): '^', P(x=6, y=6): '>', P(x=5, y=6): '>', P(x=5, y=5): 'v', P(x=4, y=5): '>', P(x=4, y=4): 'v', P(x=3, y=4): '>', P(x=3, y=3): 'v', P(x=2, y=3): '>', P(x=2, y=2): 'S', None: 'x'}
+[]
 #+end_example
 
 ** Testing Dijkstra

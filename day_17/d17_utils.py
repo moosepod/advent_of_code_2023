@@ -107,6 +107,9 @@ class PriorityQueue:
     def get(self) -> P:
         return heapq.heappop(self.elements)[1]
 
+    def get_with_priority(self) -> tuple[float,P]:
+        return heapq.heappop(self.elements)
+
 class Grid(BaseModel):
     """ Pathfinding adapted from https://www.redblobgames.com/pathfinding/a-star/introduction.html """
     size: S
@@ -138,6 +141,33 @@ class Grid(BaseModel):
 
                 if abs(path_sum.x) < max_d and abs(path_sum.y) < max_d:
                     yield p + d
+
+    def points(self) -> list[P]:
+        for x in range(0, self.size.width):
+            for y in range(0,self.size.height):
+                yield P(x=x,y=y)
+                
+    def dijkstra_k_shortest_paths(self, s: P, t: P, K: int) -> list[P]:
+        """ https://en.wikipedia.org/wiki/K_shortest_path_routing """
+        P = []
+        B = PriorityQueue()
+        B.put([s],0)
+        count = {p: 0 for p in self.points()}
+
+        while not B.empty() and count[t] < K:
+            C, p_u = B.get_with_priority()
+            u = p_u[-1]
+            if count[u] >= K:
+                continue
+            count[u] += 1
+            if u == t:
+                P.append([x for x in p_u])
+            for v in self.neighbors(u):
+                np = [p for p in p_u]
+                np.append(v)
+                B.put(np, C + (self.cells.get(v,0)+1))
+                    
+        return P
     
     def bfs(self, start: P, end: P) -> list[P]:
         """ Look for path from start to end. If end reached, return it """
