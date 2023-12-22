@@ -12,11 +12,16 @@
 : t
 
 ** Day 22 star 1
+*** Notes
+012345
+..D.EE
+.CCCCF
+AAABBB
 *** Solution
 #+BEGIN_SRC python :results output
 import re
 from d22_utils import Grid, P,S,dump_grid_x, dump_grid_y
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 def p_from_a(a: list):
     return P(x=int(a[0]),y=int(a[1]),z=int(a[2]))
@@ -25,6 +30,17 @@ class Brick(BaseModel):
     a: P
     b: P
     n: int
+
+    @model_validator(mode="after")
+    @classmethod
+    def check_point_ordering(cls, data: any) -> any:
+        if data.a.x > data.b.x:
+            raise ValueError("a.x is bigger than b.x")
+        if data.a.y > data.b.y:
+            raise ValueError("a.y is bigger than b.y")
+        if data.a.z > data.b.z:
+            raise ValueError("a.z is bigger than b.z")
+        return data
     
     def add(self,grid: Grid):
         for x in range(self.a.x, self.b.x+1):
@@ -97,13 +113,14 @@ def star_1(path: str,debug=False) -> int:
 
       moved = True
       i = 0
+
       while moved:
           i+=1
           moved = False
           for brick in bricks:
               if brick.drop(grid):
                   moved = True
-
+      print('Took',i,'iterations')
       if debug:
           print("-- After drop --")
           print(" x ")
@@ -118,36 +135,40 @@ def star_1(path: str,debug=False) -> int:
       
       for brick in bricks:
           for b in list(brick.resting_on(grid)):
+              if debug: print(f"{chr(brick.n+64)} is resting on {chr(b+64)}")
               supports[b].append(brick.n)
               supported[brick.n].append(b)
 
-      removeable = {}
-      for brick in bricks:
-          can_remove = True
-          for sb in supports[brick.n]:
-              can_remove=False
-              if len([x for x in supported[sb] if x != brick.n]):
-                  #print(f"....{sb} supported by other brick {b}")
-                  can_remove= True
-                  break
-          if can_remove:
-              removeable[brick.n] = True
+      removeable = {brick.n: len(supports[brick.n]) == 0 for brick in bricks}
+      for n in [n for n, v in removeable.items() if not v]:
+          if not removeable[n]:
+              if debug: print(chr(n+64), supports[n])
+              c = 0
+              for sb in supports[n]:
+                  if debug: print('...',chr(sb+64),supported[sb])
+                  if len([x for x in supported[sb] if x != n]) > 0:
+                      if debug: print(f"....{chr(sb+64)} supported by other brick {chr(b+64)}")
+                      c +=1
+              if c == len(supports[n]):
+                  removeable[n] = True
 
       if debug:
-          for brick in bricks:
-              if removeable.get(brick.n):
-                  print(f"Brick {chr(brick.n+64)} can be removed.")
+          for n, r in removeable.items():
+              if r:
+                  print(f"Brick {chr(n+64)} can be removed.")
               else:
-                  print(f"Brick {chr(brick.n+64)} cannot be removed.")
+                  print(f"Brick {chr(n+64)} cannot be removed.")
       
-  return len(removeable)
+  return len([x for x,v in removeable.items() if v])
   
 
-print("Star 1:",star_1("input.txt"))
+print("Star 1:",star_1("input.txt",debug=False))
 
 #+END_SRC
 
 #+RESULTS:
+: Took 89 iterations
+: Star 1: 512
 
 ** Too high
 : Star 1: 612
