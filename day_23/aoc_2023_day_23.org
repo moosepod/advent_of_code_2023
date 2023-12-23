@@ -21,6 +21,7 @@ from d23_utils import P,Grid, dump_grid,S, UP,DOWN,LEFT,RIGHT,PriorityQueue
 class Vertex(BaseModel):
     p: P
     c: str
+    paths: list[list[str]]
     edges: list["Vertex"]
 
     def __lt__(self,v):
@@ -59,10 +60,10 @@ def pathfind_d(graph: dict[P,Vertex], start: P, end: P) -> list[P]:
 
     return []
 
-def follow_to_node(graph: dict[P,Vertex], start: P, end: P) -> list[P]:
+def follow_to_node(graph: dict[P,Vertex], start: P, end: P, nodes: dict[P,Vertex]) -> list[P]:
     v = start
     path = [start]
-    while len(graph[v].edges) < 3 and v != end:
+    while v != end and not nodes.get(v):
         for edge in graph[v].edges:
             if edge not in path:
                 path.append(edge)
@@ -70,6 +71,38 @@ def follow_to_node(graph: dict[P,Vertex], start: P, end: P) -> list[P]:
 
     return path
 
+def add_node_lengths(graph: dict[P,Vertex], start: P, end: P):
+    candidates = [start]
+    visited = set()
+    visited.add(start)
+
+    while candidates:
+        current = candidates[0]
+        del candidates[0]
+        visited.add(current)
+        path = follow_to_node(graph, current, end)
+        if path:
+           for p in path:
+               visited.add(p)
+           graph[current].paths.append(path)
+           path_end = path[-1]
+           for edge in graph[path_end].edges:
+               if edge not in visited:
+                   candidates.insert(0,edge)
+
+def find_longest(graph: dict[P,Vertex], start: P, end: P, nodes: dict[P,Vertex],current_l=0) -> int:
+    path = follow_to_node(graph,start,end,nodes)
+    if path[-1] == end:
+        return len(path) + current_l - 1
+
+    longest = 0
+    for edge in graph[path[-1]].edges:
+        l = find_longest(graph, edge, end, nodes, current_l+len(path))
+        if l > longest:
+            longest = l
+
+    return longest
+                
 def pathfind(graph: dict[P,Vertex], start: P, end: P, current_path: [], all_paths: [],indent=0):
     candidates = PriorityQueue()
     candidates.put(start, 0)
@@ -81,8 +114,6 @@ def pathfind(graph: dict[P,Vertex], start: P, end: P, current_path: [], all_path
         current = candidates.get()        
         for edge in graph[current].edges:
             if edge not in paths.get(current):
-                print(current,edge)
-
                 next_path = [x for x in paths.get(current)]
                 next_path.extend(follow_to_node(graph, edge, end))
                 path_end = next_path[-1]
@@ -96,7 +127,7 @@ def pathfind(graph: dict[P,Vertex], start: P, end: P, current_path: [], all_path
 def star_1(path: str) -> int:
   with open(path,'r') as f:
       graph: dict[P,Vertex] = {}
-      nodes: list[Vertex] = []
+      nodes: dict[P,Vertex] = {}
       s = S(width=0,height=0)
       for y, line in enumerate(f.read().split("\n")):
           s.height += 1
@@ -106,7 +137,7 @@ def star_1(path: str) -> int:
               for x,c in enumerate(line):
                   if c != '#':
                       p = P(x=x,y=y)
-                      graph[p] = Vertex(p=p,edges=[],c=c)
+                      graph[p] = Vertex(p=p,edges=[],c=c, paths=[])
 
       for v in graph.values():
           if v.c == ">": v.edges.append(v.p + RIGHT)
@@ -114,16 +145,26 @@ def star_1(path: str) -> int:
           if v.c == "^": v.edges.append(v.p + UP)
           if v.c == "v": v.edges.append(v.p + DOWN)
           if v.c == ".":
-              if graph.get(v.p+UP): v.edges.append(v.p+UP)
-              if graph.get(v.p+DOWN): v.edges.append(v.p+DOWN)
-              if graph.get(v.p+LEFT): v.edges.append(v.p+LEFT)
-              if graph.get(v.p+RIGHT): v.edges.append(v.p+RIGHT)
-          if len(v.edges) > 2:
-              nodes.append(v)
+              sides = 0
+              if graph.get(v.p+UP): sides+=1
+              if graph.get(v.p+DOWN): sides+=1
+              if graph.get(v.p+LEFT): sides+=1
+              if graph.get(v.p+RIGHT): sides+=1
+              if graph.get(v.p+UP) and graph.get(v.p+UP).c != "v": v.edges.append(v.p+UP)
+              if graph.get(v.p+DOWN) and graph.get(v.p+DOWN).c != "^": v.edges.append(v.p+DOWN)
+              if graph.get(v.p+LEFT) and graph.get(v.p + LEFT).c != ">": v.edges.append(v.p+LEFT)
+              if graph.get(v.p+RIGHT) and graph.get(v.p + RIGHT).c != "<": v.edges.append(v.p+RIGHT)
+          if sides > 2 and len(v.edges) > 1:
+              nodes[v.p] = v
 
       start = P(x=1,y=0)
       end = P(x=21,y=22)
-      
+
+      return find_longest(graph,start,end, nodes)
+      #path = follow_to_node(graph,start,end, nodes)
+      #path.extend(follow_to_node(graph,graph[path[-1]].edges[1],end,nodes))
+          
+
       debug_grid = Grid(cells={},size=s,blocked=[])
       for p in debug_grid.points():
           if graph.get(p):
@@ -131,17 +172,7 @@ def star_1(path: str) -> int:
           else:
               debug_grid.cells[p] = "#"
 
-      all_paths = []
-      pathfind(graph, start, end, [], all_paths)
-      for path in all_paths:
-          print(len(path))
-      return 0
-          
-      #path = {p: "O" for p in pathfind(graph, start, end, [])}
-      p1 = follow_to_node(graph,start,end)
-      path = {p: "O" for p in p1}
-      path.update({p: "O" for p in follow_to_node(graph,p1[-1]+DOWN,end)})
-
+      path = {p:"X" for p in nodes.keys()}
       dump_grid(debug_grid,path)
 
   return len(nodes)
@@ -153,102 +184,5 @@ print("Star 1:",star_1("sample.txt"))
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
-
-x=1 y=0 z=0 x=1 y=1 z=0
-
-x=3 y=5 z=0 x=3 y=6 z=0
-x=3 y=5 z=0 x=4 y=5 z=0
-
-x=11 y=3 z=0 x=11 y=4 z=0
-x=11 y=3 z=0 x=12 y=3 z=0
-
-x=21 y=11 z=0 x=21 y=12 z=0
-x=21 y=11 z=0 x=20 y=11 z=0
-
-x=21 y=11 z=0 x=21 y=12 z=0
-
-x=5 y=13 z=0 x=5 y=14 z=0
-x=5 y=13 z=0 x=6 y=13 z=0
-
-x=13 y=13 z=0 x=13 y=12 z=0
-x=13 y=13 z=0 x=13 y=14 z=0
-x=13 y=13 z=0 x=14 y=13 z=0
-
-x=21 y=11 z=0 x=21 y=10 z=0
-x=21 y=11 z=0 x=21 y=12 z=0
-
-x=21 y=11 z=0 x=21 y=12 z=0
-
-x=13 y=13 z=0 x=13 y=14 z=0
-x=13 y=13 z=0 x=14 y=13 z=0
-
-x=21 y=11 z=0 x=21 y=10 z=0
-x=21 y=11 z=0 x=21 y=12 z=0
-
-x=21 y=11 z=0 x=21 y=12 z=0
-
-x=13 y=13 z=0 x=13 y=14 z=0
-x=13 y=13 z=0 x=14 y=13 z=0
-
-x=21 y=11 z=0 x=21 y=10 z=0
-x=21 y=11 z=0 x=21 y=12 z=0
-
-x=21 y=11 z=0 x=21 y=12 z=0
-
-x=13 y=19 z=0 x=12 y=19 z=0
-x=13 y=19 z=0 x=14 y=19 z=0
-
-x=13 y=19 z=0 x=14 y=19 z=0
-
-x=13 y=19 z=0 x=14 y=19 z=0
-
-x=13 y=19 z=0 x=14 y=19 z=0
-
-x=13 y=19 z=0 x=14 y=19 z=0
-
-x=19 y=19 z=0 x=19 y=18 z=0
-x=19 y=19 z=0 x=19 y=20 z=0
-
-x=19 y=19 z=0 x=19 y=20 z=0
-
-x=19 y=19 z=0 x=19 y=20 z=0
-
-x=19 y=19 z=0 x=19 y=20 z=0
-
-x=19 y=19 z=0 x=19 y=20 z=0
-
-x=19 y=19 z=0 x=19 y=20 z=0
-
-x=19 y=19 z=0 x=19 y=20 z=0
-
-x=19 y=19 z=0 x=19 y=20 z=0
-
-x=19 y=19 z=0 x=19 y=20 z=0
-
-x=19 y=19 z=0 x=19 y=20 z=0
-
-x=19 y=19 z=0 x=19 y=20 z=0
-
-x=19 y=19 z=0 x=19 y=20 z=0
-
-x=19 y=19 z=0 x=19 y=20 z=0
-
-x=19 y=19 z=0 x=19 y=20 z=0
-81
-81
-81
-81
-81
-81
-81
-81
-81
-81
-81
-81
-81
-81
-Star 1: 0
-#+end_example
+: Star 1: 94
 
