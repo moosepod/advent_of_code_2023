@@ -1,0 +1,136 @@
+
+* AOC 2023 Day 23
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Day 23 star 1
+*** Solution
+#+BEGIN_SRC python :results output
+from pydantic import BaseModel
+import re
+from d23_utils import P,Grid, dump_grid,S, UP,DOWN,LEFT,RIGHT,PriorityQueue
+
+class Vertex(BaseModel):
+    p: P
+    c: str
+    edges: list["Vertex"]
+
+    def __lt__(self,v):
+        return v.p.x < self.p.x and v.p.y < self.p.y
+
+    def __hash__(self):
+        return hash(f"{self.p.x}-{self.p.y}")
+
+def path_from_dict( came_from: dict, end: P) -> list[P]:
+    p = end
+    path = []
+    while p:
+        path.append(came_from[p])
+        p = came_from[p]
+
+    return path
+
+def pathfind(graph: dict[P,Vertex], start: P, end: P) -> list[P]:
+    frontier = PriorityQueue()
+    frontier.put(graph.get(start), 0)
+    came_from = {start: None}
+    cost_so_far = {start: 0}
+
+    while not frontier.empty():
+        current = frontier.get()
+
+        if current.p == end:
+            return path_from_dict(came_from, end)
+
+        for n in current.edges:
+            new_cost = cost_so_far[current.p] + 1
+            if n not in cost_so_far or new_cost < cost_so_far[n]:
+                cost_so_far[n] = new_cost
+                frontier.put(graph.get(n), new_cost)
+                came_from[n] = current.p
+
+    return []
+
+
+def star_1(path: str) -> int:
+  with open(path,'r') as f:
+      graph: dict[P,Vertex] = {}
+      s = S(width=0,height=0)
+      for y, line in enumerate(f.read().split("\n")):
+          s.height += 1
+          if line:
+              if not s.width:
+                  s.width = len(line)
+              for x,c in enumerate(line):
+                  if c != '#':
+                      p = P(x=x,y=y)
+                      graph[p] = Vertex(p=p,edges=[],c=c)
+
+      for v in graph.values():
+          if v.c == ">": v.edges.append(v.p + RIGHT)
+          if v.c == "<": v.edges.append(v.p + LEFT)
+          if v.c == "^": v.edges.append(v.p + UP)
+          if v.c == "v": v.edges.append(v.p + DOWN)
+          if v.c == ".":
+              if graph.get(v.p+UP): v.edges.append(v.p+UP)
+              if graph.get(v.p+DOWN): v.edges.append(v.p+DOWN)
+              if graph.get(v.p+LEFT): v.edges.append(v.p+LEFT)
+              if graph.get(v.p+RIGHT): v.edges.append(v.p+RIGHT)
+
+      debug_grid = Grid(cells={},size=s,blocked=[])
+      for p in debug_grid.points():
+          if graph.get(p):
+              debug_grid.cells[p] = graph[p].c
+          else:
+              debug_grid.cells[p] = "#"
+
+      path = {p: "O" for p in pathfind(graph, P(x=1,y=0),P(x=21,y=22))}
+
+      dump_grid(debug_grid,path)
+
+  return len(path)
+  
+
+
+print("Star 1:",star_1("sample.txt"))
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+#O#####################
+#OOOOOOO#########...###
+#######O#########.#.###
+###OOOOO#.>.>.###.#.###
+###O#####.#v#.###.#.###
+###O>...#.#.#.....#...#
+###O###.#.#.#########.#
+###OOO#.#.#.......#...#
+#####O#.#.#######.#.###
+#OOOOO#.#.#.......#...#
+#O#####.#.#.#########v#
+#O#OOO#...#...###...>.#
+#O#O#O#######v###.###v#
+#OOO#OOO#OOOOO>.#.###.#
+#####v#O#O###O#.#.###.#
+#.....#OOO#OOO#.#.#...#
+#.#########O###.#.#.###
+#...###...#OOO#...#.###
+###.###.#.###O#####v###
+#...#...#.#.>OOO#OOO###
+#.###.###.#.###O#O#O###
+#.....###...###OOO#OOO#
+#####################.#
+#######################
+
+Star 1: 75
+#+end_example
+
