@@ -15,6 +15,9 @@ class P(BaseModel):
         # Assume adding a P
         return P(x=self.x+value.x, y=self.y+value.y, z=self.z+value.z)
 
+    def __lt__(self,value):
+        return self.x < value.x or self.y < value.y
+    
     def __eq__(self, value):
         return self.x == value.x and self.y == value.y and self.z == value.z
     

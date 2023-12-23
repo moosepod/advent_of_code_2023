@@ -38,7 +38,7 @@ def path_from_dict( came_from: dict, end: P) -> list[P]:
 
     return path
 
-def pathfind(graph: dict[P,Vertex], start: P, end: P) -> list[P]:
+def pathfind_d(graph: dict[P,Vertex], start: P, end: P) -> list[P]:
     frontier = PriorityQueue()
     frontier.put(graph.get(start), 0)
     came_from = {start: None}
@@ -52,17 +52,51 @@ def pathfind(graph: dict[P,Vertex], start: P, end: P) -> list[P]:
 
         for n in current.edges:
             new_cost = cost_so_far[current.p] + 1
-            if n not in cost_so_far or new_cost < cost_so_far[n]:
+            if n not in cost_so_far or new_cost > cost_so_far[n]:
                 cost_so_far[n] = new_cost
                 frontier.put(graph.get(n), new_cost)
                 came_from[n] = current.p
 
     return []
 
+def follow_to_node(graph: dict[P,Vertex], start: P, end: P) -> list[P]:
+    v = start
+    path = [start]
+    while len(graph[v].edges) < 3 and v != end:
+        for edge in graph[v].edges:
+            if edge not in path:
+                path.append(edge)
+                v = graph[edge].p
 
+    return path
+
+def pathfind(graph: dict[P,Vertex], start: P, end: P, current_path: [], all_paths: [],indent=0):
+    candidates = PriorityQueue()
+    candidates.put(start, 0)
+    #visited = set()
+    paths = {start: []}
+    
+    while not candidates.empty():
+        print()
+        current = candidates.get()        
+        for edge in graph[current].edges:
+            if edge not in paths.get(current):
+                print(current,edge)
+
+                next_path = [x for x in paths.get(current)]
+                next_path.extend(follow_to_node(graph, edge, end))
+                path_end = next_path[-1]
+                paths[path_end] = next_path
+                if path_end == end:
+                    all_paths.append(next_path)
+                else:
+                    candidates.put(path_end,0)
+    
+    
 def star_1(path: str) -> int:
   with open(path,'r') as f:
       graph: dict[P,Vertex] = {}
+      nodes: list[Vertex] = []
       s = S(width=0,height=0)
       for y, line in enumerate(f.read().split("\n")):
           s.height += 1
@@ -84,7 +118,12 @@ def star_1(path: str) -> int:
               if graph.get(v.p+DOWN): v.edges.append(v.p+DOWN)
               if graph.get(v.p+LEFT): v.edges.append(v.p+LEFT)
               if graph.get(v.p+RIGHT): v.edges.append(v.p+RIGHT)
+          if len(v.edges) > 2:
+              nodes.append(v)
 
+      start = P(x=1,y=0)
+      end = P(x=21,y=22)
+      
       debug_grid = Grid(cells={},size=s,blocked=[])
       for p in debug_grid.points():
           if graph.get(p):
@@ -92,11 +131,20 @@ def star_1(path: str) -> int:
           else:
               debug_grid.cells[p] = "#"
 
-      path = {p: "O" for p in pathfind(graph, P(x=1,y=0),P(x=21,y=22))}
+      all_paths = []
+      pathfind(graph, start, end, [], all_paths)
+      for path in all_paths:
+          print(len(path))
+      return 0
+          
+      #path = {p: "O" for p in pathfind(graph, start, end, [])}
+      p1 = follow_to_node(graph,start,end)
+      path = {p: "O" for p in p1}
+      path.update({p: "O" for p in follow_to_node(graph,p1[-1]+DOWN,end)})
 
       dump_grid(debug_grid,path)
 
-  return len(path)
+  return len(nodes)
   
 
 
@@ -106,31 +154,101 @@ print("Star 1:",star_1("sample.txt"))
 
 #+RESULTS:
 #+begin_example
-#O#####################
-#OOOOOOO#########...###
-#######O#########.#.###
-###OOOOO#.>.>.###.#.###
-###O#####.#v#.###.#.###
-###O>...#.#.#.....#...#
-###O###.#.#.#########.#
-###OOO#.#.#.......#...#
-#####O#.#.#######.#.###
-#OOOOO#.#.#.......#...#
-#O#####.#.#.#########v#
-#O#OOO#...#...###...>.#
-#O#O#O#######v###.###v#
-#OOO#OOO#OOOOO>.#.###.#
-#####v#O#O###O#.#.###.#
-#.....#OOO#OOO#.#.#...#
-#.#########O###.#.#.###
-#...###...#OOO#...#.###
-###.###.#.###O#####v###
-#...#...#.#.>OOO#OOO###
-#.###.###.#.###O#O#O###
-#.....###...###OOO#OOO#
-#####################.#
-#######################
 
-Star 1: 75
+x=1 y=0 z=0 x=1 y=1 z=0
+
+x=3 y=5 z=0 x=3 y=6 z=0
+x=3 y=5 z=0 x=4 y=5 z=0
+
+x=11 y=3 z=0 x=11 y=4 z=0
+x=11 y=3 z=0 x=12 y=3 z=0
+
+x=21 y=11 z=0 x=21 y=12 z=0
+x=21 y=11 z=0 x=20 y=11 z=0
+
+x=21 y=11 z=0 x=21 y=12 z=0
+
+x=5 y=13 z=0 x=5 y=14 z=0
+x=5 y=13 z=0 x=6 y=13 z=0
+
+x=13 y=13 z=0 x=13 y=12 z=0
+x=13 y=13 z=0 x=13 y=14 z=0
+x=13 y=13 z=0 x=14 y=13 z=0
+
+x=21 y=11 z=0 x=21 y=10 z=0
+x=21 y=11 z=0 x=21 y=12 z=0
+
+x=21 y=11 z=0 x=21 y=12 z=0
+
+x=13 y=13 z=0 x=13 y=14 z=0
+x=13 y=13 z=0 x=14 y=13 z=0
+
+x=21 y=11 z=0 x=21 y=10 z=0
+x=21 y=11 z=0 x=21 y=12 z=0
+
+x=21 y=11 z=0 x=21 y=12 z=0
+
+x=13 y=13 z=0 x=13 y=14 z=0
+x=13 y=13 z=0 x=14 y=13 z=0
+
+x=21 y=11 z=0 x=21 y=10 z=0
+x=21 y=11 z=0 x=21 y=12 z=0
+
+x=21 y=11 z=0 x=21 y=12 z=0
+
+x=13 y=19 z=0 x=12 y=19 z=0
+x=13 y=19 z=0 x=14 y=19 z=0
+
+x=13 y=19 z=0 x=14 y=19 z=0
+
+x=13 y=19 z=0 x=14 y=19 z=0
+
+x=13 y=19 z=0 x=14 y=19 z=0
+
+x=13 y=19 z=0 x=14 y=19 z=0
+
+x=19 y=19 z=0 x=19 y=18 z=0
+x=19 y=19 z=0 x=19 y=20 z=0
+
+x=19 y=19 z=0 x=19 y=20 z=0
+
+x=19 y=19 z=0 x=19 y=20 z=0
+
+x=19 y=19 z=0 x=19 y=20 z=0
+
+x=19 y=19 z=0 x=19 y=20 z=0
+
+x=19 y=19 z=0 x=19 y=20 z=0
+
+x=19 y=19 z=0 x=19 y=20 z=0
+
+x=19 y=19 z=0 x=19 y=20 z=0
+
+x=19 y=19 z=0 x=19 y=20 z=0
+
+x=19 y=19 z=0 x=19 y=20 z=0
+
+x=19 y=19 z=0 x=19 y=20 z=0
+
+x=19 y=19 z=0 x=19 y=20 z=0
+
+x=19 y=19 z=0 x=19 y=20 z=0
+
+x=19 y=19 z=0 x=19 y=20 z=0
+81
+81
+81
+81
+81
+81
+81
+81
+81
+81
+81
+81
+81
+81
+Star 1: 0
 #+end_example
 
