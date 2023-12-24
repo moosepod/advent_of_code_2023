@@ -1,0 +1,103 @@
+
+* AOC 2023 Day 24
+
+** Initialize 
+#+BEGIN_SRC elisp
+  (pyvenv-activate "~/projects/project_venv/")
+  ; This is needed to make sure python indentation isn't messed up
+  (setq org-src-preserve-indentation t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Tests
+#+BEGIN_SRC python :results output
+from d24_utils import L,FP, L_from_p_and_v, P
+
+
+l1=L(a=1,b=2,c=1)
+l2=L(a=2,b=3,c=5)
+l3=L(a=2,b=3,c=6)
+l4=L(a=1,b=0,c=0)
+l5=L(a=0,b=1,c=0)
+p=FP(x=-7,y=3)
+p2=FP(x=0,y=0)
+print(f"{l1} should intersect {l2} at {p} [{l1.intersects(l2)}]")
+print(f"{l2} should not intersect {l3} at {p} [{l2.intersects(l3)}]")
+print(f"{l4} should intersect {l4} at {p2} [{l4.intersects(l5)}]")
+
+l = L_from_p_and_v(P(x=0,y=0),P(x=1,y=0))
+el = L(a=0, b=1, c=0)
+print(f"{l} -> {el}")
+
+l = L_from_p_and_v(P(x=0,y=0),P(x=0,y=1))
+el = L(a=1, b=0, c=0)
+print(f"{l} -> {el}")
+
+l = L_from_p_and_v(P(x=1,y=1),P(x=1,y=1))
+el = L(a=-1, b=1, c=0)
+print(f"{l} -> {el}")
+
+l = L_from_p_and_v(P(x=-10,y=0),P(x=2,y=1))
+el = L(a=-0.5, b=1, c=5)
+print(f"{l} -> {el}")
+
+l1 = L_from_p_and_v(P(x=19,y=13), P(x=-2,y=1))
+l2 = L_from_p_and_v(P(x=18,y=19), P(x=-1,y=-1))
+p = FP(x=14.333,y=15.333)
+print(f"{l1} intersects {l2} at {p} [{l1.intersects(l2)}]")
+l2 = L_from_p_and_v(P(x=20,y=25), P(x=-2,y=-2))
+p = FP(x=11.667, y=16.667)
+print(f"{l1} intersects {l2} at {p} [{l1.intersects(l2)}]")
+l1 = L_from_p_and_v(P(x=18,y=19), P(x=-1,y=-1))
+l2 = L_from_p_and_v(P(x=20,y=25), P(x=-2,y=-2))
+print(f"{l1} does not intersect {l2}  [{l1.intersects(l2)}]")
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+a=1.0 b=2.0 c=1.0 should intersect a=2.0 b=3.0 c=5.0 at x=-7.0 y=3.0 z=0.0 [x=-7.0 y=2.0 z=0.0]
+a=2.0 b=3.0 c=5.0 should not intersect a=2.0 b=3.0 c=6.0 at x=-7.0 y=3.0 z=0.0 [None]
+a=1.0 b=0.0 c=0.0 should intersect a=1.0 b=0.0 c=0.0 at x=0.0 y=0.0 z=0.0 [x=0.0 y=0.0 z=0.0]
+a=-0.0 b=1.0 c=-0.0 -> a=0.0 b=1.0 c=0.0
+a=0.0 b=1.0 c=0.0 -> a=1.0 b=0.0 c=0.0
+a=-1.0 b=1.0 c=-0.0 -> a=-1.0 b=1.0 c=0.0
+a=-0.5 b=1.0 c=-5.0 -> a=-0.5 b=1.0 c=5.0
+a=0.5 b=1.0 c=-22.5 intersects a=-1.0 b=1.0 c=-1.0 at x=14.333 y=15.333 z=0.0 [x=14.333333333333334 y=-14.666666666666666 z=0.0]
+a=0.5 b=1.0 c=-22.5 intersects a=-1.0 b=1.0 c=-5.0 at x=11.667 y=16.667 z=0.0 [x=11.666666666666666 y=-13.333333333333334 z=0.0]
+a=-1.0 b=1.0 c=-1.0 does not intersect a=-1.0 b=1.0 c=-5.0  [None]
+#+end_example
+
+** Day 24 star 1
+*** Notes
+- Ignore z
+- Test data has 5 lines. That's 20 permutations of lines to check
+- Input data has 300 lines. 89,700 permutations
+- It's not simply a line, it's a path (so has a start point)
+  
+*** Solution
+#+BEGIN_SRC python :results output
+import re
+def star_1(path: str) -> int:
+  with open(path,'r') as f:
+     pass
+  return 0
+  
+print("Star 1:",star_1("sample.txt"))
+
+#+END_SRC
+
+** Day 24 star 2
+*** Problem statement
+*** Solution
+#+BEGIN_SRC python :results output
+def star_2(path: str) -> int:
+  with open(path,'r') as f:
+     pass
+  return 0
+  
+print("Star 2:", star_2("sample.txt"))
+#+END_SRC
+

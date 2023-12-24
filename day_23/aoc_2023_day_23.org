@@ -179,7 +179,7 @@ def star_1(path: str) -> int:
   
 
 
-print("Star 1:",star_1("sample.txt"))
+print("Star 1:",star_1("input.txt"))
 
 #+END_SRC
 
