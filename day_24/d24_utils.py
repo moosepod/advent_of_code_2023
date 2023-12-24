@@ -13,7 +13,11 @@ class P(BaseModel):
 
     def __add__(self, value):
         # Assume adding a P
-        return P(x=self.x+value.x, y=self.y+value.y, z=self.z+value.z)
+        return FP(x=self.x+value.x, y=self.y+value.y, z=self.z+value.z)
+
+    def __sub__(self, value):
+        # Assume adding a P
+        return FP(x=self.x-value.x, y=self.y-value.y, z=self.z-value.z)
 
     def __lt__(self,value):
         return self.x < value.x or self.y < value.y
@@ -24,12 +28,25 @@ class P(BaseModel):
     def clone(self) -> 'P':
         return P(x=self.x,y=self.y,z=self.z)
 
+    def magnitude(self):
+        return abs(self.x + self.y + self.z)
+
 class FP(BaseModel):
     """ A point """
     x: float = 0.0
     y: float = 0.0
     z: float = 0.0
 
+    def __hash__(self):
+        return hash(f'{self.x}x{self.y}x{self.z}')
+
+    def __add__(self, value):
+        # Assume adding a P
+        return FP(x=self.x+value.x, y=self.y+value.y, z=self.z+value.z)
+
+    def magnitude(self):
+        return abs(self.x + self.y + self.z)
+    
 class L(BaseModel):
     a: float
     b: float
@@ -41,7 +58,7 @@ class L(BaseModel):
         if x2 == 0:
             return None
         
-        y1 = (l.b*self.c - self.a*l.c)
+        y1 = (l.a*self.c - self.a*l.c)
         y2 = (self.a*l.b - l.a*self.b)
         if y2 == 0:
             return None
@@ -49,7 +66,9 @@ class L(BaseModel):
         return FP(x=x1/x2,y=y1/y2)
 
     def contains(self, p: FP) -> bool:
-        return p.x * self.a + p.y * self.b + self.c == 0
+        v =  p.x * self.a + p.y * self.b + self.c
+
+        return abs(v) <= 0.0000000001
         
 def L_from_p_and_v(p: P, v: P) -> L:
     if v.x == 0:

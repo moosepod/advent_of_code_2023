@@ -43,30 +43,49 @@ l = L_from_p_and_v(P(x=-10,y=0),P(x=2,y=1))
 el = L(a=-0.5, b=1, c=5)
 print(f"{l} -> {el}")
 
-l1 = L_from_p_and_v(P(x=19,y=13), P(x=-2,y=1))
-l2 = L_from_p_and_v(P(x=18,y=19), P(x=-1,y=-1))
-p = FP(x=14.333,y=15.333)
-print(f"{l1} intersects {l2} at {p} [{l1.intersects(l2)}]")
-l2 = L_from_p_and_v(P(x=20,y=25), P(x=-2,y=-2))
-p = FP(x=11.667, y=16.667)
-print(f"{l1} intersects {l2} at {p} [{l1.intersects(l2)}]")
+print("--- Checking intersections ---")
+p = P(x=19,y=13)
+l1 = L_from_p_and_v(p, P(x=-2,y=1))
+print(f"{p} should be on {l1} [{l1.contains(p)}]")
+
+p = P(x=18,y=19)
+l2 = L_from_p_and_v(p, P(x=-1,y=-1))
+print(f"{p} should be on {l2} [{l2.contains(p)}]")
+
+ip = l1.intersects(l2)
+print(f"{l1} intersects {l2} at {p} [{ip}]")
+print(f"Interesection {ip} should be on {l1} [{l1.contains(ip)}]")
+print(f"Intersection {ip} should be on {l2} [{l2.contains(ip)}]")
+
+
 l1 = L_from_p_and_v(P(x=18,y=19), P(x=-1,y=-1))
 l2 = L_from_p_and_v(P(x=20,y=25), P(x=-2,y=-2))
 print(f"{l1} does not intersect {l2}  [{l1.intersects(l2)}]")
+
+# P = (1,1)
+# V = (1,1)
+# T1 = (0,0)
+# T2 = (4,4)
+# T1 + V = (1,1)
+# T2 + v = (5,5)
 
 #+END_SRC
 
 #+RESULTS:
 #+begin_example
-a=1.0 b=2.0 c=1.0 should intersect a=2.0 b=3.0 c=5.0 at x=-7.0 y=3.0 z=0.0 [x=-7.0 y=2.0 z=0.0]
+a=1.0 b=2.0 c=1.0 should intersect a=2.0 b=3.0 c=5.0 at x=-7.0 y=3.0 z=0.0 [x=-7.0 y=3.0 z=0.0]
 a=2.0 b=3.0 c=5.0 should not intersect a=2.0 b=3.0 c=6.0 at x=-7.0 y=3.0 z=0.0 [None]
 a=1.0 b=0.0 c=0.0 should intersect a=1.0 b=0.0 c=0.0 at x=0.0 y=0.0 z=0.0 [x=0.0 y=0.0 z=0.0]
 a=-0.0 b=1.0 c=-0.0 -> a=0.0 b=1.0 c=0.0
 a=0.0 b=1.0 c=0.0 -> a=1.0 b=0.0 c=0.0
 a=-1.0 b=1.0 c=-0.0 -> a=-1.0 b=1.0 c=0.0
 a=-0.5 b=1.0 c=-5.0 -> a=-0.5 b=1.0 c=5.0
-a=0.5 b=1.0 c=-22.5 intersects a=-1.0 b=1.0 c=-1.0 at x=14.333 y=15.333 z=0.0 [x=14.333333333333334 y=-14.666666666666666 z=0.0]
-a=0.5 b=1.0 c=-22.5 intersects a=-1.0 b=1.0 c=-5.0 at x=11.667 y=16.667 z=0.0 [x=11.666666666666666 y=-13.333333333333334 z=0.0]
+--- Checking intersections ---
+x=19 y=13 z=0 should be on a=0.5 b=1.0 c=-22.5 [True]
+x=18 y=19 z=0 should be on a=-1.0 b=1.0 c=-1.0 [True]
+a=0.5 b=1.0 c=-22.5 intersects a=-1.0 b=1.0 c=-1.0 at x=18 y=19 z=0 [x=14.333333333333334 y=15.333333333333334 z=0.0]
+Interesection x=14.333333333333334 y=15.333333333333334 z=0.0 should be on a=0.5 b=1.0 c=-22.5 [True]
+Intersection x=14.333333333333334 y=15.333333333333334 z=0.0 should be on a=-1.0 b=1.0 c=-1.0 [True]
 a=-1.0 b=1.0 c=-1.0 does not intersect a=-1.0 b=1.0 c=-5.0  [None]
 #+end_example
 
@@ -80,14 +99,64 @@ a=-1.0 b=1.0 c=-1.0 does not intersect a=-1.0 b=1.0 c=-5.0  [None]
 *** Solution
 #+BEGIN_SRC python :results output
 import re
-def star_1(path: str) -> int:
+from itertools import permutations
+from d24_utils import L,FP, L_from_p_and_v, P,R,S
+def star_1(path: str, min_v: int, max_v: int) -> int:
   with open(path,'r') as f:
-     pass
-  return 0
+    lines = []
+    for line in f.read().split("\n"):
+      if line.strip():
+        x,y,z, vx,vy,vz = re.match(r"^(-?\d+),\s+(-?\d+),\s+(-?\d+)\s+@\s+(-?\d+),\s+(-?\d+),\s+(-?\d+)$",line.strip()).groups()
+        p = P(x=x,y=y)
+        v = P(x=vx,y=vy)
+        lines.append((line,p,v,L_from_p_and_v(p,v)))
+
+  count = 0
+  ul=P(x=min_v,y=min_v)
+  lr=P(x=max_v,y=max_v)
+  debug = False
+  intersected = set()
+  for perm in permutations(lines, 2):
+    if debug: print()
+    n1,p1,v1,l1 = perm[0]
+    n2,p2,v2,l2 = perm[1]
+    p = l1.intersects(l2)
+    if p in intersected:
+      continue
+    intersected.add(p)
+    if debug: print(f"Hailstone A: {n1}")
+    if debug: print(f"Hailstone B: {n2}")
+    if p:
+      d1 = (p1 - p).magnitude()
+      d2 = (p1 - p + v1).magnitude()
+      if d2 > d1:
+        if debug: print("Hailstone's paths crossed in the past for hailstone A.")
+        continue
+      d1 = (p2 - p).magnitude()
+      d2 = (p2 - p + v2).magnitude()
+      if d2 > d1:
+        if debug: print("Hailstone's paths crossed in the past for hailstone B.")
+        continue
+      if (p.x >= ul.x and p.y >= ul.y and p.x <= lr.x and p.y <= lr.y):
+        count += 1
+        if debug: print(f"Hailstone's paths will cross inside the test area (at {p})")
+      else:
+        if debug: print(f"Hailstone's paths will cross outside the test area (at {p})")
+    else:
+      if debug: print(f"Hailstone's paths are parallel, they never intersect.")
+
+  return count
   
-print("Star 1:",star_1("sample.txt"))
+#print("Star 1:",star_1("sample.txt",7,27))
+print("Star 1:",star_1("input.txt",200000000000000, 400000000000000))
 
 #+END_SRC
+
+#+RESULTS:
+: Star 1: 27732
+
+** TOO LOW
+: Star 1: 15767
 
 ** Day 24 star 2
 *** Problem statement
